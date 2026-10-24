@@ -60,7 +60,7 @@ node -e "fs=require('fs');f='dist/static/blueprint-icons.css';fs.writeFileSync(f
 
 cp index_dist.html dist/index.html
 
-APP_HASH=`md5sum dist/static/app.js | cut -c1-6`
+APP_HASH=`node -e "console.log(require('crypto').createHash('md5').update(require('fs').readFileSync('dist/static/app.js')).digest('hex').slice(0,6))"`
 
 mv dist/static/app.js dist/static/app.${APP_HASH}.js
 mv dist/static/app.js.map dist/static/app.${APP_HASH}.js.map
