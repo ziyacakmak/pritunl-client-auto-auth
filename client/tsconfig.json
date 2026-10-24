@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "es2021",
+    "module": "es2015",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "removeComments": true,
+    "sourceMap": true,
+    "jsx": "react",
+    "strict": false
+  },
+  "exclude": [
+    "node_modules",
+    "vendor"
+  ]
+}

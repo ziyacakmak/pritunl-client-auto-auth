@@ -1,0 +1,14 @@
+#!/bin/sh
+sleep 0.2
+launchctl enable system/com.pritunl.service || true
+sleep 0.5
+
+i=0
+while ! launchctl bootstrap system /Library/LaunchDaemons/com.pritunl.service.plist 2>/dev/null; do
+    i=$((i+1))
+    if [ "$i" -ge 20 ]; then
+        launchctl bootstrap system /Library/LaunchDaemons/com.pritunl.service.plist
+        break
+    fi
+    sleep 0.5
+done

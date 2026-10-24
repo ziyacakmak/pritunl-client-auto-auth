@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.pritunl.client</id>
+  <name>Pritunl Client</name>
+  <summary>Connect to Pritunl VPN servers</summary>
+  <developer id="com.pritunl">
+    <name>Pritunl</name>
+  </developer>
+  <metadata_license>CC0-1.0</metadata_license>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/pritunl/pritunl-client/0df5c23bf9557496323d985ea7317a5e1ec02df7/images/flatpak_client_short_light.png</image>
+      <caption>Client profile list in light theme</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/pritunl/pritunl-client/0df5c23bf9557496323d985ea7317a5e1ec02df7/images/flatpak_client_short_dark.png</image>
+      <caption>Client profile list in dark theme</caption>
+    </screenshot>
+  </screenshots>
+  <project_license>LicenseRef-proprietary=https://github.com/pritunl/pritunl-client/blob/master/LICENSE</project_license>
+  <description>
+    <p>
+      Pritunl Client is the desktop client for Pritunl VPN servers. It
+      imports profiles from a Pritunl server and manages WireGuard
+      connections, keeping profiles synchronized and connections
+      re-established.
+    </p>
+    <p>
+      The Flatpak build runs without a privileged background service and
+      configures WireGuard tunnels through NetworkManager. OpenVPN mode is
+      not available in this build.
+    </p>
+  </description>
+  <launchable type="desktop-id">com.pritunl.client.desktop</launchable>
+  <url type="homepage">https://client.pritunl.com</url>
+  <url type="bugtracker">https://forum.pritunl.com</url>
+  <url type="help">https://docs.pritunl.com</url>
+  <url type="vcs-browser">https://github.com/pritunl/pritunl-client</url>
+  <content_rating type="oars-1.1"/>
+  <categories>
+    <category>Network</category>
+  </categories>
+  <requires>
+    <display_length compare="ge" side="shortest">520</display_length>
+  </requires>
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+  </supports>
+  <branding>
+    <color type="primary" scheme_preference="light">#dcdfe4</color>
+    <color type="primary" scheme_preference="dark">#1a1a1a</color>
+  </branding>
+  <releases>
+    <release version="1.4.4777.90" date="2026-10-11">
+      <url type="details">https://github.com/pritunl/pritunl-client/blob/1.4.4777.90/CHANGES</url>
+      <description>
+        <ul>
+          <li>Add host priority support</li>
+          <li>Fix WireGuard privilege escalation</li>
+          <li>Fix sso url display in TUI</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.4.4752.50" date="2026-09-16">
+      <url type="details">https://github.com/pritunl/pritunl-client/blob/1.4.4752.50/CHANGES</url>
+      <description>
+        <ul>
+          <li>Fix copy link button in Electron interface</li>
+          <li>Flatpak improvements</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.4.4744.47" date="2026-09-08">
+      <url type="details">https://github.com/pritunl/pritunl-client/blob/1.4.4744.47/CHANGES</url>
+      <description>
+        <ul>
+          <li>Added a terminal user interface</li>
+          <li>Added user profile support to the command-line interface</li>
+          <li>Added Flatpak support</li>
+          <li>Improved connection management</li>
+          <li>Improved the user interface</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+</component>

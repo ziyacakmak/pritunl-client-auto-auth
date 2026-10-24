@@ -1,0 +1,8 @@
+@font-face{
+  font-family:"blueprint-icons-16";
+  src:url("./blueprint-icons-16.ttf?5d78b4b43082505585f7f781d62b3fe5") format("truetype"), url("./blueprint-icons-16.eot?5d78b4b43082505585f7f781d62b3fe5#iefix") format("embedded-opentype"), url("./blueprint-icons-16.woff2?5d78b4b43082505585f7f781d62b3fe5") format("woff2"), url("./blueprint-icons-16.woff?5d78b4b43082505585f7f781d62b3fe5") format("woff"), url("./blueprint-icons-16.svg?5d78b4b43082505585f7f781d62b3fe5#blueprint-icons-16") format("svg");
+}
+@font-face{
+  font-family:"blueprint-icons-20";
+  src:url("./blueprint-icons-20.ttf?7f857b094687e8470516c6aecbbd10f8") format("truetype"), url("./blueprint-icons-20.eot?7f857b094687e8470516c6aecbbd10f8#iefix") format("embedded-opentype"), url("./blueprint-icons-20.woff2?7f857b094687e8470516c6aecbbd10f8") format("woff2"), url("./blueprint-icons-20.woff?7f857b094687e8470516c6aecbbd10f8") format("woff"), url("./blueprint-icons-20.svg?7f857b094687e8470516c6aecbbd10f8#blueprint-icons-20") format("svg");
+}

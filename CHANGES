@@ -1,0 +1,1017 @@
+Pritunl Client Changelog
+========================
+
+Version 1.4.4777.90 2026-10-11
+------------------------------
+
+Add host priority support
+Fix WireGuard privilege escalation
+Fix sso url display in TUI
+
+Version 1.4.4752.50 2026-09-16
+------------------------------
+
+Fix copy link button in Electron interface
+Flatpak improvements
+
+Version 1.4.4744.47 2026-09-08
+------------------------------
+
+Add TUI interface
+Add user profiles to CLI
+Add Flatpak support
+Connection management improvements
+Interface improvements
+
+Version 1.3.4729.52 2026-08-24
+------------------------------
+
+Improve DNS priority
+
+Version 1.3.4696.56 2026-07-22
+------------------------------
+
+Fix DNS issues on macOS
+
+Version 1.3.4686.95 2026-07-12
+------------------------------
+
+Add support for Pritunl Zero
+Fix macOS 27 support
+
+Version 1.3.4655.98 2026-06-11
+------------------------------
+
+Add post connection configuration sync
+Fix automatic reconnection issues
+Update bundled OpenVPN
+
+Version 1.3.4566.62 2026-03-14
+------------------------------
+
+Improve openvpn dco support
+
+Version 1.3.4562.57 2026-03-10
+------------------------------
+
+Fix openvpn 2.7 connection issues
+
+Version 1.3.4559.86 2026-03-07
+------------------------------
+
+Fix openvpn dco on Windows
+
+Version 1.3.4558.55 2026-03-06
+------------------------------
+
+Interface improvements
+Add grid layout
+Fix DNS issues on macOS
+Fix issue with closing to tray on Windows
+
+Version 1.3.4554.60 2026-03-02
+------------------------------
+
+Add wg route metric support
+Add ovpn dco support
+Add debug options
+Bundle WireGuard on Windows
+Support openvpn 2.7
+
+Version 1.3.4466.51 2025-12-04
+------------------------------
+
+Add support for syncing profile certificates
+
+Version 1.3.4439.70 2025-11-07
+------------------------------
+
+Fix Windows interface crashing
+Library updates
+
+Version 1.3.4438.95 2025-11-06
+------------------------------
+
+Interface improvements
+Library updates
+
+Version 1.3.4392.66 2025-09-21
+------------------------------
+
+Interface improvements
+Fix issues causing reconnection to fail
+Fix reset networking on Windows
+
+Version 1.3.4375.96 2025-09-04
+------------------------------
+
+Add reset secure enclave on macos
+Fix race condition causing service crash
+
+Version 1.3.4335.94 2025-07-26
+------------------------------
+
+Fix race condition causing service crash
+
+Version 1.3.4275.94 2025-05-27
+------------------------------
+
+Fix connection issues
+
+Version 1.3.4269.93 2025-05-21
+------------------------------
+
+Fix DNS issues on Linux
+
+Version 1.3.4262.38 2025-05-14
+------------------------------
+
+Fix profile import issue
+
+Version 1.3.4261.88 2025-05-13
+------------------------------
+
+Fix compatibility issues with Ubuntu 25.04
+
+Version 1.3.4220.57 2025-04-02
+------------------------------
+
+Add wg search domain support
+Fix local privilege escalation with admin user on macOS
+
+Version 1.3.4210.52 2025-03-23
+------------------------------
+
+Fix wg connectons on unstable networks
+Fix Windows silent install
+
+Version 1.3.4099.99 2024-12-02
+------------------------------
+
+Improve device registration prompt
+Fix reconnection issues
+
+Version 1.3.4083.88 2024-11-16
+------------------------------
+
+Add tray icon for Windows light theme
+
+Version 1.3.4075.60 2024-11-08
+------------------------------
+
+Fix reconnect after wakeup
+Notification for authenticated reconnections
+Fix disable gateway for IPv6
+
+Version 1.3.4066.51 2024-10-30
+------------------------------
+
+Improve connection management
+Fix disable reconnection option
+
+Version 1.3.4059.45 2024-10-23
+------------------------------
+
+Fix connection retry
+
+Version 1.3.4058.0 2024-10-22
+-----------------------------
+
+Increase connection timeout
+
+Version 1.3.4056.37 2024-10-20
+------------------------------
+
+Fix issues with system profiles
+
+Version 1.3.4051.36 2024-10-15
+------------------------------
+
+Rewritten connection management
+New themes
+Full Windows ARM support
+Bundle WireGuard on macOS
+
+Version 1.3.4026.10 2024-09-20
+------------------------------
+
+Fix profile import issues
+
+Version 1.3.4024.40 2024-09-18
+------------------------------
+
+Improve cli password prompt
+Add sso auth support to cli
+Add geo location host selection
+Support for Windows ARM
+Fix search domain on macos
+Fix issue with IPv6 connections
+
+Version 1.3.3883.60 2024-04-30
+------------------------------
+
+Improve vpn configuration support
+
+Version 1.3.3814.40 2024-02-21
+------------------------------
+
+Add minimal interface
+
+Version 1.3.3785.81 2024-01-23
+------------------------------
+
+Fix wg DNS issue on macOS
+
+Version 1.3.3782.35 2024-01-20
+------------------------------
+
+Update openvpn build
+
+Version 1.3.3781.28 2024-01-19
+------------------------------
+
+Fix network reset on macOS
+Disable Electron debugging
+
+Version 1.3.3772.10 2024-01-10
+------------------------------
+
+Improve DNS on macOS
+
+Version 1.3.3709.64 2023-11-08
+------------------------------
+
+Fix macOS service issues
+
+Version 1.3.3708.51 2023-11-07
+------------------------------
+
+Fix macOS device authentication compatibility issues
+
+Version 1.3.3705.92 2023-11-04
+------------------------------
+
+Fix paths on macOS
+
+Version 1.3.3704.98 2023-11-03
+------------------------------
+
+Fix network adapter issues on Windows
+
+Version 1.3.3637.72 2023-08-28
+------------------------------
+
+Fix DNS issues
+
+Version 1.3.3600.11 2023-07-22
+------------------------------
+
+Fix Linux compatibility issues
+
+Version 1.3.3596.68 2023-07-18
+------------------------------
+
+Fix server compatibility issue
+
+Version 1.3.3585.79 2023-07-07
+------------------------------
+
+Fix issues with reconnection
+
+Version 1.3.3584.5 2023-07-06
+-----------------------------
+
+Add macOS DNS options
+Update openvpn client
+
+Version 1.3.3484.2 2023-03-28
+-----------------------------
+
+Improve logging output
+Improve device authentication
+
+Version 1.3.3477.58 2023-03-21
+------------------------------
+
+Fix DNS issues on macOS
+
+Version 1.3.3474.95 2023-03-18
+------------------------------
+
+Add device authentication
+Interface improvements
+
+Version 1.3.3467.51 2023-03-11
+------------------------------
+
+Redesign DNS management on macOS
+Add network reset function to menu
+
+Version 1.3.3465.84 2023-03-09
+------------------------------
+
+Add force DNS profile option on macOS
+
+Version 1.3.3464.45 2023-03-08
+------------------------------
+
+Fix connection issues
+
+Version 1.3.3463.71 2023-03-07
+------------------------------
+
+Fix interface issues
+
+Version 1.3.3457.61 2023-03-01
+------------------------------
+
+Fix DNS issues on macOS Ventura
+Fix tuntap issue on Windows
+
+Version 1.3.3441.64 2023-02-13
+------------------------------
+
+Add advanced settings
+Improve connection management with multi-factor authentication
+
+Version 1.3.3430.77 2023-02-02
+------------------------------
+
+Fix profile connection issue
+
+Version 1.3.3428.82 2023-01-31
+------------------------------
+
+Fix startup issue
+
+Version 1.3.3420.31 2023-01-23
+------------------------------
+
+Add disable reconnection option
+Use safe storage for profile keys
+
+Version 1.3.3373.6 2022-12-07
+-----------------------------
+
+Fix connection issues on Linux
+
+Version 1.3.3370.14 2022-12-04
+------------------------------
+
+Fix DNS issues
+
+Version 1.3.3343.50 2022-11-07
+------------------------------
+
+Fix issues with reconnections
+Improve connection single sign-on
+
+Version 1.3.3329.81 2022-10-24
+------------------------------
+
+Add connection single sign-on
+Add disable gateway option
+
+Version 1.3.3300.95 2022-09-25
+------------------------------
+
+Improve interface layout
+
+Version 1.3.3290.45 2022-09-15
+------------------------------
+
+Redesign profile layout
+
+Version 1.3.3289.99 2022-09-14
+------------------------------
+
+Fix issue disabling tray icon
+
+Version 1.3.3289.33 2022-09-14
+------------------------------
+
+Improve Windows service management
+
+Version 1.3.3288.98 2022-09-13
+------------------------------
+
+Fix issue with unformatted ovpn profiles
+
+Version 1.3.3283.46 2022-09-08
+------------------------------
+
+Interface improvements
+
+Version 1.3.3282.37 2022-09-07
+------------------------------
+
+Improve error message display
+
+Version 1.3.3281.66 2022-09-06
+------------------------------
+
+Redesign client
+Fix connection state management
+
+Version 1.2.3236.80 2022-07-23
+------------------------------
+
+Improve dynamic firewall support
+
+Version 1.2.3233.75 2022-07-20
+------------------------------
+
+Add dynamic firewall support
+
+Version 1.2.3154.57 2022-05-02
+------------------------------
+
+Fix connection issues on Fedora
+
+Version 1.2.3145.98 2022-04-23
+------------------------------
+
+Add support for systemd update
+
+Version 1.2.3128.59 2022-04-06
+------------------------------
+
+Fix compatibility issues on Windows
+
+Version 1.2.3127.88 2022-04-05
+------------------------------
+
+Fix startup issue on Windows
+
+Version 1.2.3124.65 2022-04-02
+------------------------------
+
+Fix issue with Windows network adapters
+Add silent install to Windows installer
+
+Version 1.2.3121.61 2022-03-30
+------------------------------
+
+Fix connection issues
+
+Version 1.2.3119.63 2022-03-28
+------------------------------
+
+Add disable for cli profiles
+Fix local privilege escalation on Windows
+
+Version 1.2.3019.52 2021-12-18
+------------------------------
+
+Improve connection management
+
+Version 1.2.2943.11 2021-10-03
+------------------------------
+
+Fix certificate issue
+
+Version 1.2.2916.18 2021-09-06
+------------------------------
+
+Fix reconnect from suspend
+
+Version 1.2.2897.44 2021-08-18
+------------------------------
+
+Fix cli connection issues
+
+Version 1.2.2799.2 2021-05-12
+-----------------------------
+
+Improve connection management
+Fix connection information
+
+Version 1.2.2768.85 2021-04-11
+------------------------------
+
+Block unsafe openvpn environment variables
+
+Version 1.2.2737.2 2021-03-11
+-----------------------------
+
+Fix connection issues
+Block unsafe openvpn environment variables
+
+Version 1.2.2709.72 2021-02-11
+------------------------------
+
+Fix reliability issues
+
+Version 1.2.2685.61 2021-01-18
+------------------------------
+
+Fix local privilege escalation with openvpn configuration
+
+Version 1.2.2653.1 2020-12-17
+-----------------------------
+
+Fix DNS issue on macOS
+
+Version 1.2.2631.70 2020-11-25
+------------------------------
+
+Linux connection improvements
+
+Version 1.2.2626.63 2020-11-20
+------------------------------
+
+Stability improvements
+
+Version 1.2.2624.84 2020-11-18
+------------------------------
+
+Partial apple silicon support
+
+Version 1.2.2615.73 2020-11-09
+------------------------------
+
+Fix routing issue on Windows
+Improve system profile connection management
+
+Version 1.2.2550.20 2020-09-05
+------------------------------
+
+Fix system profiles autostart on Windows
+Fix local privilege escalation with openvpn configuration
+Fix file permissions on Linux and macOS
+
+Version 1.2.2549.5 2020-09-04
+-----------------------------
+
+Add command line client
+Improve autostart profiles
+
+Version 1.0.2440.93 2020-05-18
+------------------------------
+
+Improve connection management
+
+Version 1.0.2428.78 2020-05-06
+------------------------------
+
+Add authentication cache for wg
+
+Version 1.0.2418.61 2020-04-26
+------------------------------
+
+Fix connection error message
+
+Version 1.0.2404.6 2020-04-12
+-----------------------------
+
+Improve connection reliability
+
+Version 1.0.2395.64 2020-04-03
+------------------------------
+
+Improve connection management
+
+Version 1.0.2388.46 2020-03-27
+------------------------------
+
+Add support for wg
+
+Version 1.0.2317.40 2020-01-16
+------------------------------
+
+Interface improvements
+Linux improvements
+Fix file permissions on Linux and macOS
+
+Version 1.0.2226.23 2019-10-17
+------------------------------
+
+Linux improvements
+Fix unquoted service path in Windows service
+
+Version 1.0.2207.23 2019-09-28
+------------------------------
+
+Interface improvements
+
+Version 1.0.2144.93 2019-07-27
+------------------------------
+
+Fix connection issues
+
+Version 1.0.2079.9 2019-05-23
+-----------------------------
+
+Linux improvements
+
+Version 1.0.1953.32 2019-01-17
+------------------------------
+
+Interface improvements
+
+Version 1.0.1952.30 2019-01-16
+------------------------------
+
+Interface improvements
+
+Version 1.0.1951.33 2019-01-15
+------------------------------
+
+Redesign interface
+
+Version 1.0.1909.80 2018-12-04
+------------------------------
+
+Fix issue with pre connection message
+
+Version 1.0.1907.2 2018-12-02
+-----------------------------
+
+Fix issue importing profiles
+
+Version 1.0.1889.51 2018-11-14
+------------------------------
+
+Fix macOS compatibility issue
+
+Version 1.0.1888.35 2018-11-13
+------------------------------
+
+Add option to disable tray icon
+
+Version 1.0.1886.21 2018-11-11
+------------------------------
+
+Authentication cache improvements
+
+Version 1.0.1804.90 2018-08-21
+------------------------------
+
+Interface improvements
+
+Version 1.0.1782.9 2018-07-30
+-----------------------------
+
+Add support for OneLogin and Okta passcodes
+
+Version 1.0.1768.89 2018-07-16
+------------------------------
+
+Import profile improvements
+
+Version 1.0.1749.25 2018-06-27
+------------------------------
+
+Add Linux support
+
+Version 1.0.1653.28 2018-03-23
+------------------------------
+
+Improve IPv6 support
+
+Version 1.0.1632.42 2018-03-02
+------------------------------
+
+Interface improvements
+
+Version 1.0.1561.31 2017-12-21
+------------------------------
+
+Fix startup issue
+
+Version 1.0.1561.29 2017-12-21
+------------------------------
+
+Fix wakeup issue on Windows
+
+Version 1.0.1561.27 2017-12-21
+------------------------------
+
+Add auto reconnect option
+Fix issue with code 49 error
+
+Version 1.0.1543.29 2017-12-03
+------------------------------
+
+Stability improvements
+
+Version 1.0.1461.29 2017-09-12
+------------------------------
+
+Add option to disable reconnect
+
+Version 1.0.1442.97 2017-08-24
+------------------------------
+
+Fix service startup issue on macOS
+
+Version 1.0.1436.36 2017-08-18
+------------------------------
+
+Networking improvements on macOS
+
+Version 1.0.1435.1 2017-08-16
+-----------------------------
+
+MacOS improvements
+
+Version 1.0.1429.19 2017-08-11
+------------------------------
+
+Stability improvements
+Fix DNS issues on macOS
+
+Version 1.0.1400.11 2017-07-12
+------------------------------
+
+Fix issue with client stuck on disconnecting
+
+Version 1.0.1380.37 2017-06-23
+------------------------------
+
+Update openvpn
+
+Version 1.0.1364.29 2017-06-07
+------------------------------
+
+Interface improvements
+
+Version 1.0.1364.27 2017-06-07
+------------------------------
+
+Improve Windows install
+
+Version 1.0.1364.22 2017-06-07
+------------------------------
+
+Fix issues with Windows setup
+
+Version 1.0.1363.37 2017-06-06
+------------------------------
+
+Redesign interface
+Fix interface issues on Windows
+
+Version 1.0.1361.39 2017-06-04
+------------------------------
+
+Improve profile import
+
+Version 1.0.1359.97 2017-06-02
+------------------------------
+
+Fix issue with reading archives
+
+Version 1.0.1356.36 2017-05-30
+------------------------------
+
+Interface improvements
+Add support for AES GCM ciphers
+
+Version 1.0.1311.6 2017-04-14
+-----------------------------
+
+Fix issue with Windows 10 update
+
+Version 1.0.1304.41 2017-04-08
+------------------------------
+
+Interface improvements
+Fix DNS issues on macOS
+
+Version 1.0.1303.3 2017-04-06
+-----------------------------
+
+Improve logging
+
+Version 1.0.1296.88 2017-03-31
+------------------------------
+
+Improve DNS management on macOS
+
+Version 1.0.1294.83 2017-03-29
+------------------------------
+
+Fix connection issues
+
+Version 1.0.1294.3 2017-03-28
+-----------------------------
+
+Fix reconnection issues
+
+Version 1.0.1265.14 2017-02-27
+------------------------------
+
+Stability improvements
+
+Version 1.0.1265.1 2017-02-27
+-----------------------------
+
+Add support for inactive timeout
+Interface improvements
+
+Version 1.0.1258.42 2017-02-21
+------------------------------
+
+Add support for YubiKey
+
+Version 1.0.1223.17 2017-01-16
+------------------------------
+
+Fix startup issues on macOS
+
+Version 1.0.1222.48 2017-01-16
+------------------------------
+
+Fix reconnection issues on macOS
+
+Version 1.0.1219.32 2017-01-13
+------------------------------
+
+Improve connection reliability
+Improve DNS management on macOS
+Fix issues with reconnecting
+
+Version 1.0.1212.27 2017-01-06
+------------------------------
+
+Improve DNS management on macOS
+
+Version 1.0.1210.71 2017-01-04
+------------------------------
+
+Fix issue with unexpected disconnect
+
+Version 1.0.1210.1 2017-01-03
+-----------------------------
+
+Improve logging format
+
+Version 1.0.1209.98 2017-01-03
+------------------------------
+
+Add service logs view to interface
+Improve logging
+Fix autostart on macOS
+
+Version 1.0.1187.7 2016-12-11
+-----------------------------
+
+Add support for Duo passcodes
+Add clear system logs
+Improve configuration sync
+
+Version 1.0.1177.2 2016-12-01
+-----------------------------
+
+Add system logs view to interface
+Add support for push authentication cache
+Fix connection issues
+
+Version 1.0.1174.27 2016-11-29
+------------------------------
+
+Configuration improvements
+
+Version 1.0.1174.20 2016-11-28
+------------------------------
+
+Reliability improvements
+Fix issue with search domains
+
+Version 1.0.1154.75 2016-11-09
+------------------------------
+
+Fix issue with unhandled exit on macOS
+
+Version 1.0.1149.25 2016-11-04
+------------------------------
+
+Interface improvements
+Reliability improvements
+
+Version 1.0.1141.79 2016-10-27
+------------------------------
+
+Stability improvements
+Fix dns issues when reconnecting
+
+Version 1.0.1116.6 2016-10-01
+-----------------------------
+
+Fix local privilege escalation (Anthony Weems of Praetorian)
+Fix configuration corruption issue (Anthony Weems of Praetorian)
+
+Version 1.0.1075.52 2016-08-22
+------------------------------
+
+Fix connection timeout issues
+
+Version 1.0.1070.17 2016-08-16
+------------------------------
+
+Interface improvements
+Improve profile reconnection
+Fix authentication failure message
+Fix connection issues after waking from sleep
+
+Version 0.10.19 2016-07-09
+--------------------------
+
+Support for macOS Sierra
+Fix issues with import profile
+
+Version 0.10.18 2016-03-24
+--------------------------
+
+Add support for username and passwords
+Improve IPv6 support
+
+Version 0.10.17 2016-02-02
+--------------------------
+
+Add support for passwords
+
+Version 0.10.16 2016-01-03
+--------------------------
+
+Fix interface display issue
+
+Version 0.10.15 2016-01-03
+--------------------------
+
+Add support for pins
+Interface improvements
+
+Version 0.10.14 2015-11-08
+--------------------------
+
+Fix issue with importing profiles
+
+Version 0.10.13 2015-10-05
+--------------------------
+
+Handle drag and drop for profile import
+
+Version 0.10.12 2015-10-03
+--------------------------
+
+Fix copy and paste
+
+Version 0.10.11 2015-10-02
+--------------------------
+
+Fix IPv6 connection issue on Windows
+Fix display issues with viewing logs
+
+Version 0.10.10 2015-10-02
+--------------------------
+
+Improvements for OS X client
+
+Version 0.10.9 2015-08-02
+-------------------------
+
+Improve Windows startup
+
+Version 0.10.8 2015-08-01
+-------------------------
+
+Improve Windows 10 support
+
+Version 0.10.7 2015-08-01
+-------------------------
+
+Fix dns issues with OS X
+Enable Windows 7 support
+
+Version 0.10.6 2015-07-18
+-------------------------
+
+Fix key sync error message
+
+Version 0.10.5 2015-07-10
+-------------------------
+
+Update openvpn and openssl
+
+Version 0.10.4 2015-07-09
+-------------------------
+
+Handle reopen events
+Add autostart to OS X
+
+Version 0.10.3 2015-07-08
+-------------------------
+
+Allow using path with auth-user-pass
+
+Version 0.10.2 2015-07-07
+-------------------------
+
+Fix disconnect issue with Windows client
+
+Version 0.10.1 2015-07-07
+-------------------------
+
+Initial beta release

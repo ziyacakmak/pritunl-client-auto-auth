@@ -1,0 +1,18 @@
+#!/bin/sh
+pkill -2 -f Pritunl.app 2>/dev/null || true
+launchctl bootout system/com.pritunl.service || true
+sleep 0.2
+rm -f /Library/LaunchDaemons/com.pritunl.service.plist || true
+rm -rf /Library/PrivilegedHelperTools/pritunl-client || true
+
+rm -rf /var/lib/pritunl || true
+rm -f /var/log/pritunl.log || true
+rm -f /var/log/pritunl-client.log || true
+kextunload -b net.sf.tuntaposx.tap || true
+kextunload -b net.sf.tuntaposx.tun || true
+rm -rf /Library/Extensions/tap.kext || true
+rm -rf /Library/Extensions/tun.kext || true
+rm -f /Library/LaunchDaemons/net.sf.tuntaposx.tap.plist || true
+rm -f /Library/LaunchDaemons/net.sf.tuntaposx.tun.plist || true
+rm -rf /usr/local/bin/pritunl-openvpn || true
+rm -rf /usr/local/bin/pritunl-service || true
