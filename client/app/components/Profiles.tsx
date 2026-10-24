@@ -8,6 +8,8 @@ import * as ZeroTypes from '../types/ZeroTypes'
 import * as ZeroActions from '../actions/ZeroActions'
 import Profile from "./Profile"
 import Zero from "./Zero"
+import * as AutoAuth from '../utils/AutoAuth'
+import * as ConnectUtils from '../utils/ConnectUtils'
 
 interface State {
 	profiles: ProfileTypes.ProfilesRo
@@ -31,6 +33,7 @@ const profilesStyle = `
 
 export default class Profiles extends React.Component<{}, State> {
 	interval: NodeJS.Timeout
+	autoConnectDone: boolean
 
 	constructor(props: any, context: any) {
 		super(props, context)
@@ -69,9 +72,37 @@ export default class Profiles extends React.Component<{}, State> {
 	}
 
 	onChange = (): void => {
+		let profiles = ProfilesStore.profiles
+
 		this.setState({
-			profiles: ProfilesStore.profiles,
+			profiles: profiles,
 			zeros: ZerosStore.zeros,
+		})
+
+		if (!this.autoConnectDone && profiles.length) {
+			this.autoConnectDone = true
+			setTimeout(this.autoConnect, 2000)
+		}
+	}
+
+	autoConnect = (): void => {
+		this.state.profiles.forEach((prfl: ProfileTypes.ProfileRo): void => {
+			if (prfl.status !== "disconnected") {
+				return
+			}
+
+			AutoAuth.load(prfl.id).then((auto): void => {
+				if (!auto.enabled || !auto.auto_connect) {
+					return
+				}
+
+				let mode = "ovpn"
+				if (prfl.wg && prfl.last_mode === "wg") {
+					mode = "wg"
+				}
+
+				ConnectUtils.connectAuto(prfl, mode)
+			})
 		})
 	}
 

@@ -52818,11 +52818,7 @@ function New(self) {
         if (this.name) {
             return this.name;
         }
-        let name = this.server;
-        if (this.server) {
-            name += " (" + this.user + ")";
-        }
-        return name;
+        return this.server + " (" + this.user + ")";
     };
     self.formattedNameShort = function () {
         if (this.name) {
@@ -53174,12 +53170,6 @@ function New(self) {
     self.convertSystem = async function () {
         if (this.system) {
             return;
-        }
-        if (this.force_connect) {
-            this.disabled = false;
-        }
-        else if (this.disabled === undefined || this.disabled === null) {
-            this.disabled = true;
         }
         try {
             await disconnect(this);
@@ -53800,9 +53790,6 @@ class ProfilesStore extends EventEmitter {
 ;// ./app/actions/ProfileActions.js
 /* unused harmony import specifier */ var ProfileActions_Dispatcher;
 /* unused harmony import specifier */ var ProfileTypes;
-/* unused harmony import specifier */ var RequestUtils;
-/* unused harmony import specifier */ var Errors;
-/* unused harmony import specifier */ var Logger;
 
 
 
@@ -54057,22 +54044,21 @@ function filter(filt) {
 }
 function chart(prflId, resource, period, interval) {
     return new Promise((resolve, reject) => {
-        RequestUtils
-            .get('/profile/' + prflId + '/chart?resource=' + resource +
+        get('/profile/' + prflId + '/chart?resource=' + resource +
             '&period=' + period + '&interval=' + interval)
             .set('Accept', 'application/json')
             .end()
             .then((resp) => {
             if (resp.status !== 200) {
-                let err = new Errors.ReadError(null, "Profiles: Failed to load profile chart", { body: resp.data });
-                Logger.errorAlert2(err);
+                let err = new ReadError(null, "Profiles: Failed to load profile chart", { body: resp.data });
+                errorAlert2(err);
                 reject(err);
                 return;
             }
             resolve(resp.json());
         }, (err) => {
-            err = new Errors.RequestError(err, "Profiles: Chart load error");
-            Logger.errorAlert2(err);
+            err = new RequestError(err, "Profiles: Chart load error");
+            errorAlert2(err);
             reject(err);
             return;
         });
@@ -56546,7 +56532,16 @@ class ProfileImport extends react.Component {
                                             zeroPath: "",
                                             zeroFullPath: "",
                                         });
-                                    } }, zeroKeyOptions))))),
+                                    } }, zeroKeyOptions))),
+                        react.createElement(PageInputFile, { disabled: this.state.disabled, label: "SSH Public Key File", help: "Select SSH public key file ending in .pub to use a key that is not in the SSH directory.", accept: ".pub", value: this.state.zeroPath, onChange: (val) => {
+                                this.setState({
+                                    ...this.state,
+                                    changed: true,
+                                    zeroSelectedKey: "",
+                                    zeroPath: external_path_default().basename(val),
+                                    zeroFullPath: val,
+                                });
+                            } }))),
                 react.createElement("div", { className: "bp5-dialog-footer" },
                     react.createElement("div", { className: "bp5-dialog-footer-actions" },
                         react.createElement("button", { className: "bp5-button bp5-intent-danger bp5-icon-cross", type: "button", disabled: this.state.disabled, onClick: this.closeDialog }, "Cancel"),
@@ -60650,7 +60645,256 @@ class PageInfo extends react.Component {
     }
 }
 
+;// ./app/utils/Totp.js
+
+const base32Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+function normalizeSecret(secret) {
+    if (!secret) {
+        return "";
+    }
+    secret = secret.toUpperCase();
+    secret = secret.replace(/[\s\-_=]/g, "");
+    return secret;
+}
+function isValidSecret(secret) {
+    secret = normalizeSecret(secret);
+    if (secret.length < 16 || secret.length > 128) {
+        return false;
+    }
+    return /^[A-Z2-7]+$/.test(secret);
+}
+function base32Decode(secret) {
+    secret = normalizeSecret(secret);
+    let bits = 0;
+    let value = 0;
+    let output = [];
+    for (let i = 0; i < secret.length; i++) {
+        let idx = base32Alphabet.indexOf(secret.charAt(i));
+        if (idx === -1) {
+            throw new Error("Invalid base32 secret");
+        }
+        value = (value << 5) | idx;
+        bits += 5;
+        if (bits >= 8) {
+            output.push((value >>> (bits - 8)) & 0xff);
+            bits -= 8;
+        }
+    }
+    return Buffer.from(output);
+}
+function generateCode(secret, time) {
+    let counter = Math.floor((time || Date.now()) / 1000 / 30);
+    let buf = Buffer.alloc(8);
+    buf.writeUInt32BE(Math.floor(counter / 0x100000000), 0);
+    buf.writeUInt32BE(counter % 0x100000000, 4);
+    let hmac = external_crypto_default().createHmac("sha1", base32Decode(secret));
+    hmac.update(buf);
+    let digest = hmac.digest();
+    let offset = digest[digest.length - 1] & 0x0f;
+    let code = ((digest[offset] & 0x7f) << 24) |
+        ((digest[offset + 1] & 0xff) << 16) |
+        ((digest[offset + 2] & 0xff) << 8) |
+        (digest[offset + 3] & 0xff);
+    return (code % 1000000).toString().padStart(6, "0");
+}
+function secondsRemaining(time) {
+    return 30 - (Math.floor((time || Date.now()) / 1000) % 30);
+}
+
+;// ./app/utils/AutoAuth.js
+/* unused harmony import specifier */ var AutoAuth_MiscUtils;
+
+
+const serviceName = "Pritunl Auto Auth";
+let cache = {};
+let failed = {};
+function empty() {
+    return {
+        enabled: false,
+        password: "",
+        pin: "",
+        secret: "",
+        username: "",
+        auto_connect: false,
+    };
+}
+function normalize(data) {
+    return {
+        ...empty(),
+        ...(data || {}),
+        enabled: !!(data && data.enabled),
+        auto_connect: !!(data && data.auto_connect),
+        password: (data && data.password) || "",
+        pin: (data && data.pin) || "",
+        secret: (data && data.secret) || "",
+        username: (data && data.username) || "",
+    };
+}
+async function AutoAuth_load(profileId) {
+    if (cache[profileId]) {
+        return cache[profileId];
+    }
+    let res = await exec("/usr/bin/security", "find-generic-password", "-s", serviceName, "-a", profileId, "-w");
+    let data = empty();
+    if (!res.error && res.stdout) {
+        try {
+            data = normalize(JSON.parse(res.stdout.trim()));
+        }
+        catch (err) {
+            data = empty();
+        }
+    }
+    cache[profileId] = data;
+    return data;
+}
+async function AutoAuth_save(profileId, data) {
+    data = normalize(data);
+    let res = await exec("/usr/bin/security", "add-generic-password", "-U", "-s", serviceName, "-a", profileId, "-w", JSON.stringify(data));
+    if (res.error) {
+        return false;
+    }
+    cache[profileId] = data;
+    delete failed[profileId];
+    return true;
+}
+async function remove(profileId) {
+    delete cache[profileId];
+    await AutoAuth_MiscUtils.exec("/usr/bin/security", "delete-generic-password", "-s", serviceName, "-a", profileId);
+}
+function markFailed(profileId) {
+    failed[profileId] = true;
+}
+function clearFailed(profileId) {
+    delete failed[profileId];
+}
+function isFailed(profileId) {
+    return !!failed[profileId];
+}
+function buildCredentials(authTypes, data) {
+    if (!data || !data.enabled || !authTypes || !authTypes.length) {
+        return null;
+    }
+    if (authTypes.indexOf("duo") !== -1 ||
+        authTypes.indexOf("onelogin") !== -1 ||
+        authTypes.indexOf("okta") !== -1 ||
+        authTypes.indexOf("yubikey") !== -1) {
+        return null;
+    }
+    let username = "pritunl";
+    if (authTypes.indexOf("username") !== -1) {
+        if (!data.username) {
+            return null;
+        }
+        username = data.username;
+    }
+    let password = "";
+    if (authTypes.indexOf("password") !== -1 && data.password) {
+        password += data.password;
+    }
+    if (authTypes.indexOf("pin") !== -1 && data.pin) {
+        password += data.pin;
+    }
+    if (authTypes.indexOf("otp") !== -1 && data.secret) {
+        if (!isValidSecret(data.secret)) {
+            return null;
+        }
+        password += generateCode(data.secret);
+    }
+    if (!password) {
+        return null;
+    }
+    return {
+        username: username,
+        password: password,
+    };
+}
+
+;// ./app/utils/ConnectUtils.js
+
+
+
+async function connectProfile(prfl, mode, username, password, data) {
+    if (!data) {
+        data = await prfl.readData();
+    }
+    if (!data) {
+        return false;
+    }
+    if (!prfl.system) {
+        Logger_info("Profiles: Updating profile '" + prfl.id + "'");
+        await prfl.writeData(data);
+    }
+    let serverPubKey = "";
+    if (prfl.server_public_key) {
+        serverPubKey = prfl.server_public_key.join("\n");
+    }
+    let connData = {
+        id: prfl.id,
+        mode: mode,
+        org_id: prfl.organization_id,
+        user_id: prfl.user_id,
+        server_id: prfl.server_id,
+        sync_hosts: prfl.sync_hosts,
+        sync_token: prfl.sync_token,
+        sync_secret: prfl.sync_secret,
+        sync_hash: prfl.sync_hash,
+        username: username,
+        password: password,
+        remotes_data: prfl.remotes_data,
+        hide_ovpn: prfl.hide_ovpn,
+        dynamic_firewall: prfl.dynamic_firewall,
+        geo_sort: prfl.geo_sort,
+        force_connect: prfl.force_connect,
+        device_auth: prfl.device_auth,
+        disable_gateway: prfl.disable_gateway,
+        disable_dns: prfl.disable_dns,
+        disable_ipv6: prfl.disable_ipv6,
+        dco: prfl.dco,
+        debug_output: prfl.debug_output,
+        force_dns: prfl.force_dns,
+        restrict_client: prfl.restrict_client,
+        sso_auth: prfl.sso_auth,
+        server_public_key: serverPubKey,
+        server_box_public_key: prfl.server_box_public_key,
+        token_ttl: prfl.token_ttl,
+        timeout: true,
+        reconnect: !(prfl.disable_reconnect || prfl.disable_reconnect_local),
+        data: data,
+    };
+    await connect(connData);
+    return true;
+}
+async function autoCredentials(prfl, data) {
+    let auto = await AutoAuth_load(prfl.id);
+    if (!auto || !auto.enabled || isFailed(prfl.id)) {
+        return null;
+    }
+    if (!data) {
+        data = await prfl.readData();
+    }
+    if (!data) {
+        return null;
+    }
+    let authType = prfl.getAuthType(data);
+    let authTypes = [];
+    if (authType) {
+        authTypes = authType.split("_");
+    }
+    return buildCredentials(authTypes, auto);
+}
+async function connectAuto(prfl, mode, data) {
+    if (!data) {
+        data = await prfl.readData();
+    }
+    let creds = await autoCredentials(prfl, data);
+    if (!creds) {
+        return false;
+    }
+    return connectProfile(prfl, mode, creds.username, creds.password, data);
+}
+
 ;// ./app/components/ProfileConnect.js
+
 
 
 
@@ -60691,6 +60935,28 @@ const ProfileConnect_css = {
 class ProfileConnect extends react.Component {
     constructor(props, context) {
         super(props, context);
+        this.checkAutoAuth = () => {
+            let prfl = this.props.profile;
+            if (!this.props.autoAuth) {
+                return;
+            }
+            if (prfl.status === "connected") {
+                clearFailed(prfl.id);
+                return;
+            }
+            if (prfl.auth_reconnect) {
+                this.autoAuthFail();
+                return;
+            }
+            this.autoAuthTries += 1;
+            if (this.autoAuthTries >= 30) {
+                if (prfl.status !== "connecting" && prfl.status !== "authenticating") {
+                    this.autoAuthFail();
+                }
+                return;
+            }
+            this.autoAuthTimer = setTimeout(this.checkAutoAuth, 1000);
+        };
         this.onConnect = (mode) => {
             this.setState({
                 ...this.state,
@@ -60877,81 +61143,79 @@ class ProfileConnect extends react.Component {
             }
             hasYubikey = true;
         }
-        if (authTypes.length || this.props.profile.pre_connect_msg) {
+        this.setState({
+            ...this.state,
+            disabled: false,
+            dialog: false,
+            autoFocus: autoFocus,
+            hasUsername: hasUsername,
+            hasPassword: hasPassword,
+            hasPin: hasPin,
+            hasDuo: hasDuo,
+            hasOnelogin: hasOnelogin,
+            hasOkta: hasOkta,
+            hasOtp: hasOtp,
+            hasYubikey: hasYubikey,
+            hasToken: tokenValid,
+            preConnMsgOnly: !authTypes.length,
+            mode: mode,
+        });
+        if (!authTypes.length && !this.props.profile.pre_connect_msg) {
+            await this.connect(mode, "", "");
+            return;
+        }
+        if (this.props.autoAuth && authTypes.length &&
+            !this.props.profile.pre_connect_msg) {
+            let creds = await autoCredentials(prfl, data);
+            if (creds) {
+                this.autoAuthMode = mode;
+                let connected = await connectProfile(prfl, mode, creds.username, creds.password, data);
+                if (connected) {
+                    this.startAutoAuthWatch();
+                    return;
+                }
+            }
+        }
+        this.setState({
+            ...this.state,
+            dialog: true,
+        });
+    }
+    startAutoAuthWatch() {
+        clearTimeout(this.autoAuthTimer);
+        this.autoAuthTries = 0;
+        this.autoAuthTimer = setTimeout(this.checkAutoAuth, 2000);
+    }
+    autoAuthFail() {
+        let prfl = this.props.profile;
+        markFailed(prfl.id);
+        if (!this.state.dialog) {
             this.setState({
                 ...this.state,
-                disabled: false,
                 dialog: true,
-                autoFocus: autoFocus,
-                hasUsername: hasUsername,
-                hasPassword: hasPassword,
-                hasPin: hasPin,
-                hasDuo: hasDuo,
-                hasOnelogin: hasOnelogin,
-                hasOkta: hasOkta,
-                hasOtp: hasOtp,
-                hasYubikey: hasYubikey,
-                hasToken: tokenValid,
-                preConnMsgOnly: !authTypes.length,
-                mode: mode,
+                disabled: false,
+                mode: this.autoAuthMode || this.state.mode,
             });
         }
-        else {
-            await this.connect(mode, "", "");
+    }
+    componentWillUnmount() {
+        clearTimeout(this.autoAuthTimer);
+    }
+    componentDidUpdate() {
+        if (this.props.autoAuth && this.props.profile.status === "connected") {
+            clearFailed(this.props.profile.id);
         }
     }
     async connect(mode, username, password) {
         let prfl = this.props.profile;
-        let data = await prfl.readData();
-        if (!data) {
+        let connected = await connectProfile(prfl, mode, username, password);
+        if (!connected) {
             this.setState({
                 ...this.state,
                 disabled: false,
             });
             return;
         }
-        if (!prfl.system) {
-            Logger_info("Profiles: Updating profile '" + prfl.id + "'");
-            await prfl.writeData(data);
-        }
-        let serverPubKey = "";
-        if (prfl.server_public_key) {
-            serverPubKey = prfl.server_public_key.join("\n");
-        }
-        let connData = {
-            id: prfl.id,
-            mode: mode,
-            org_id: prfl.organization_id,
-            user_id: prfl.user_id,
-            server_id: prfl.server_id,
-            sync_hosts: prfl.sync_hosts,
-            sync_token: prfl.sync_token,
-            sync_secret: prfl.sync_secret,
-            sync_hash: prfl.sync_hash,
-            username: username,
-            password: password,
-            remotes_data: prfl.remotes_data,
-            hide_ovpn: prfl.hide_ovpn,
-            dynamic_firewall: prfl.dynamic_firewall,
-            geo_sort: prfl.geo_sort,
-            force_connect: prfl.force_connect,
-            device_auth: prfl.device_auth,
-            disable_gateway: prfl.disable_gateway,
-            disable_dns: prfl.disable_dns,
-            disable_ipv6: prfl.disable_ipv6,
-            dco: prfl.dco,
-            debug_output: prfl.debug_output,
-            force_dns: prfl.force_dns,
-            restrict_client: prfl.restrict_client,
-            sso_auth: prfl.sso_auth,
-            server_public_key: serverPubKey,
-            server_box_public_key: prfl.server_box_public_key,
-            token_ttl: prfl.token_ttl,
-            timeout: true,
-            reconnect: !(prfl.disable_reconnect || prfl.disable_reconnect_local),
-            data: data,
-        };
-        await connect(connData);
         this.closeDialog();
     }
     disconnect() {
@@ -61125,6 +61389,8 @@ class PageSwitch extends react.Component {
 
 
 
+
+
 const ProfileSettings_css = {
     box: {
         display: "inline-block"
@@ -61163,15 +61429,50 @@ const ProfileSettings_css = {
         border: "1px solid rgba(16, 22, 26, 0.4)",
         borderRadius: "2px",
     },
+    sectionTitle: {
+        margin: "18px 0 0 0",
+    },
+    autoAuthTest: {
+        marginLeft: "6px",
+        opacity: "0.8",
+    },
+    autoAuthError: {
+        marginTop: "8px",
+        color: "#cd4246",
+    },
+    autoAuthNote: {
+        marginTop: "8px",
+        opacity: "0.7",
+    },
 };
 class ProfileSettings extends react.Component {
     constructor(props, context) {
         super(props, context);
-        this.onSave = () => {
+        this.onSave = async () => {
             let prfl = this.state.profile;
+            let profile = prfl || this.props.profile;
+            if (this.state.autoAuthLoaded) {
+                let autoAuthError = this.validateAutoAuth(profile);
+                if (autoAuthError) {
+                    this.setState({
+                        ...this.state,
+                        autoAuthError: autoAuthError,
+                    });
+                    return;
+                }
+                let saved = await AutoAuth_save(profile.id, this.state.autoAuth);
+                if (!saved) {
+                    this.setState({
+                        ...this.state,
+                        autoAuthError: "Failed to save to macOS Keychain",
+                    });
+                    return;
+                }
+            }
             this.setState({
                 ...this.state,
                 disabled: true,
+                autoAuthError: "",
             });
             if (prfl) {
                 if (this.state.setAutoStart !== null) {
@@ -61248,6 +61549,15 @@ class ProfileSettings extends react.Component {
             this.setState({
                 ...this.state,
                 dialog: true,
+                autoAuthError: "",
+                autoAuthTest: "",
+            });
+            AutoAuth_load(this.props.profile.id).then((data) => {
+                this.setState({
+                    ...this.state,
+                    autoAuth: data,
+                    autoAuthLoaded: true,
+                });
             });
         };
         this.closeDialog = () => {
@@ -61258,6 +61568,8 @@ class ProfileSettings extends react.Component {
                 profile: null,
                 setAutoStart: null,
                 setSystem: null,
+                autoAuthError: "",
+                autoAuthTest: "",
             });
         };
         this.toggleData = () => {
@@ -61274,6 +61586,10 @@ class ProfileSettings extends react.Component {
             setAutoStart: null,
             setSystem: null,
             showData: false,
+            autoAuth: empty(),
+            autoAuthLoaded: false,
+            autoAuthTest: "",
+            autoAuthError: "",
         };
     }
     set(name, val) {
@@ -61305,6 +61621,35 @@ class ProfileSettings extends react.Component {
             });
         }
     }
+    setAutoAuth(name, val) {
+        this.setState({
+            ...this.state,
+            changed: true,
+            autoAuth: {
+                ...this.state.autoAuth,
+                [name]: val,
+            },
+            autoAuthTest: "",
+            autoAuthError: "",
+        });
+    }
+    validateAutoAuth(profile) {
+        let auto = this.state.autoAuth;
+        if (!auto || !auto.enabled) {
+            return "";
+        }
+        let modes = (profile.password_mode || "").split("_");
+        if (modes.indexOf("username") !== -1 && !auto.username) {
+            return "Username is required";
+        }
+        if (auto.secret && !isValidSecret(auto.secret)) {
+            return "Enter a valid base32 TOTP secret";
+        }
+        if (!auto.pin && !auto.password && !auto.secret) {
+            return "Enter a PIN, password, or TOTP secret";
+        }
+        return "";
+    }
     render() {
         let profile = this.state.profile ||
             this.props.profile;
@@ -61327,6 +61672,13 @@ class ProfileSettings extends react.Component {
         else {
             lastSync = "Never";
         }
+        let auto = this.state.autoAuth || empty();
+        let authModes = (profile.password_mode || "").split("_");
+        let autoAuthSupported = authModes.length > 0 &&
+            authModes.indexOf("duo") === -1 &&
+            authModes.indexOf("onelogin") === -1 &&
+            authModes.indexOf("okta") === -1 &&
+            authModes.indexOf("yubikey") === -1;
         let dataInfo;
         if (this.state.showData) {
             dataInfo = react.createElement("div", { style: ProfileSettings_css.dataInfoBox },
@@ -61490,7 +61842,7 @@ class ProfileSettings extends react.Component {
                                     changed: true,
                                     profile: profile,
                                     setSystem: !system,
-                                    setAutoStart: !!profile.force_connect,
+                                    setAutoStart: true,
                                 });
                             }
                             else {
@@ -61508,6 +61860,43 @@ class ProfileSettings extends react.Component {
                     react.createElement(PageSwitch, { label: "Disable Auto Reconnect", help: "Disable automatically reconnecting on disconnect.", hidden: !!system || profile.restrict_client, checked: !!profile.disable_reconnect_local, onToggle: () => {
                             this.set("disable_reconnect_local", !profile.disable_reconnect_local);
                         } }),
+                    autoAuthSupported ? react.createElement("div", null,
+                        react.createElement("h4", { style: ProfileSettings_css.sectionTitle }, "Auto Auth"),
+                        react.createElement(PageSwitch, { disabled: this.state.disabled || !this.state.autoAuthLoaded, label: "Enable Auto Auth", help: "Store the profile credentials in the macOS Keychain and connect without prompting.", checked: !!auto.enabled, onToggle: () => {
+                                this.setAutoAuth("enabled", !auto.enabled);
+                            } }),
+                        react.createElement("div", { style: ProfileSettings_css.autoAuthNote, hidden: !auto.enabled }, "Enter the PIN, the TOTP secret, or both. Only the fields you fill in are sent."),
+                        react.createElement(PageInput, { disabled: this.state.disabled || !this.state.autoAuthLoaded, hidden: !auto.enabled ||
+                                authModes.indexOf("password") === -1, label: "Password", help: "VPN account password. Leave empty to skip it.", type: "password", placeholder: "Enter password", value: auto.password, onChange: (val) => {
+                                this.setAutoAuth("password", val);
+                            } }),
+                        react.createElement(PageInput, { disabled: this.state.disabled || !this.state.autoAuthLoaded, hidden: !auto.enabled ||
+                                authModes.indexOf("pin") === -1, label: "Pin", help: "VPN pin. Leave empty to send only the TOTP code.", type: "password", placeholder: "Enter pin", value: auto.pin, onChange: (val) => {
+                                this.setAutoAuth("pin", val);
+                            } }),
+                        react.createElement(PageInput, { disabled: this.state.disabled || !this.state.autoAuthLoaded, hidden: !auto.enabled ||
+                                authModes.indexOf("username") === -1, label: "Username", help: "VPN username.", type: "text", placeholder: "Enter username", value: auto.username, onChange: (val) => {
+                                this.setAutoAuth("username", val);
+                            } }),
+                        react.createElement(PageInput, { disabled: this.state.disabled || !this.state.autoAuthLoaded, hidden: !auto.enabled ||
+                                authModes.indexOf("otp") === -1, label: "TOTP Secret", help: "Optional. Base32 secret from the authenticator QR code. Leave empty to send only the PIN.", type: "password", placeholder: "Enter base32 secret", value: auto.secret, onChange: (val) => {
+                                this.setAutoAuth("secret", val);
+                            } }),
+                        react.createElement(PageSwitch, { disabled: this.state.disabled || !this.state.autoAuthLoaded, hidden: !auto.enabled, label: "Connect on App Start", help: "Automatically connect this profile when the app starts.", checked: !!auto.auto_connect, onToggle: () => {
+                                this.setAutoAuth("auto_connect", !auto.auto_connect);
+                            } }),
+                        react.createElement("div", { hidden: !auto.enabled ||
+                                authModes.indexOf("otp") === -1 },
+                            react.createElement("button", { className: "bp5-button bp5-minimal bp5-icon-key", type: "button", disabled: this.state.disabled ||
+                                    !isValidSecret(auto.secret), onClick: () => {
+                                    this.setState({
+                                        ...this.state,
+                                        autoAuthTest: generateCode(auto.secret) +
+                                            " (" + secondsRemaining() + "s)",
+                                    });
+                                } }, "Test Code"),
+                            react.createElement("span", { style: ProfileSettings_css.autoAuthTest }, this.state.autoAuthTest)),
+                        react.createElement("div", { style: ProfileSettings_css.autoAuthError, hidden: !this.state.autoAuthError }, this.state.autoAuthError)) : null,
                     react.createElement(PageSwitch, { label: "Disable Default Gateway", help: "Disable routing internet traffic through the VPN connection.", hidden: profile.restrict_client, checked: !!profile.disable_gateway, onToggle: () => {
                             this.set("disable_gateway", !profile.disable_gateway);
                         } }),
@@ -61546,7 +61935,602 @@ class ProfileSettings extends react.Component {
     }
 }
 
+;// ./app/types/ChartTypes.js
+function getChartLabels(resource, data) {
+    switch (resource) {
+        case 'bandwidth':
+            let bandwidthData = data;
+            let bandwidthDatasets = [];
+            for (let key of Object.keys(bandwidthData).sort()) {
+                let label = '';
+                switch (key) {
+                    case 'bs':
+                        label = 'Transmitted';
+                        break;
+                    case 'br':
+                        label = 'Received';
+                        break;
+                    default:
+                        label = 'Unknown';
+                }
+                bandwidthDatasets.push({
+                    label: label,
+                });
+            }
+            return {
+                title: 'Bandwidth',
+                resource_label: 'Traffic',
+                resource_type: 'bytes',
+                resource_suffix: '',
+                resource_fixed: 2,
+                resource_min: 0,
+                hide_zero: true,
+                datasets: bandwidthDatasets,
+            };
+    }
+    return undefined;
+}
+function getChartData(resource, data) {
+    switch (resource) {
+        case 'bandwidth':
+            let bandwidthData = data;
+            let bandwidthChart = [];
+            for (let key of Object.keys(bandwidthData).sort()) {
+                bandwidthChart.push(bandwidthData[key]);
+            }
+            return bandwidthChart;
+    }
+    return undefined;
+}
+
+;// ./app/components/MetricChart.js
+
+
+
+
+
+
+const baseColors = [
+    '#0091ea',
+    '#d50000',
+    '#00c853',
+    '#aa00ff',
+    '#ffab00',
+    '#c51162',
+    '#2962ff',
+    '#ff6d00',
+    '#00bfa5',
+    '#304ffe',
+    '#00b8d4',
+    '#6200ea',
+    '#ffd600',
+    '#dd2c00',
+    '#5d4037',
+    '#455a64',
+    '#64dd17',
+    '#aeea00',
+];
+const MetricChart_colors = [];
+for (let i = 0; i < 24; i++) {
+    MetricChart_colors.push(...baseColors);
+}
+class MetricChart extends react.Component {
+    constructor(props, context) {
+        super(props, context);
+        this.ticks = (axis) => {
+            let ticks = axis.ticks;
+            let newTicks = [];
+            let dataset = Object.values(this.data)[0];
+            let tickMod = 3600000;
+            let len = dataset.length;
+            if (len) {
+                let first = dataset[0];
+                let last = dataset[len - 1];
+                let range = last.x - first.x;
+                if (range >= 2833920000) {
+                    tickMod = 604800000;
+                }
+                else if (range >= 1451520000) {
+                    tickMod = 172800000;
+                }
+                else if (range >= 611280000) {
+                    tickMod = 86400000;
+                }
+                else if (range >= 276480000) {
+                    tickMod = 43200000;
+                }
+                else if (range >= 89280000) {
+                    tickMod = 21600000;
+                }
+                else if (range >= 10800000) {
+                    tickMod = 3600000;
+                }
+                else {
+                    tickMod = 600000;
+                }
+            }
+            for (let i = 0; i < ticks.length; i++) {
+                let tick = ticks[i];
+                if (tick.value % tickMod === 0) {
+                    newTicks.push(tick);
+                }
+            }
+            axis.ticks = newTicks;
+        };
+        this.config = () => {
+            this.labels = getChartLabels(this.props.resource, this.data);
+            let self = this;
+            let config = {
+                type: 'line',
+                options: {
+                    scales: {
+                        x: {
+                            type: 'time',
+                            title: {
+                                display: true,
+                                text: 'Time',
+                                color: chartColor1(),
+                                padding: 0,
+                                font: {
+                                    weight: 'bold',
+                                },
+                            },
+                            time: {
+                                unit: 'minute',
+                                displayFormats: {
+                                    minute: 'HH:mm',
+                                },
+                            },
+                            ticks: {
+                                stepSize: 1,
+                                count: 100,
+                                maxTicksLimit: 100,
+                                color: chartColor1(),
+                                source: 'data',
+                            },
+                            grid: {
+                                color: chartColor2(),
+                            },
+                            beforeTickToLabelConversion: this.ticks,
+                        },
+                        y: {
+                            min: this.labels.resource_min,
+                            max: this.labels.resource_max,
+                            offset: false,
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: this.labels.resource_label,
+                                color: chartColor1(),
+                                padding: 0,
+                                font: {
+                                    weight: 'bold',
+                                },
+                            },
+                            ticks: {
+                                color: chartColor1(),
+                                callback: (val) => {
+                                    switch (this.labels.resource_type) {
+                                        case 'bytes':
+                                            return formatBytes(val, 0);
+                                        default:
+                                            return val;
+                                    }
+                                }
+                            },
+                            grid: {
+                                color: chartColor2(),
+                            },
+                        },
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: this.labels.title,
+                            color: chartColor1(),
+                            padding: 3,
+                            font: {
+                                size: 13,
+                            },
+                        },
+                        tooltip: {
+                            enabled: false,
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            external: (context) => {
+                                let toolElm = document.getElementById('chartjs-tooltip');
+                                if (!toolElm) {
+                                    toolElm = document.createElement('div');
+                                    toolElm.id = 'chartjs-tooltip';
+                                    toolElm.className = 'bp5-card';
+                                    toolElm.innerHTML = '<table class="bp5-html-table ' +
+                                        'bp5-html-table-bordered bp5-html-table-striped ' +
+                                        'bp5-small"></table>';
+                                    document.body.appendChild(toolElm);
+                                }
+                                const model = context.tooltip;
+                                if (model.opacity === 0) {
+                                    toolElm.style.opacity = '0';
+                                    return;
+                                }
+                                function getBody(bodyItem) {
+                                    return bodyItem.lines;
+                                }
+                                let boxRect = this.props.getBoxRect();
+                                let boxBottom = boxRect.bottom + window.pageYOffset;
+                                let boxTop = boxRect.top + window.pageYOffset + 130;
+                                let rowCount = 0;
+                                let height = 0;
+                                if (model.body) {
+                                    const titleLines = model.title || [];
+                                    const bodyLines = model.body.map(getBody);
+                                    let innerHtml = '<thead>';
+                                    titleLines.forEach(function (title) {
+                                        innerHtml += '<tr><th colspan="2">' + title + '</th></tr>';
+                                    });
+                                    innerHtml += '</thead><tbody>';
+                                    let tableRows = [];
+                                    bodyLines.forEach(function (body, i) {
+                                        if (!body || !body.length) {
+                                            return;
+                                        }
+                                        let items = body[0].split(';');
+                                        if (items.length < 2) {
+                                            return;
+                                        }
+                                        const colors = model.labelColors[i];
+                                        let style = 'background:' + colors.backgroundColor;
+                                        style += '; border-color:' + colors.borderColor;
+                                        const span = '<span style="' + style + '"></span>';
+                                        tableRows.push('<td class="line-box">' + span + items[0] +
+                                            '</td><td>' + items[1] + '</td>');
+                                        rowCount += 1;
+                                    });
+                                    height = 26.33 + (rowCount * 17.33);
+                                    let double = false;
+                                    let curRow = '';
+                                    let curTime = Math.round(Date.now() / 1000);
+                                    if (curTime - this.lastDouble < 60 &&
+                                        height > (boxRect.height - 280)) {
+                                        double = true;
+                                        this.lastDouble = curTime;
+                                    }
+                                    else if (height > (boxRect.height - 130)) {
+                                        double = true;
+                                        this.lastDouble = curTime;
+                                    }
+                                    rowCount = 0;
+                                    tableRows.forEach(function (columns, i) {
+                                        if (double && !curRow) {
+                                            curRow = columns;
+                                        }
+                                        else {
+                                            innerHtml += '<tr>' + curRow + columns + '</tr>';
+                                            curRow = '';
+                                            rowCount += 1;
+                                        }
+                                    });
+                                    if (curRow) {
+                                        innerHtml += '<tr>' + curRow + '</tr>';
+                                        curRow = '';
+                                        rowCount += 1;
+                                    }
+                                    height = 26.33 + (rowCount * 17.33);
+                                    innerHtml += '</tbody>';
+                                    let tableRoot = toolElm.querySelector('table');
+                                    tableRoot.innerHTML = innerHtml;
+                                }
+                                toolElm = document.getElementById('chartjs-tooltip');
+                                const position = context.chart.canvas.getBoundingClientRect();
+                                toolElm.style.opacity = '1';
+                                toolElm.style.position = 'absolute';
+                                if (this.props.left) {
+                                    toolElm.style.right = "";
+                                    toolElm.style.left = (document.body.offsetWidth -
+                                        position.right + window.pageXOffset - 18) + 'px';
+                                }
+                                else {
+                                    toolElm.style.left = "";
+                                    toolElm.style.right = (document.body.offsetWidth -
+                                        position.left + window.pageXOffset + 3) + 'px';
+                                }
+                                let toolTop = Math.round(position.top + (position.height / 2) -
+                                    (height / 2) + window.pageYOffset);
+                                if (height > (boxRect.height - 130)) {
+                                    toolTop = Math.round(boxRect.top + (boxRect.height / 2) -
+                                        (height / 2) + window.pageYOffset);
+                                }
+                                else if (toolTop < boxTop) {
+                                    toolTop = boxTop;
+                                }
+                                else if ((toolTop + height) > boxBottom) {
+                                    toolTop = boxBottom - height;
+                                }
+                                toolElm.style.top = toolTop + 'px';
+                                toolElm.style.pointerEvents = 'none';
+                            },
+                            callbacks: {
+                                label(item) {
+                                    let raw = item.raw;
+                                    if (self.labels.hide_zero && !raw.y) {
+                                        return '';
+                                    }
+                                    let val = '';
+                                    if (raw) {
+                                        switch (self.labels.resource_type) {
+                                            case 'bytes':
+                                                val = formatBytes(raw.y, self.labels.resource_fixed);
+                                                break;
+                                            case 'float':
+                                                val = raw.y.toFixed(self.labels.resource_fixed);
+                                                break;
+                                            default:
+                                                val = raw.y;
+                                        }
+                                    }
+                                    let dataset = item.dataset;
+                                    return dataset.label + ';' + val +
+                                        self.labels.resource_suffix;
+                                },
+                            },
+                        },
+                    },
+                },
+                data: {
+                    datasets: [],
+                },
+            };
+            let data = getChartData(this.props.resource, this.data);
+            for (let i = 0; i < this.labels.datasets.length; i++) {
+                let datasetLabels = this.labels.datasets[i];
+                config.data.datasets.push({
+                    label: datasetLabels.label,
+                    data: data[i],
+                    fill: 'origin',
+                    pointRadius: 0,
+                    backgroundColor: MetricChart_colors[i] + '15',
+                    borderColor: MetricChart_colors[i],
+                    borderWidth: 2,
+                });
+            }
+            return config;
+        };
+        this.state = {
+            hidden: false,
+            disabled: false,
+        };
+        this.chartRef = react.createRef();
+    }
+    loadChart() {
+        return chart(this.props.profile, this.props.resource, this.period, this.interval);
+    }
+    update(sync, period, interval) {
+        this.sync = sync;
+        this.period = period;
+        this.interval = interval;
+        let loading = true;
+        this.props.onLoading();
+        this.loadChart().then((data) => {
+            if (loading) {
+                loading = false;
+                this.props.onLoaded();
+            }
+            if (data && data.has_data && data.data) {
+                if (this.state.hidden) {
+                    this.setState({
+                        ...this.state,
+                        hidden: false,
+                    });
+                }
+                this.data = data.data;
+                if (this.chart) {
+                    this.updateChart();
+                }
+                else {
+                    this.chart = new Chart(this.chartRef.current, this.config());
+                }
+            }
+            else {
+                if (!this.state.hidden) {
+                    this.setState({
+                        ...this.state,
+                        hidden: true,
+                    });
+                }
+            }
+        }).catch(() => {
+            if (loading) {
+                loading = false;
+                this.props.onLoaded();
+            }
+        });
+    }
+    updateChart() {
+        try {
+            this.labels = getChartLabels(this.props.resource, this.data);
+            let data = getChartData(this.props.resource, this.data);
+            let dataLen = data.length;
+            let datasetsLen = this.chart.data.datasets.length;
+            for (let i = 0; i < Math.min(dataLen, datasetsLen); i++) {
+                this.chart.data.datasets[i].label = this.labels.datasets[i].label;
+                this.chart.data.datasets[i].data = data[i];
+            }
+            if (dataLen > datasetsLen) {
+                for (let i = datasetsLen; i < dataLen; i++) {
+                    this.chart.data.datasets.push({
+                        label: this.labels.datasets[i].label,
+                        data: data[i],
+                        fill: 'origin',
+                        pointRadius: 0,
+                        backgroundColor: MetricChart_colors[i] + '15',
+                        borderColor: MetricChart_colors[i],
+                        borderWidth: 2,
+                    });
+                }
+            }
+            else if (datasetsLen > dataLen) {
+                for (let i = 0; i < datasetsLen - dataLen; i++) {
+                    this.chart.data.datasets.pop();
+                }
+            }
+            this.chart.update();
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
+    componentDidMount() {
+        this.sync = this.props.sync;
+        this.period = this.props.period;
+        this.interval = this.props.interval;
+        let loading = true;
+        this.props.onLoading();
+        this.loadChart().then((data) => {
+            if (loading) {
+                loading = false;
+                this.props.onLoaded();
+            }
+            if (data && data.has_data && data.data) {
+                if (this.state.hidden) {
+                    this.setState({
+                        ...this.state,
+                        hidden: false,
+                    });
+                }
+                this.data = data.data;
+                this.chart = new Chart(this.chartRef.current, this.config());
+            }
+            else {
+                if (!this.state.hidden) {
+                    this.setState({
+                        ...this.state,
+                        hidden: true,
+                    });
+                }
+            }
+        }).catch(() => {
+            if (loading) {
+                loading = false;
+                this.props.onLoaded();
+            }
+        });
+    }
+    componentWillUnmount() {
+        if (this.chart) {
+            this.chart.destroy();
+        }
+    }
+    render() {
+        if ((this.sync !== undefined && this.period !== undefined &&
+            this.interval !== undefined) &&
+            (this.props.sync !== this.sync ||
+                this.props.period !== this.period ||
+                this.props.interval !== this.interval)) {
+            this.update(this.props.sync, this.props.period, this.props.interval);
+        }
+        return react.createElement("canvas", { hidden: this.state.hidden, ref: this.chartRef });
+    }
+}
+
+;// ./app/components/MetricCharts.js
+
+
+const MetricCharts_css = {
+    buttons: {
+        marginTop: '8px',
+    },
+    button: {
+        margin: '8px 0 0 8px',
+    },
+    chartGroup: {
+        flex: 1,
+        minWidth: '250px',
+        margin: '0 10px',
+        marginBottom: '5px',
+        marginTop: '10px',
+    },
+};
+class MetricCharts extends react.Component {
+    constructor(props, context) {
+        super(props, context);
+        this.state = {
+            sync: 0,
+            period: 1440,
+            interval: 30,
+            loading: {},
+        };
+        this.chartBoxRef = react.createRef();
+    }
+    getDefaultInterval(period) {
+        switch (period) {
+            case 60:
+                return 1;
+            case 720:
+                return 15;
+            case 1440:
+                return 30;
+            case 4320:
+                return 60;
+            default:
+                return 30;
+        }
+    }
+    setLoading(resource) {
+        let loading = {
+            ...this.state.loading,
+        };
+        loading[resource] = true;
+        this.setState({
+            ...this.state,
+            loading: loading,
+        });
+    }
+    setLoaded(resource) {
+        let loading = {
+            ...this.state.loading,
+        };
+        delete loading[resource];
+        this.setState({
+            ...this.state,
+            loading: loading,
+        });
+    }
+    periodButton(label, period) {
+        return react.createElement("button", { className: 'bp5-button bp5-small' +
+                (this.state.period === period ? ' bp5-active' : ''), type: "button", onClick: () => {
+                this.setState({
+                    ...this.state,
+                    period: period,
+                    interval: this.getDefaultInterval(period),
+                });
+            } }, label);
+    }
+    render() {
+        if (this.props.disabled) {
+            return react.createElement("div", null);
+        }
+        return react.createElement("div", { ref: this.chartBoxRef },
+            react.createElement("div", { className: "layout horizontal wrap center-justified" },
+                react.createElement("div", { className: "bp5-button-group", style: MetricCharts_css.buttons },
+                    this.periodButton('1 Hours', 60),
+                    this.periodButton('12 Hours', 720),
+                    this.periodButton('24 Hours', 1440),
+                    this.periodButton('3 Days', 4320))),
+            react.createElement("div", { className: "layout horizontal wrap" },
+                react.createElement("div", { style: MetricCharts_css.chartGroup },
+                    react.createElement(MetricChart, { profile: this.props.profile, resource: 'bandwidth', sync: this.state.sync, period: this.state.period, interval: this.state.interval, left: true, onLoading: () => {
+                            this.setLoading('bandwidth');
+                        }, onLoaded: () => {
+                            this.setLoaded('bandwidth');
+                        }, getBoxRect: () => {
+                            return this.chartBoxRef.current.getBoundingClientRect();
+                        } }))));
+    }
+}
+
 ;// ./app/components/Profile.js
+
 
 
 
@@ -61806,9 +62790,10 @@ class Profile extends react.Component {
                     react.createElement(PageInfo, { style: Profile_css.label, fields: fieldsRight })),
                 react.createElement(PageInfo, { style: Profile_css.labelLast, hidden: !longIp, fields: fieldsLong }),
                 react.createElement("div", { style: Profile_css.message, hidden: !this.state.message }, this.state.message),
+                react.createElement(MetricCharts, { profile: profile.id, disabled: this.props.minimal && !open }),
                 react.createElement("div", { className: "layout horizontal" },
                     react.createElement("div", { style: Profile_css.buttons },
-                        react.createElement(ProfileConnect, { profile: this.props.profile }),
+                        react.createElement(ProfileConnect, { profile: this.props.profile, autoAuth: true }),
                         react.createElement(ProfileSettings, { profile: this.props.profile })))));
     }
 }
@@ -62078,6 +63063,8 @@ class Zero extends react.Component {
 
 
 
+
+
 const profilesStyle = `
 .profiles-grid {
 	display: grid;
@@ -62100,9 +63087,31 @@ class Profiles extends react.Component {
             });
         };
         this.onChange = () => {
+            let profiles = stores_ProfilesStore.profiles;
             this.setState({
-                profiles: stores_ProfilesStore.profiles,
+                profiles: profiles,
                 zeros: stores_ZerosStore.zeros,
+            });
+            if (!this.autoConnectDone && profiles.length) {
+                this.autoConnectDone = true;
+                setTimeout(this.autoConnect, 2000);
+            }
+        };
+        this.autoConnect = () => {
+            this.state.profiles.forEach((prfl) => {
+                if (prfl.status !== "disconnected") {
+                    return;
+                }
+                AutoAuth_load(prfl.id).then((auto) => {
+                    if (!auto.enabled || !auto.auto_connect) {
+                        return;
+                    }
+                    let mode = "ovpn";
+                    if (prfl.wg && prfl.last_mode === "wg") {
+                        mode = "wg";
+                    }
+                    connectAuto(prfl, mode);
+                });
             });
         };
         this.state = {
