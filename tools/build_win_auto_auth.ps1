@@ -67,18 +67,18 @@ try {
 	Invoke-Checked "npm" @("ci")
 	Invoke-Checked "bash" @("build.sh")
 
-	$packager = Join-Path $Client "node_modules\.bin\electron-packager.cmd"
+	$packager = Join-Path $Client "node_modules\@electron\packager\bin\electron-packager.js"
 	if (-not (Test-Path $packager)) {
 		throw "electron-packager not found at $packager"
 	}
 
-	Invoke-Checked $packager @(".", "pritunl",
+	Invoke-Checked "node" @($packager, ".", "pritunl",
 		"--platform=win32", "--arch=x64",
 		"--icon=www/img/logo.ico",
 		"--out=../build/win", "--prune", "--asar", "--overwrite",
 		'--ignore=^/dist-dev($|/)', '--ignore=^/build-local($|/)')
 
-	Invoke-Checked $packager @(".", "pritunl",
+	Invoke-Checked "node" @($packager, ".", "pritunl",
 		"--platform=win32", "--arch=arm64",
 		"--icon=www/img/logo.ico",
 		"--out=../build/win", "--prune", "--asar", "--overwrite",
