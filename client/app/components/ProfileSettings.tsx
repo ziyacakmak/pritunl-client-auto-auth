@@ -10,6 +10,8 @@ import PageInfo from "./PageInfo"
 import PageInput from "./PageInput"
 import PageSwitch from "./PageSwitch"
 import * as MiscUtils from "../utils/MiscUtils";
+import * as AutoAuth from "../utils/AutoAuth";
+import * as Totp from "../utils/Totp";
 import * as Constants from "../Constants";
 import * as Errors from "../Errors";
 import * as Logger from "../Logger";
@@ -26,6 +28,10 @@ interface State {
 	setAutoStart: boolean
 	setSystem: boolean
 	showData: boolean
+	autoAuth: AutoAuth.AutoAuthData
+	autoAuthLoaded: boolean
+	autoAuthTest: string
+	autoAuthError: string
 }
 
 const css = {
@@ -66,6 +72,21 @@ const css = {
 		border: "1px solid rgba(16, 22, 26, 0.4)",
 		borderRadius: "2px",
 	} as React.CSSProperties,
+	sectionTitle: {
+		margin: "18px 0 0 0",
+	} as React.CSSProperties,
+	autoAuthTest: {
+		marginLeft: "6px",
+		opacity: "0.8",
+	} as React.CSSProperties,
+	autoAuthError: {
+		marginTop: "8px",
+		color: "#cd4246",
+	} as React.CSSProperties,
+	autoAuthNote: {
+		marginTop: "8px",
+		opacity: "0.7",
+	} as React.CSSProperties,
 }
 
 export default class ProfileSettings extends React.Component<Props, State> {
@@ -79,6 +100,10 @@ export default class ProfileSettings extends React.Component<Props, State> {
 			setAutoStart: null,
 			setSystem: null,
 			showData: false,
+			autoAuth: AutoAuth.empty(),
+			autoAuthLoaded: false,
+			autoAuthTest: "",
+			autoAuthError: "",
 		}
 	}
 
@@ -113,12 +138,73 @@ export default class ProfileSettings extends React.Component<Props, State> {
 		}
 	}
 
-	onSave = (): void => {
+	setAutoAuth(name: string, val: any): void {
+		this.setState({
+			...this.state,
+			changed: true,
+			autoAuth: {
+				...this.state.autoAuth,
+				[name]: val,
+			},
+			autoAuthTest: "",
+			autoAuthError: "",
+		})
+	}
+
+	validateAutoAuth(profile: ProfileTypes.Profile): string {
+		let auto = this.state.autoAuth
+
+		if (!auto || !auto.enabled) {
+			return ""
+		}
+
+		let modes = (profile.password_mode || "").split("_")
+
+		if (modes.indexOf("username") !== -1 && !auto.username) {
+			return "Username is required"
+		}
+
+		if (auto.secret && !Totp.isValidSecret(auto.secret)) {
+			return "Enter a valid base32 TOTP secret"
+		}
+
+		if (!auto.pin && !auto.password && !auto.secret) {
+			return "Enter a PIN, password, or TOTP secret"
+		}
+
+		return ""
+	}
+
+	onSave = async (): Promise<void> => {
 		let prfl = this.state.profile
+		let profile = prfl || this.props.profile
+
+		if (this.state.autoAuthLoaded) {
+			let autoAuthError = this.validateAutoAuth(profile)
+
+			if (autoAuthError) {
+				this.setState({
+					...this.state,
+					autoAuthError: autoAuthError,
+				})
+				return
+			}
+
+			let saved = await AutoAuth.save(profile.id, this.state.autoAuth)
+
+			if (!saved) {
+				this.setState({
+					...this.state,
+					autoAuthError: "Failed to save to macOS Keychain",
+				})
+				return
+			}
+		}
 
 		this.setState({
 			...this.state,
 			disabled: true,
+			autoAuthError: "",
 		})
 
 		if (prfl) {
@@ -200,6 +286,16 @@ export default class ProfileSettings extends React.Component<Props, State> {
 		this.setState({
 			...this.state,
 			dialog: true,
+			autoAuthError: "",
+			autoAuthTest: "",
+		})
+
+		AutoAuth.load(this.props.profile.id).then((data): void => {
+			this.setState({
+				...this.state,
+				autoAuth: data,
+				autoAuthLoaded: true,
+			})
 		})
 	}
 
@@ -211,6 +307,8 @@ export default class ProfileSettings extends React.Component<Props, State> {
 			profile: null,
 			setAutoStart: null,
 			setSystem: null,
+			autoAuthError: "",
+			autoAuthTest: "",
 		})
 	}
 
@@ -245,6 +343,14 @@ export default class ProfileSettings extends React.Component<Props, State> {
 		} else {
 			lastSync = "Never"
 		}
+
+		let auto = this.state.autoAuth || AutoAuth.empty()
+		let authModes = (profile.password_mode || "").split("_")
+		let autoAuthSupported = authModes.length > 0 &&
+			authModes.indexOf("duo") === -1 &&
+			authModes.indexOf("onelogin") === -1 &&
+			authModes.indexOf("okta") === -1 &&
+			authModes.indexOf("yubikey") === -1
 
 		let dataInfo: JSX.Element;
 		if (this.state.showData) {
@@ -473,6 +579,107 @@ export default class ProfileSettings extends React.Component<Props, State> {
 								!profile.disable_reconnect_local)
 						}}
 					/>
+					{autoAuthSupported ? <div>
+						<h4 style={css.sectionTitle}>Auto Auth</h4>
+						<PageSwitch
+							disabled={this.state.disabled || !this.state.autoAuthLoaded}
+							label="Enable Auto Auth"
+							help="Store the profile credentials in the macOS Keychain and connect without prompting."
+							checked={!!auto.enabled}
+							onToggle={(): void => {
+								this.setAutoAuth("enabled", !auto.enabled)
+							}}
+						/>
+						<div style={css.autoAuthNote} hidden={!auto.enabled}>
+							Enter the PIN, the TOTP secret, or both. Only the
+							fields you fill in are sent.
+						</div>
+						<PageInput
+							disabled={this.state.disabled || !this.state.autoAuthLoaded}
+							hidden={!auto.enabled ||
+								authModes.indexOf("password") === -1}
+							label="Password"
+							help="VPN account password. Leave empty to skip it."
+							type="password"
+							placeholder="Enter password"
+							value={auto.password}
+							onChange={(val: string): void => {
+								this.setAutoAuth("password", val)
+							}}
+						/>
+						<PageInput
+							disabled={this.state.disabled || !this.state.autoAuthLoaded}
+							hidden={!auto.enabled ||
+								authModes.indexOf("pin") === -1}
+							label="Pin"
+							help="VPN pin. Leave empty to send only the TOTP code."
+							type="password"
+							placeholder="Enter pin"
+							value={auto.pin}
+							onChange={(val: string): void => {
+								this.setAutoAuth("pin", val)
+							}}
+						/>
+						<PageInput
+							disabled={this.state.disabled || !this.state.autoAuthLoaded}
+							hidden={!auto.enabled ||
+								authModes.indexOf("username") === -1}
+							label="Username"
+							help="VPN username."
+							type="text"
+							placeholder="Enter username"
+							value={auto.username}
+							onChange={(val: string): void => {
+								this.setAutoAuth("username", val)
+							}}
+						/>
+						<PageInput
+							disabled={this.state.disabled || !this.state.autoAuthLoaded}
+							hidden={!auto.enabled ||
+								authModes.indexOf("otp") === -1}
+							label="TOTP Secret"
+							help="Optional. Base32 secret from the authenticator QR code. Leave empty to send only the PIN."
+							type="password"
+							placeholder="Enter base32 secret"
+							value={auto.secret}
+							onChange={(val: string): void => {
+								this.setAutoAuth("secret", val)
+							}}
+						/>
+						<PageSwitch
+							disabled={this.state.disabled || !this.state.autoAuthLoaded}
+							hidden={!auto.enabled}
+							label="Connect on App Start"
+							help="Automatically connect this profile when the app starts."
+							checked={!!auto.auto_connect}
+							onToggle={(): void => {
+								this.setAutoAuth("auto_connect", !auto.auto_connect)
+							}}
+						/>
+						<div hidden={!auto.enabled ||
+								authModes.indexOf("otp") === -1}>
+							<button
+								className="bp5-button bp5-minimal bp5-icon-key"
+								type="button"
+								disabled={this.state.disabled ||
+									!Totp.isValidSecret(auto.secret)}
+								onClick={(): void => {
+									this.setState({
+										...this.state,
+										autoAuthTest: Totp.generateCode(auto.secret) +
+											" (" + Totp.secondsRemaining() + "s)",
+									})
+								}}
+							>Test Code</button>
+							<span style={css.autoAuthTest}>
+								{this.state.autoAuthTest}
+							</span>
+						</div>
+						<div style={css.autoAuthError}
+							hidden={!this.state.autoAuthError}>
+							{this.state.autoAuthError}
+						</div>
+					</div> : null}
 					<PageSwitch
 						label="Disable Default Gateway"
 						help="Disable routing internet traffic through the VPN connection."

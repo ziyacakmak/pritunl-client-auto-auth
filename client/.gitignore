@@ -4,6 +4,7 @@ node_modules/*
 jspm_packages/*
 !package.js
 !package-windows.js
+!package_local.js
 !webpack.config.js
 !webpack.dev.config.js
 !webpack-main.config.js

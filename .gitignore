@@ -14,3 +14,5 @@ build_keys.json
 /dev
 /client/node_modules
 /service/service
+
+/client/build-local

@@ -389,7 +389,10 @@ export default class Profile extends React.Component<Props, State> {
 				/>
 				<div className="layout horizontal">
 					<div style={css.buttons}>
-						<ProfileConnect profile={this.props.profile}/>
+						<ProfileConnect
+							profile={this.props.profile}
+							autoAuth={true}
+						/>
 						<ProfileSettings profile={this.props.profile}/>
 					</div>
 				</div>

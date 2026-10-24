@@ -8021,8 +8021,7 @@ class Main {
             icon: external_path_default().join(__dirname, "..", "logo.png"),
             titleBarStyle: titleBarStyle,
             frame: !frameless,
-            transparent: ((external_process_default()).platform === "linux" && frameless &&
-                (main_Config.transparent_window || (external_process_default()).env.XDG_SESSION_TYPE === "x11")),
+            transparent: (external_process_default()).platform === "linux" && frameless,
             trafficLightPosition: {
                 x: 14,
                 y: 12,

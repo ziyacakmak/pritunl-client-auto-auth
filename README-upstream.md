@@ -1,0 +1,59 @@
+# pritunl-client: pritunl vpn client
+
+[![package-macOS](https://img.shields.io/badge/package-macOS-cfcfcf.svg?style=flat)](https://github.com/pritunl/pritunl-client/releases)
+[![package-windows](https://img.shields.io/badge/package-windows-00adef.svg?style=flat)](https://github.com/pritunl/pritunl-client/releases)
+[![github](https://img.shields.io/badge/github-pritunl-181717.svg?style=flat)](https://github.com/pritunl)
+[![twitter](https://img.shields.io/badge/twitter-pritunl-55acee.svg?style=flat)](https://twitter.com/pritunl)
+[![substack](https://img.shields.io/badge/substack-pritunl-ff6719.svg?style=flat)](https://pritunl.substack.com/)
+[![forum](https://img.shields.io/badge/discussion-forum-ffffff.svg?style=flat)](https://forum.pritunl.com)
+
+[Pritunl Client](https://github.com/pritunl/pritunl-client)
+is an open source openvpn client. Documentation and more information can be
+found at the home page [client.pritunl.com](https://client.pritunl.com)
+
+[![pritunl](client/logo_code.png)](https://docs.pritunl.com/kb/vpn)
+
+## Install from Source (macOS)
+
+If the Pritunl package is currently installed run the uninstall command
+below. Requires homebrew with git, go and node.
+
+```bash
+brew install git go node
+bash <(curl -s https://raw.githubusercontent.com/pritunl/pritunl-client/master/tools/install_macos.sh)
+```
+
+## Uninstall from Source (macOS)
+
+```bash
+bash <(curl -s https://raw.githubusercontent.com/pritunl/pritunl-client/master/tools/uninstall_macos.sh)
+```
+
+## Install from Source (Linux)
+
+```bash
+sudo dnf -y install git-core wireguard-tools openvpn
+
+sudo rm -rf /usr/local/go
+wget https://go.dev/dl/go1.27.1.linux-amd64.tar.gz
+echo "63d339f0da5ab53635a56f2490a7984dfe12dfcff22ad749f63edaf590168445 go1.27.1.linux-amd64.tar.gz" | sha256sum -c - && sudo tar -C /usr/local -xf go1.27.1.linux-amd64.tar.gz
+rm -f go1.27.1.linux-amd64.tar.gz
+
+tee -a ~/.bashrc << EOF
+export GOPATH=\$HOME/go
+export GOROOT=/usr/local/go
+export PATH=/usr/local/go/bin:\$PATH
+EOF
+source ~/.bashrc
+
+go install github.com/pritunl/pritunl-client/service@latest
+go install github.com/pritunl/pritunl-client/cli@latest
+sudo cp ~/go/bin/service /usr/bin/pritunl-client-service
+sudo cp ~/go/bin/cli /usr/bin/pritunl-client
+
+sudo cp "$(ls -td ~/go/pkg/mod/github.com/pritunl/pritunl-client@*/ | head -n1)/resources_linux/pritunl-client.service" /etc/systemd/system/pritunl-client.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now pritunl-client.service
+
+pritunl-client
+```

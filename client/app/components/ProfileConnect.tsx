@@ -5,12 +5,14 @@ import * as ServiceActions from "../actions/ServiceActions"
 import * as Blueprint from "@blueprintjs/core"
 import * as Constants from "../Constants"
 import PageInput from "./PageInput";
-import * as Logger from "../Logger";
+import * as AutoAuth from "../utils/AutoAuth";
+import * as ConnectUtils from "../utils/ConnectUtils";
 
 interface Props {
 	profile: ProfileTypes.ProfileRo
 	minimal?: boolean
 	hidden?: boolean
+	autoAuth?: boolean
 	onConfirm?: () => void
 }
 
@@ -75,6 +77,10 @@ const css = {
 }
 
 export default class ProfileConnect extends React.Component<Props, State> {
+	autoAuthTimer: NodeJS.Timeout
+	autoAuthMode: string
+	autoAuthTries: number
+
 	constructor(props: Props, context: any) {
 		super(props, context)
 		this.state = {
@@ -206,26 +212,108 @@ export default class ProfileConnect extends React.Component<Props, State> {
 			hasYubikey = true
 		}
 
-		if (authTypes.length || this.props.profile.pre_connect_msg) {
+		this.setState({
+			...this.state,
+			disabled: false,
+			dialog: false,
+			autoFocus: autoFocus,
+			hasUsername: hasUsername,
+			hasPassword: hasPassword,
+			hasPin: hasPin,
+			hasDuo: hasDuo,
+			hasOnelogin: hasOnelogin,
+			hasOkta: hasOkta,
+			hasOtp: hasOtp,
+			hasYubikey: hasYubikey,
+			hasToken: tokenValid,
+			preConnMsgOnly: !authTypes.length,
+			mode: mode,
+		})
+
+		if (!authTypes.length && !this.props.profile.pre_connect_msg) {
+			await this.connect(mode, "", "")
+			return
+		}
+
+		if (this.props.autoAuth && authTypes.length &&
+				!this.props.profile.pre_connect_msg) {
+			let creds = await ConnectUtils.autoCredentials(prfl, data)
+
+			if (creds) {
+				this.autoAuthMode = mode
+				let connected = await ConnectUtils.connectProfile(prfl, mode,
+					creds.username, creds.password, data)
+
+				if (connected) {
+					this.startAutoAuthWatch()
+					return
+				}
+			}
+		}
+
+		this.setState({
+			...this.state,
+			dialog: true,
+		})
+	}
+
+	startAutoAuthWatch(): void {
+		clearTimeout(this.autoAuthTimer)
+		this.autoAuthTries = 0
+		this.autoAuthTimer = setTimeout(this.checkAutoAuth, 2000)
+	}
+
+	checkAutoAuth = (): void => {
+		let prfl = this.props.profile
+
+		if (!this.props.autoAuth) {
+			return
+		}
+
+		if (prfl.status === "connected") {
+			AutoAuth.clearFailed(prfl.id)
+			return
+		}
+
+		if (prfl.auth_reconnect) {
+			this.autoAuthFail()
+			return
+		}
+
+		this.autoAuthTries += 1
+
+		if (this.autoAuthTries >= 30) {
+			if (prfl.status !== "connecting" && prfl.status !== "authenticating") {
+				this.autoAuthFail()
+			}
+			return
+		}
+
+		this.autoAuthTimer = setTimeout(this.checkAutoAuth, 1000)
+	}
+
+	autoAuthFail(): void {
+		let prfl = this.props.profile
+
+		AutoAuth.markFailed(prfl.id)
+
+		if (!this.state.dialog) {
 			this.setState({
 				...this.state,
-				disabled: false,
 				dialog: true,
-				autoFocus: autoFocus,
-				hasUsername: hasUsername,
-				hasPassword: hasPassword,
-				hasPin: hasPin,
-				hasDuo: hasDuo,
-				hasOnelogin: hasOnelogin,
-				hasOkta: hasOkta,
-				hasOtp: hasOtp,
-				hasYubikey: hasYubikey,
-				hasToken: tokenValid,
-				preConnMsgOnly: !authTypes.length,
-				mode: mode,
+				disabled: false,
+				mode: this.autoAuthMode || this.state.mode,
 			})
-		} else {
-			await this.connect(mode, "", "")
+		}
+	}
+
+	componentWillUnmount(): void {
+		clearTimeout(this.autoAuthTimer)
+	}
+
+	componentDidUpdate(): void {
+		if (this.props.autoAuth && this.props.profile.status === "connected") {
+			AutoAuth.clearFailed(this.props.profile.id)
 		}
 	}
 
@@ -233,61 +321,17 @@ export default class ProfileConnect extends React.Component<Props, State> {
 		password: string): Promise<void> {
 
 		let prfl = this.props.profile
-		let data = await prfl.readData()
 
-		if (!data) {
+		let connected = await ConnectUtils.connectProfile(prfl, mode,
+			username, password)
+
+		if (!connected) {
 			this.setState({
 				...this.state,
 				disabled: false,
 			})
 			return
 		}
-
-		if (!prfl.system) {
-			Logger.info("Profiles: Updating profile '" + prfl.id + "'")
-			await prfl.writeData(data)
-		}
-
-		let serverPubKey = ""
-		if (prfl.server_public_key) {
-			serverPubKey = prfl.server_public_key.join("\n")
-		}
-
-		let connData: ProfileTypes.ProfileData = {
-			id: prfl.id,
-			mode: mode,
-			org_id: prfl.organization_id,
-			user_id: prfl.user_id,
-			server_id: prfl.server_id,
-			sync_hosts: prfl.sync_hosts,
-			sync_token: prfl.sync_token,
-			sync_secret: prfl.sync_secret,
-			sync_hash: prfl.sync_hash,
-			username: username,
-			password: password,
-			remotes_data: prfl.remotes_data,
-			hide_ovpn: prfl.hide_ovpn,
-			dynamic_firewall: prfl.dynamic_firewall,
-			geo_sort: prfl.geo_sort,
-			force_connect: prfl.force_connect,
-			device_auth: prfl.device_auth,
-			disable_gateway: prfl.disable_gateway,
-			disable_dns: prfl.disable_dns,
-			disable_ipv6: prfl.disable_ipv6,
-			dco: prfl.dco,
-			debug_output: prfl.debug_output,
-			force_dns: prfl.force_dns,
-			restrict_client: prfl.restrict_client,
-			sso_auth: prfl.sso_auth,
-			server_public_key: serverPubKey,
-			server_box_public_key: prfl.server_box_public_key,
-			token_ttl: prfl.token_ttl,
-			timeout: true,
-			reconnect: !(prfl.disable_reconnect || prfl.disable_reconnect_local),
-			data: data,
-		}
-
-		await ServiceActions.connect(connData)
 
 		this.closeDialog()
 	}
