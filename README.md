@@ -271,12 +271,12 @@ upstream source and published bundles are not always in sync.
 ## License
 
 This fork is based on Pritunl Client. The upstream `LICENSE` is a restrictive
-personal, non-commercial license that does not permit distributing the software
-or derivative works. See [LICENSE](LICENSE) for the full terms.
+personal, non-commercial license: it does not permit reselling or distributing
+the software or derivative works. See [LICENSE](LICENSE) for the full terms.
 
-Use this fork for personal purposes only. Do not publish, redistribute, or sell
-the source or binaries without permission from the copyright holder. If you
-want to share changes, review the upstream license first.
+Use this fork for personal purposes only. If you want to reuse or redistribute
+it, review the upstream license and obtain permission from the copyright holder
+where required.
 
 Upstream project: <https://github.com/pritunl/pritunl-client>
 Upstream documentation: <https://client.pritunl.com>
