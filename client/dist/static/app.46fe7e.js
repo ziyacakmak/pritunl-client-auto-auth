@@ -60705,7 +60705,10 @@ function secondsRemaining(time) {
 /* unused harmony import specifier */ var AutoAuth_MiscUtils;
 
 
+
+
 const serviceName = "Pritunl Auto Auth";
+const isWindows = process.platform === "win32";
 let cache = {};
 let failed = {};
 function empty() {
@@ -60730,27 +60733,111 @@ function normalize(data) {
         username: (data && data.username) || "",
     };
 }
+function storageName() {
+    return isWindows ? "Windows DPAPI" : "macOS Keychain";
+}
+function windowsAuthPath(profileId) {
+    let appData = {}.APPDATA;
+    if (!appData) {
+        appData = external_path_default().join(external_os_default().homedir(), "AppData", "Roaming");
+    }
+    return external_path_default().join(appData, "Pritunl", "auto-auth", profileId + ".bin");
+}
+function psQuote(value) {
+    return "'" + value.replace(/'/g, "''") + "'";
+}
+function powershell(script) {
+    return exec("powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", script);
+}
+async function loadKeychain(profileId) {
+    let res = await exec("/usr/bin/security", "find-generic-password", "-s", serviceName, "-a", profileId, "-w");
+    if (res.error || !res.stdout) {
+        return empty();
+    }
+    try {
+        return normalize(JSON.parse(res.stdout.trim()));
+    }
+    catch (err) {
+        return empty();
+    }
+}
+async function saveKeychain(profileId, data) {
+    let res = await exec("/usr/bin/security", "add-generic-password", "-U", "-s", serviceName, "-a", profileId, "-w", JSON.stringify(data));
+    return !res.error;
+}
+async function removeKeychain(profileId) {
+    await AutoAuth_MiscUtils.exec("/usr/bin/security", "delete-generic-password", "-s", serviceName, "-a", profileId);
+}
+async function loadWindows(profileId) {
+    let file = windowsAuthPath(profileId);
+    let script = [
+        "$ErrorActionPreference = 'Stop'",
+        "Add-Type -AssemblyName System.Security",
+        "$f = " + psQuote(file),
+        "if (Test-Path -LiteralPath $f) {",
+        "$b = [Convert]::FromBase64String((Get-Content -LiteralPath $f -Raw))",
+        "$p = [System.Security.Cryptography.ProtectedData]::Unprotect($b, $null, [System.Security.Cryptography.DataProtectionScope]::CurrentUser)",
+        "[Convert]::ToBase64String($p)",
+        "}",
+    ].join("\n");
+    let res = await powershell(script);
+    if (res.error || !res.stdout || !res.stdout.trim()) {
+        return empty();
+    }
+    try {
+        let json = Buffer.from(res.stdout.trim(), "base64").toString("utf8");
+        return normalize(JSON.parse(json));
+    }
+    catch (err) {
+        return empty();
+    }
+}
+async function saveWindows(profileId, data) {
+    let file = windowsAuthPath(profileId);
+    let encoded = Buffer.from(JSON.stringify(data), "utf8").toString("base64");
+    let script = [
+        "$ErrorActionPreference = 'Stop'",
+        "Add-Type -AssemblyName System.Security",
+        "$f = " + psQuote(file),
+        "New-Item -ItemType Directory -Force -Path " +
+            psQuote(external_path_default().dirname(file)) + " | Out-Null",
+        "$b = [Convert]::FromBase64String(" + psQuote(encoded) + ")",
+        "$p = [System.Security.Cryptography.ProtectedData]::Protect($b, $null, [System.Security.Cryptography.DataProtectionScope]::CurrentUser)",
+        "[IO.File]::WriteAllText($f, [Convert]::ToBase64String($p), [Text.Encoding]::ASCII)",
+    ].join("\n");
+    let res = await powershell(script);
+    return !res.error;
+}
+async function removeWindows(profileId) {
+    let file = windowsAuthPath(profileId);
+    let script = "Remove-Item -LiteralPath " + psQuote(file) +
+        " -Force -ErrorAction SilentlyContinue";
+    await powershell(script);
+}
 async function AutoAuth_load(profileId) {
     if (cache[profileId]) {
         return cache[profileId];
     }
-    let res = await exec("/usr/bin/security", "find-generic-password", "-s", serviceName, "-a", profileId, "-w");
-    let data = empty();
-    if (!res.error && res.stdout) {
-        try {
-            data = normalize(JSON.parse(res.stdout.trim()));
-        }
-        catch (err) {
-            data = empty();
-        }
+    let data;
+    if (isWindows) {
+        data = await loadWindows(profileId);
+    }
+    else {
+        data = await loadKeychain(profileId);
     }
     cache[profileId] = data;
     return data;
 }
 async function AutoAuth_save(profileId, data) {
     data = normalize(data);
-    let res = await exec("/usr/bin/security", "add-generic-password", "-U", "-s", serviceName, "-a", profileId, "-w", JSON.stringify(data));
-    if (res.error) {
+    let saved;
+    if (isWindows) {
+        saved = await saveWindows(profileId, data);
+    }
+    else {
+        saved = await saveKeychain(profileId, data);
+    }
+    if (!saved) {
         return false;
     }
     cache[profileId] = data;
@@ -60759,7 +60846,12 @@ async function AutoAuth_save(profileId, data) {
 }
 async function remove(profileId) {
     delete cache[profileId];
-    await AutoAuth_MiscUtils.exec("/usr/bin/security", "delete-generic-password", "-s", serviceName, "-a", profileId);
+    if (isWindows) {
+        await removeWindows(profileId);
+    }
+    else {
+        await removeKeychain(profileId);
+    }
 }
 function markFailed(profileId) {
     failed[profileId] = true;
@@ -61464,7 +61556,7 @@ class ProfileSettings extends react.Component {
                 if (!saved) {
                     this.setState({
                         ...this.state,
-                        autoAuthError: "Failed to save to macOS Keychain",
+                        autoAuthError: "Failed to save to " + storageName(),
                     });
                     return;
                 }
@@ -61862,7 +61954,7 @@ class ProfileSettings extends react.Component {
                         } }),
                     autoAuthSupported ? react.createElement("div", null,
                         react.createElement("h4", { style: ProfileSettings_css.sectionTitle }, "Auto Auth"),
-                        react.createElement(PageSwitch, { disabled: this.state.disabled || !this.state.autoAuthLoaded, label: "Enable Auto Auth", help: "Store the profile credentials in the macOS Keychain and connect without prompting.", checked: !!auto.enabled, onToggle: () => {
+                        react.createElement(PageSwitch, { disabled: this.state.disabled || !this.state.autoAuthLoaded, label: "Enable Auto Auth", help: "Store the profile credentials in the " + storageName() + " and connect without prompting.", checked: !!auto.enabled, onToggle: () => {
                                 this.setAutoAuth("enabled", !auto.enabled);
                             } }),
                         react.createElement("div", { style: ProfileSettings_css.autoAuthNote, hidden: !auto.enabled }, "Enter the PIN, the TOTP secret, or both. Only the fields you fill in are sent."),

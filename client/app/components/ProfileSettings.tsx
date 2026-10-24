@@ -195,7 +195,7 @@ export default class ProfileSettings extends React.Component<Props, State> {
 			if (!saved) {
 				this.setState({
 					...this.state,
-					autoAuthError: "Failed to save to macOS Keychain",
+					autoAuthError: "Failed to save to " + AutoAuth.storageName(),
 				})
 				return
 			}
@@ -584,7 +584,7 @@ export default class ProfileSettings extends React.Component<Props, State> {
 						<PageSwitch
 							disabled={this.state.disabled || !this.state.autoAuthLoaded}
 							label="Enable Auto Auth"
-							help="Store the profile credentials in the macOS Keychain and connect without prompting."
+							help={"Store the profile credentials in the " + AutoAuth.storageName() + " and connect without prompting."}
 							checked={!!auto.enabled}
 							onToggle={(): void => {
 								this.setAutoAuth("enabled", !auto.enabled)
