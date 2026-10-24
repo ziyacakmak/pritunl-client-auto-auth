@@ -1,0 +1,150 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  macos:
+    name: macOS app
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      - name: Build client
+        working-directory: client
+        run: |
+          npm ci
+          sh build.sh
+
+      - name: Extract official Pritunl app
+        run: |
+          mkdir -p "$RUNNER_TEMP/pritunl"
+          curl -L --fail --retry 3 \
+            -o "$RUNNER_TEMP/pritunl/Pritunl.pkg.zip" \
+            "https://github.com/pritunl/pritunl-client/releases/download/1.4.4777.90/Pritunl.pkg.zip"
+          unzip -q "$RUNNER_TEMP/pritunl/Pritunl.pkg.zip" \
+            -d "$RUNNER_TEMP/pritunl"
+          pkgutil --expand-full \
+            "$RUNNER_TEMP/pritunl/Pritunl.pkg" \
+            "$RUNNER_TEMP/pritunl/expanded"
+          APP=$(find "$RUNNER_TEMP/pritunl/expanded" \
+            -name "Pritunl.app" -type d | head -1)
+          test -n "$APP"
+          echo "PRITUNL_SOURCE_APP=$APP" >> "$GITHUB_ENV"
+
+      - name: Package app
+        working-directory: client
+        run: |
+          node package_local.js
+          ditto -c -k --sequesterRsrc --keepParent \
+            build-local/Pritunl-darwin-arm64/Pritunl.app \
+            "$RUNNER_TEMP/Pritunl-AutoAuth-macOS-arm64.zip"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: ${{ runner.temp }}/Pritunl-AutoAuth-macOS-arm64.zip
+          if-no-files-found: error
+
+  windows:
+    name: Windows installer
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: service/go.mod
+          cache-dependency-path: |
+            service/go.sum
+            cli/go.sum
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          $paths = @(
+            "C:\Program Files (x86)\Inno Setup 6\ISCC.exe",
+            "C:\Program Files\Inno Setup 6\ISCC.exe"
+          )
+          if (-not ($paths | Where-Object { Test-Path $_ })) {
+            choco install innosetup --no-progress -y
+          }
+
+      - name: Verify Windows DPAPI
+        shell: pwsh
+        run: |
+          Add-Type -AssemblyName System.Security
+          $plain = [Text.Encoding]::UTF8.GetBytes('{"enabled":true}')
+          $blob = [Security.Cryptography.ProtectedData]::Protect(
+            $plain, $null,
+            [Security.Cryptography.DataProtectionScope]::CurrentUser)
+          $back = [Security.Cryptography.ProtectedData]::Unprotect(
+            $blob, $null,
+            [Security.Cryptography.DataProtectionScope]::CurrentUser)
+          if ([Text.Encoding]::UTF8.GetString($back) -ne '{"enabled":true}') {
+            throw "DPAPI round trip failed"
+          }
+
+      - name: Build installer
+        shell: pwsh
+        run: ./tools/build_win_auto_auth.ps1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: build/Pritunl-AutoAuth-*-setup.exe
+          if-no-files-found: error
+
+  release:
+    name: Publish release
+    needs: [macos, windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Create checksums
+        run: |
+          cd dist
+          sha256sum * > SHA256SUMS.txt
+          ls -lh
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "Pritunl Client 1.4.4777.90 — Auto Auth"
+          body: |
+            Source-built Pritunl Client 1.4.4777.90 with Keychain/DPAPI-backed
+            auto authentication and local TOTP.
+
+            - **macOS (Apple Silicon):** `Pritunl-AutoAuth-macOS-arm64.zip`
+              is ad-hoc signed and not notarized.
+            - **Windows (x64 / arm64):** `Pritunl-AutoAuth-1.4.4777.90-setup.exe`
+              is an unsigned Inno Setup installer.
+
+            The builds are unsigned, so Gatekeeper and SmartScreen will warn.
+            Verify `SHA256SUMS.txt` before running anything.
+
+            This is an unofficial personal fork, not affiliated with Pritunl,
+            Inc. Review the upstream license before redistributing.
+          files: dist/*
+          fail_on_unmatched_files: true

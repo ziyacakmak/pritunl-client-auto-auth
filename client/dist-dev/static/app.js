@@ -8882,7 +8882,7 @@ class ProfileSettings extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
                 if (!saved) {
                     this.setState({
                         ...this.state,
-                        autoAuthError: "Failed to save to macOS Keychain",
+                        autoAuthError: "Failed to save to " + _utils_AutoAuth__WEBPACK_IMPORTED_MODULE_7__.storageName(),
                     });
                     return;
                 }
@@ -9280,7 +9280,7 @@ class ProfileSettings extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
                         } }),
                     autoAuthSupported ? react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null,
                         react__WEBPACK_IMPORTED_MODULE_0__.createElement("h4", { style: css.sectionTitle }, "Auto Auth"),
-                        react__WEBPACK_IMPORTED_MODULE_0__.createElement(_PageSwitch__WEBPACK_IMPORTED_MODULE_5__["default"], { disabled: this.state.disabled || !this.state.autoAuthLoaded, label: "Enable Auto Auth", help: "Store the profile credentials in the macOS Keychain and connect without prompting.", checked: !!auto.enabled, onToggle: () => {
+                        react__WEBPACK_IMPORTED_MODULE_0__.createElement(_PageSwitch__WEBPACK_IMPORTED_MODULE_5__["default"], { disabled: this.state.disabled || !this.state.autoAuthLoaded, label: "Enable Auto Auth", help: "Store the profile credentials in the " + _utils_AutoAuth__WEBPACK_IMPORTED_MODULE_7__.storageName() + " and connect without prompting.", checked: !!auto.enabled, onToggle: () => {
                                 this.setAutoAuth("enabled", !auto.enabled);
                             } }),
                         react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", { style: css.autoAuthNote, hidden: !auto.enabled }, "Enter the PIN, the TOTP secret, or both. Only the fields you fill in are sent."),
@@ -11424,13 +11424,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   load: () => (/* binding */ load),
 /* harmony export */   markFailed: () => (/* binding */ markFailed),
 /* harmony export */   remove: () => (/* binding */ remove),
-/* harmony export */   save: () => (/* binding */ save)
+/* harmony export */   save: () => (/* binding */ save),
+/* harmony export */   storageName: () => (/* binding */ storageName)
 /* harmony export */ });
-/* harmony import */ var _MiscUtils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MiscUtils */ "./app/utils/MiscUtils.js");
-/* harmony import */ var _Totp__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Totp */ "./app/utils/Totp.js");
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! path */ "path");
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var os__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! os */ "os");
+/* harmony import */ var os__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(os__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _MiscUtils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./MiscUtils */ "./app/utils/MiscUtils.js");
+/* harmony import */ var _Totp__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Totp */ "./app/utils/Totp.js");
+
+
 
 
 const serviceName = "Pritunl Auto Auth";
+const isWindows = process.platform === "win32";
 let cache = {};
 let failed = {};
 function empty() {
@@ -11455,27 +11463,111 @@ function normalize(data) {
         username: (data && data.username) || "",
     };
 }
+function storageName() {
+    return isWindows ? "Windows DPAPI" : "macOS Keychain";
+}
+function windowsAuthPath(profileId) {
+    let appData = {}.APPDATA;
+    if (!appData) {
+        appData = path__WEBPACK_IMPORTED_MODULE_0___default().join(os__WEBPACK_IMPORTED_MODULE_1___default().homedir(), "AppData", "Roaming");
+    }
+    return path__WEBPACK_IMPORTED_MODULE_0___default().join(appData, "Pritunl", "auto-auth", profileId + ".bin");
+}
+function psQuote(value) {
+    return "'" + value.replace(/'/g, "''") + "'";
+}
+function powershell(script) {
+    return _MiscUtils__WEBPACK_IMPORTED_MODULE_2__.exec("powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", script);
+}
+async function loadKeychain(profileId) {
+    let res = await _MiscUtils__WEBPACK_IMPORTED_MODULE_2__.exec("/usr/bin/security", "find-generic-password", "-s", serviceName, "-a", profileId, "-w");
+    if (res.error || !res.stdout) {
+        return empty();
+    }
+    try {
+        return normalize(JSON.parse(res.stdout.trim()));
+    }
+    catch (err) {
+        return empty();
+    }
+}
+async function saveKeychain(profileId, data) {
+    let res = await _MiscUtils__WEBPACK_IMPORTED_MODULE_2__.exec("/usr/bin/security", "add-generic-password", "-U", "-s", serviceName, "-a", profileId, "-w", JSON.stringify(data));
+    return !res.error;
+}
+async function removeKeychain(profileId) {
+    await _MiscUtils__WEBPACK_IMPORTED_MODULE_2__.exec("/usr/bin/security", "delete-generic-password", "-s", serviceName, "-a", profileId);
+}
+async function loadWindows(profileId) {
+    let file = windowsAuthPath(profileId);
+    let script = [
+        "$ErrorActionPreference = 'Stop'",
+        "Add-Type -AssemblyName System.Security",
+        "$f = " + psQuote(file),
+        "if (Test-Path -LiteralPath $f) {",
+        "$b = [Convert]::FromBase64String((Get-Content -LiteralPath $f -Raw))",
+        "$p = [System.Security.Cryptography.ProtectedData]::Unprotect($b, $null, [System.Security.Cryptography.DataProtectionScope]::CurrentUser)",
+        "[Convert]::ToBase64String($p)",
+        "}",
+    ].join("\n");
+    let res = await powershell(script);
+    if (res.error || !res.stdout || !res.stdout.trim()) {
+        return empty();
+    }
+    try {
+        let json = Buffer.from(res.stdout.trim(), "base64").toString("utf8");
+        return normalize(JSON.parse(json));
+    }
+    catch (err) {
+        return empty();
+    }
+}
+async function saveWindows(profileId, data) {
+    let file = windowsAuthPath(profileId);
+    let encoded = Buffer.from(JSON.stringify(data), "utf8").toString("base64");
+    let script = [
+        "$ErrorActionPreference = 'Stop'",
+        "Add-Type -AssemblyName System.Security",
+        "$f = " + psQuote(file),
+        "New-Item -ItemType Directory -Force -Path " +
+            psQuote(path__WEBPACK_IMPORTED_MODULE_0___default().dirname(file)) + " | Out-Null",
+        "$b = [Convert]::FromBase64String(" + psQuote(encoded) + ")",
+        "$p = [System.Security.Cryptography.ProtectedData]::Protect($b, $null, [System.Security.Cryptography.DataProtectionScope]::CurrentUser)",
+        "[IO.File]::WriteAllText($f, [Convert]::ToBase64String($p), [Text.Encoding]::ASCII)",
+    ].join("\n");
+    let res = await powershell(script);
+    return !res.error;
+}
+async function removeWindows(profileId) {
+    let file = windowsAuthPath(profileId);
+    let script = "Remove-Item -LiteralPath " + psQuote(file) +
+        " -Force -ErrorAction SilentlyContinue";
+    await powershell(script);
+}
 async function load(profileId) {
     if (cache[profileId]) {
         return cache[profileId];
     }
-    let res = await _MiscUtils__WEBPACK_IMPORTED_MODULE_0__.exec("/usr/bin/security", "find-generic-password", "-s", serviceName, "-a", profileId, "-w");
-    let data = empty();
-    if (!res.error && res.stdout) {
-        try {
-            data = normalize(JSON.parse(res.stdout.trim()));
-        }
-        catch (err) {
-            data = empty();
-        }
+    let data;
+    if (isWindows) {
+        data = await loadWindows(profileId);
+    }
+    else {
+        data = await loadKeychain(profileId);
     }
     cache[profileId] = data;
     return data;
 }
 async function save(profileId, data) {
     data = normalize(data);
-    let res = await _MiscUtils__WEBPACK_IMPORTED_MODULE_0__.exec("/usr/bin/security", "add-generic-password", "-U", "-s", serviceName, "-a", profileId, "-w", JSON.stringify(data));
-    if (res.error) {
+    let saved;
+    if (isWindows) {
+        saved = await saveWindows(profileId, data);
+    }
+    else {
+        saved = await saveKeychain(profileId, data);
+    }
+    if (!saved) {
         return false;
     }
     cache[profileId] = data;
@@ -11484,7 +11576,12 @@ async function save(profileId, data) {
 }
 async function remove(profileId) {
     delete cache[profileId];
-    await _MiscUtils__WEBPACK_IMPORTED_MODULE_0__.exec("/usr/bin/security", "delete-generic-password", "-s", serviceName, "-a", profileId);
+    if (isWindows) {
+        await removeWindows(profileId);
+    }
+    else {
+        await removeKeychain(profileId);
+    }
 }
 function markFailed(profileId) {
     failed[profileId] = true;
@@ -11520,10 +11617,10 @@ function buildCredentials(authTypes, data) {
         password += data.pin;
     }
     if (authTypes.indexOf("otp") !== -1 && data.secret) {
-        if (!_Totp__WEBPACK_IMPORTED_MODULE_1__.isValidSecret(data.secret)) {
+        if (!_Totp__WEBPACK_IMPORTED_MODULE_3__.isValidSecret(data.secret)) {
             return null;
         }
-        password += _Totp__WEBPACK_IMPORTED_MODULE_1__.generateCode(data.secret);
+        password += _Totp__WEBPACK_IMPORTED_MODULE_3__.generateCode(data.secret);
     }
     if (!password) {
         return null;
