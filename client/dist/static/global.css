@@ -1187,3 +1187,201 @@ bp5 datepicker
 .bp5-dateinput-popover{
   padding:0; }
 /*# sourceMappingURL=blueprint-datetime.css.map */
+
+/*******************************
+        Dialogs
+*******************************/
+.profile-settings-dialog,
+.profile-connect-dialog,
+.profile-import-dialog,
+.about-dialog {
+  max-width: calc(100vw - 24px);
+  max-height: calc(100vh - 24px);
+  margin: 12px auto;
+  padding-bottom: 0;
+}
+
+.profile-settings-dialog {
+  width: min(560px, calc(100vw - 24px));
+}
+
+.profile-connect-dialog,
+.profile-import-dialog {
+  width: min(400px, calc(100vw - 24px));
+}
+
+.about-dialog {
+  width: min(440px, calc(100vw - 24px));
+}
+
+.profile-settings-dialog .bp5-dialog-header,
+.profile-connect-dialog .bp5-dialog-header,
+.profile-import-dialog .bp5-dialog-header,
+.about-dialog .bp5-dialog-header {
+  padding: 16px 20px 0;
+}
+
+.profile-settings-dialog .bp5-dialog-body,
+.profile-connect-dialog .bp5-dialog-body,
+.profile-import-dialog .bp5-dialog-body,
+.about-dialog .bp5-dialog-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  margin: 0;
+  padding: 16px 20px 20px;
+}
+
+.profile-settings-dialog .bp5-dialog-footer,
+.profile-connect-dialog .bp5-dialog-footer,
+.profile-import-dialog .bp5-dialog-footer,
+.about-dialog .bp5-dialog-footer {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 12px 20px;
+  border-top: 1px solid rgba(16, 22, 26, 0.15);
+}
+
+.bp5-dark .profile-settings-dialog .bp5-dialog-footer,
+.bp5-dark .profile-connect-dialog .bp5-dialog-footer,
+.bp5-dark .profile-import-dialog .bp5-dialog-footer,
+.bp5-dark .about-dialog .bp5-dialog-footer {
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+
+/*******************************
+        Profile Settings
+*******************************/
+.settings-section {
+  padding: 4px 0 12px;
+  border-bottom: 1px solid rgba(16, 22, 26, 0.1);
+}
+
+.settings-section:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.settings-section + .settings-section {
+  padding-top: 14px;
+}
+
+.bp5-dark .settings-section {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.settings-section-title {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5c7080;
+}
+
+.bp5-dark .settings-section-title {
+  color: #a7b6c2;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  column-gap: 20px;
+  row-gap: 2px;
+}
+
+.profile-settings-dialog .bp5-label,
+.profile-connect-dialog .bp5-label,
+.profile-import-dialog .bp5-label {
+  display: block;
+  width: 100%;
+  max-width: 100% !important;
+  margin: 10px 0 0;
+}
+
+.profile-settings-dialog .bp5-label input.bp5-input,
+.profile-connect-dialog .bp5-label input.bp5-input,
+.profile-import-dialog .bp5-label input.bp5-input {
+  width: 100%;
+}
+
+.settings-test-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.settings-test-code {
+  font-family: "Roboto Mono", monospace;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: #0d8050;
+}
+
+.bp5-dark .settings-test-code {
+  color: #15b371;
+}
+
+/*******************************
+        About
+*******************************/
+.about-name {
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.about-byline {
+  margin-top: 2px;
+  margin-bottom: 16px;
+  font-size: 12px;
+  opacity: 0.65;
+}
+
+.about-title {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #106ba3;
+}
+
+.bp5-dark .about-title {
+  color: #2b95d6;
+}
+
+.about-license {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(16, 22, 26, 0.15);
+  border-radius: 4px;
+  background: rgba(16, 22, 26, 0.04);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.bp5-dark .about-license {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.about-license-title {
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.about-link {
+  font-size: 11px;
+  color: #106ba3;
+  text-decoration: none;
+  word-break: break-all;
+  cursor: pointer;
+}
+
+.about-link:hover {
+  text-decoration: underline;
+}
+
+.bp5-dark .about-link {
+  color: #2b95d6;
+}

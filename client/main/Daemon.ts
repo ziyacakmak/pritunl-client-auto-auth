@@ -97,13 +97,13 @@ function showApproval(): void {
 
 	electron.dialog.showMessageBox(null, {
 		type: "info",
-		buttons: ["Open Login Items Settings"],
-		title: "Pritunl Client - Service Approval Required",
-		message: "The Pritunl background service must be enabled " +
-			"to use Pritunl Client. Approve the Background Items " +
-			"notification or open System Settings > " +
-			"General > Login Items & Extensions and enable Pritunl " +
-			"under Allow in the Background.",
+		buttons: ["Oturum Açma Öğeleri Ayarlarını Aç"],
+		title: "pritunl++ - Hizmet Onayı Gerekli",
+		message: "pritunl++ kullanmak için Pritunl arka plan hizmeti " +
+			"etkinleştirilmelidir. Arka Plan Öğeleri bildirimini onaylayın " +
+			"veya Sistem Ayarları > Genel > Oturum Açma Öğeleri ve " +
+			"Uzantılar bölümünü açıp Arka Planda İzin Ver altında " +
+			"Pritunl'u etkinleştirin.",
 	}).then((evt) => {
 		approvalShown = false
 		if (evt.response === 0) {
@@ -126,8 +126,8 @@ async function approve(): Promise<string> {
 
 export async function restart(): Promise<void> {
 	if (!Auth.token || !await ping()) {
-		Logger.error("Daemon: Skipping service restart, " +
-			"service not running")
+		Logger.error("Daemon: Hizmet yeniden başlatılıyor, " +
+			"hizmet çalışmıyor")
 		return
 	}
 
@@ -136,7 +136,7 @@ export async function restart(): Promise<void> {
 	await register()
 
 	let state = await status()
-	Logger.info("Daemon: Service state after restart '" + state + "'")
+	Logger.info("Daemon: Yeniden başlatma sonrası hizmet durumu '" + state + "'")
 
 	if (state === "requiresApproval") {
 		state = await approve()
@@ -155,7 +155,7 @@ export async function ensure(): Promise<void> {
 	}
 
 	let state = await status()
-	Logger.info("Daemon: Service state '" + state + "'")
+	Logger.info("Daemon: Hizmet durumu '" + state + "'")
 	if (state === "") {
 		return
 	}
@@ -163,17 +163,17 @@ export async function ensure(): Promise<void> {
 	if (state === "notRegistered" || state === "notFound") {
 		await register()
 		state = await status()
-		Logger.info("Daemon: Service register state '" + state + "'")
+		Logger.info("Daemon: Hizmet kayıt durumu '" + state + "'")
 	}
 
 	if (state === "requiresApproval") {
 		state = await approve()
-		Logger.info("Daemon: Service approval state '" + state + "'")
+		Logger.info("Daemon: Hizmet onay durumu '" + state + "'")
 	}
 
 	if (state !== "enabled") {
-		Logger.error("Daemon: Failed to register service " +
-			"(state: " + state + ")")
+		Logger.error("Daemon: Hizmet kaydedilemedi " +
+			"(durum: " + state + ")")
 		return
 	}
 
@@ -181,11 +181,11 @@ export async function ensure(): Promise<void> {
 		return
 	}
 
-	Logger.warning("Daemon: Service enabled but not running, " +
-		"re-registering service")
+	Logger.warning("Daemon: Hizmet etkin ancak çalışmıyor, " +
+		"hizmet yeniden kaydediliyor")
 	await register()
 	state = await status()
-	Logger.info("Daemon: Service run state '" + state + "'")
+	Logger.info("Daemon: Hizmet çalışma durumu '" + state + "'")
 
 	if (state === "requiresApproval") {
 		state = await approve()
@@ -195,8 +195,8 @@ export async function ensure(): Promise<void> {
 		return
 	}
 
-	Logger.warning("Daemon: Service enabled but not running, " +
-		"waiting for user approval")
+	Logger.warning("Daemon: Hizmet etkin ancak çalışmıyor, " +
+		"kullanıcı onayı bekleniyor")
 	showApproval()
 
 	for (let i = 0; i < 10; i++) {
@@ -210,7 +210,7 @@ export async function ensure(): Promise<void> {
 		}
 	}
 
-	Logger.error("Daemon: Timed out waiting for service to start")
+	Logger.error("Daemon: Hizmetin başlaması beklenirken zaman aşımı")
 }
 
 export async function checkUpgrade(): Promise<void> {
@@ -228,8 +228,8 @@ export async function checkUpgrade(): Promise<void> {
 	}
 	restarted = true
 
-	Logger.info("Daemon: Service version mismatch, restarting service " +
-		"(app: " + appVer + " service: " + serviceVer + ")")
+	Logger.info("Daemon: Hizmet sürümü uyuşmuyor, hizmet yeniden başlatılıyor " +
+		"(uygulama: " + appVer + " hizmet: " + serviceVer + ")")
 
 	await restart()
 }

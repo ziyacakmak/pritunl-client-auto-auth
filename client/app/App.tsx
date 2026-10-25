@@ -57,13 +57,13 @@ let unrejCount = 0
 window.onerror = (event, source, line, col, err): void => {
 	unerrCount += 1
 	if (unerrCount == 100) {
-		Logger.errorAlert("Main: Ending unhandled error infinite loop")
+		Logger.errorAlert("Ana: İşlenmeyen hata döngüsü sonlandırılıyor")
 		return
 	} else if (unerrCount > 100) {
 		return
 	}
 
-	err = new Errors.UnknownError(err, "Main: Unhandled exception", {
+	err = new Errors.UnknownError(err, "Ana: İşlenmeyen özel durum", {
 		event: event,
 		source: source,
 		line: line,
@@ -152,7 +152,7 @@ try {
 	}
 	sourceMapReq.send()
 } catch (err) {
-	err = new Errors.ReadError(err, "Main: Failed to load source map", {
+	err = new Errors.ReadError(err, "Ana: Kaynak haritası yüklenemedi", {
 		path: sourceMapPath,
 	})
 	Logger.error(err)
@@ -163,7 +163,7 @@ try {
 		"lib/mappings.wasm": "static/mappings.wasm"
 	})
 } catch (err) {
-	err = new Errors.ReadError(err, "Main: Failed to initialize source map", {
+	err = new Errors.ReadError(err, "Ana: Kaynak haritası başlatılamadı", {
 		path: sourceMapPath,
 	})
 	Logger.error(err)

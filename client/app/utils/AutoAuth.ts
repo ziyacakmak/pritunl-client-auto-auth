@@ -49,7 +49,7 @@ function normalize(data: any): AutoAuthData {
 }
 
 export function storageName(): string {
-	return isWindows ? "Windows DPAPI" : "macOS Keychain"
+	return isWindows ? "Windows DPAPI" : "macOS Anahtar Zinciri"
 }
 
 function windowsAuthPath(profileId: string): string {

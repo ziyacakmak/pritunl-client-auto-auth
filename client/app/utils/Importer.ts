@@ -144,7 +144,7 @@ export class Importer {
 			}
 		} catch (e) {
 			let err = new Errors.ParseError(null,
-				"Importer: Json parse error",
+				"İçe Aktarıcı: JSON ayrıştırma hatası",
 				{path: pth},
 			)
 			Logger.error(err)
@@ -214,7 +214,7 @@ export async function importFile(pth: string): Promise<void> {
 
 		let size = await MiscUtils.fileSize(pth)
 		if (size > 3000000) {
-			Alert.error("Importer: File too large")
+			Alert.error("İçe Aktarıcı: Dosya çok büyük")
 			return
 		}
 
@@ -228,7 +228,7 @@ export async function importFile(pth: string): Promise<void> {
 				break
 			default:
 				let err = new Errors.ParseError(null,
-					"Importer: Unsupported file type",
+					"İçe Aktarıcı: Desteklenmeyen dosya türü",
 					{path: pth})
 				Logger.errorAlert(err)
 				return
@@ -279,18 +279,18 @@ export async function importUri(prflUri: string): Promise<void> {
 	}
 
 	if (resp.status === 404) {
-		Alert.error("Invalid or expired profile URI", 15)
+		Alert.error("Geçersiz veya süresi dolmuş profil URI'si", 15)
 		return
 	}
 
 	if (resp.status !== 200) {
-		Alert.error("HTTP error status " + resp.status + " received", 15)
+		Alert.error("HTTP hata durumu alındı: " + resp.status, 15)
 		return
 	}
 
 	let data = resp.jsonPassive()
 	if (!data) {
-		Alert.error("No data received from server", 15)
+		Alert.error("Sunucudan veri alınamadı", 15)
 		return
 	}
 

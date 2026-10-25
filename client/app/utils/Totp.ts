@@ -35,7 +35,7 @@ function base32Decode(secret: string): Buffer {
 		let idx = base32Alphabet.indexOf(secret.charAt(i))
 
 		if (idx === -1) {
-			throw new Error("Invalid base32 secret")
+			throw new Error("Geçersiz base32 anahtarı")
 		}
 
 		value = (value << 5) | idx

@@ -41,13 +41,13 @@ export function getChartLabels(resource: string, data: any): Labels {
 				let label = '';
 				switch (key) {
 					case 'bs':
-						label = 'Transmitted';
+						label = 'Gönderilen';
 						break;
 					case 'br':
-						label = 'Received';
+						label = 'Alınan';
 						break;
 					default:
-						label = 'Unknown';
+						label = 'Bilinmeyen';
 				}
 
 				bandwidthDatasets.push({
@@ -56,8 +56,8 @@ export function getChartLabels(resource: string, data: any): Labels {
 			}
 
 			return {
-				title: 'Bandwidth',
-				resource_label: 'Traffic',
+				title: 'Bant Genişliği',
+				resource_label: 'Trafik',
 				resource_type: 'bytes',
 				resource_suffix: '',
 				resource_fixed: 2,

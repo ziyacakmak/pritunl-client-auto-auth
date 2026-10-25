@@ -34,7 +34,7 @@ export function connect(prfl: ProfileTypes.ProfileData,
 				}
 
 				err = new Errors.RequestError(err,
-					"Profiles: Profile connect failed")
+					"Profiller: Profile bağlanılamadı")
 				Logger.errorAlert(err)
 
 				resolve()
@@ -67,7 +67,7 @@ export function disconnect(prfl: ProfileTypes.ProfileData,
 				}
 
 				err = new Errors.RequestError(err,
-					"Profiles: Profile disconnect failed")
+					"Profiller: Profil bağlantısı kesilemedi")
 				Logger.errorAlert(err)
 
 				resolve()
@@ -104,7 +104,7 @@ export async function tokenUpdate(prfl: ProfileTypes.Profile,
 			.end()
 		if (resp.status !== 200) {
 			let err = new Errors.RequestError(null,
-				"Profiles: Token update request error " + resp.status)
+				"Profiller: Belirteç güncelleme isteği hatası " + resp.status)
 			Logger.errorAlert(err, 10)
 		} else {
 			let data = resp.jsonPassive()
@@ -114,7 +114,7 @@ export async function tokenUpdate(prfl: ProfileTypes.Profile,
 		}
 	} catch (err) {
 		err = new Errors.RequestError(
-			err, "Profiles: Token update request failed")
+			err, "Profiller: Belirteç güncelleme isteği başarısız")
 		Logger.errorAlert(err, 10)
 	}
 
@@ -139,7 +139,7 @@ export async function tokenDelete(prfl: ProfileTypes.Profile,
 			.end()
 	} catch (err) {
 		err = new Errors.RequestError(
-			err, "Profiles: Token update request failed")
+			err, "Profiller: Belirteç güncelleme isteği başarısız")
 		Logger.errorAlert(err, 10)
 	}
 
@@ -166,14 +166,14 @@ export function resetDns(noLoading?: boolean): Promise<void> {
 
 				if (resp.status !== 200) {
 					let err = new Errors.RequestError(null,
-						"System: DNS reset failed", {
+						"Sistem: DNS sıfırlanamadı", {
 							status: resp.status.toString()
 						})
 					Logger.errorAlert(err)
 					return
 				}
 
-				Alert.success("System: DNS reset successful")
+				Alert.success("Sistem: DNS sıfırlandı")
 
 				resolve()
 			}, (err) => {
@@ -182,7 +182,7 @@ export function resetDns(noLoading?: boolean): Promise<void> {
 				}
 
 				err = new Errors.RequestError(err,
-					"System: DNS reset failed")
+					"Sistem: DNS sıfırlanamadı")
 				Logger.errorAlert(err)
 
 				resolve()
@@ -209,14 +209,14 @@ export function resetAll(noLoading?: boolean): Promise<void> {
 
 				if (resp.status !== 200) {
 					let err = new Errors.RequestError(null,
-						"System: Network reset failed", {
+						"Sistem: Ağ ayarları sıfırlanamadı", {
 							status: resp.status.toString()
 						})
 					Logger.errorAlert(err)
 					return
 				}
 
-				Alert.success("System: Network reset successful")
+				Alert.success("Sistem: Ağ ayarları sıfırlandı")
 
 				resolve()
 			}, (err) => {
@@ -225,7 +225,7 @@ export function resetAll(noLoading?: boolean): Promise<void> {
 				}
 
 				err = new Errors.RequestError(err,
-					"System: Network reset failed")
+					"Sistem: Ağ ayarları sıfırlanamadı")
 				Logger.errorAlert(err)
 
 				resolve()
@@ -252,14 +252,14 @@ export function resetEnclave(noLoading?: boolean): Promise<void> {
 
 				if (resp.status !== 200) {
 					let err = new Errors.RequestError(null,
-						"System: Secure Enclave reset failed", {
+						"Sistem: Güvenli Alan anahtarı sıfırlanamadı", {
 							status: resp.status.toString()
 						})
 					Logger.errorAlert(err)
 					return
 				}
 
-				Alert.success("System: Secure Enclave reset successful")
+				Alert.success("Sistem: Güvenli Alan anahtarı sıfırlandı")
 
 				resolve()
 			}, (err) => {
@@ -268,7 +268,7 @@ export function resetEnclave(noLoading?: boolean): Promise<void> {
 				}
 
 				err = new Errors.RequestError(err,
-					"System: Secure Enclave reset failed")
+					"Sistem: Güvenli Alan anahtarı sıfırlanamadı")
 				Logger.errorAlert(err)
 
 				resolve()

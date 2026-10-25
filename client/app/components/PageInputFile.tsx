@@ -31,7 +31,7 @@ const css = {
 
 export default class PageInputFile extends React.Component<Props, {}> {
 	render(): JSX.Element {
-		let label = this.props.value || "Choose profile file..."
+		let label = this.props.value || "Profil dosyası seçin..."
 
 		return <div>
 			<label

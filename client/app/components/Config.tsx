@@ -142,13 +142,13 @@ export default class ConfigView extends React.Component<Props, State> {
 				/>
 			</div>
 			<div className="layout horizontal">
-				<h3 style={css.header}>Advanced Settings</h3>
+				<h3 style={css.header}>Gelişmiş Ayarlar</h3>
 			</div>
 			<div className="layout horizontal">
 				<PageSwitch
 					disabled={this.state.disabled}
-					label="Enable DNS refresh"
-					help="Automatically refresh DNS to fix issues with macOS DNS cache."
+					label="DNS yenilemeyi etkinleştir"
+					help="macOS DNS önbelleğiyle ilgili sorunları gidermek için DNS'i otomatik olarak yenile."
 					checked={!!this.state.config.enable_dns_refresh}
 					onToggle={(): void => {
 						this.set("enable_dns_refresh",
@@ -159,8 +159,8 @@ export default class ConfigView extends React.Component<Props, State> {
 			<div className="layout horizontal">
 				<PageSwitch
 					disabled={this.state.disabled}
-					label="Disable DNS watch"
-					help="Disable automatic correction of DNS changes if configuration is lost from system network change."
+					label="DNS izlemeyi devre dışı bırak"
+					help="Sistem ağı değişikliğinde yapılandırma kaybolursa DNS değişikliklerinin otomatik düzeltilmesini devre dışı bırak."
 					checked={!!this.state.config.disable_dns_watch}
 					onToggle={(): void => {
 						this.set("disable_dns_watch",
@@ -171,8 +171,8 @@ export default class ConfigView extends React.Component<Props, State> {
 			<div className="layout horizontal">
 				<PageSwitch
 					disabled={this.state.disabled}
-					label="Disable WireGuard DNS watch"
-					help="Disable WireGuard DNS watch on macOS."
+					label="WireGuard DNS izlemeyi devre dışı bırak"
+					help="macOS'ta WireGuard DNS izlemeyi devre dışı bırak."
 					checked={!!this.state.config.disable_wg_dns}
 					onToggle={(): void => {
 						this.set("disable_wg_dns",
@@ -183,8 +183,8 @@ export default class ConfigView extends React.Component<Props, State> {
 			<div className="layout horizontal">
 				<PageSwitch
 					disabled={this.state.disabled}
-					label="Disable device wake watch"
-					help="Disable wake watch used for faster reconnections when device is resumed from sleep."
+					label="Cihaz uyanma izlemeyi devre dışı bırak"
+					help="Cihaz uykudan döndüğünde daha hızlı yeniden bağlanmak için kullanılan uyanma izlemeyi devre dışı bırak."
 					checked={!!this.state.config.disable_wake_watch}
 					onToggle={(): void => {
 						this.set("disable_wake_watch",
@@ -195,8 +195,8 @@ export default class ConfigView extends React.Component<Props, State> {
 			<div className="layout horizontal">
 				<PageSwitch
 					disabled={this.state.disabled}
-					label="Disable network clean"
-					help="Disable Windows VPN interface cleanup on startup."
+					label="Ağ temizliğini devre dışı bırak"
+					help="Başlangıçta Windows VPN arayüzü temizliğini devre dışı bırak."
 					checked={!!this.state.config.disable_net_clean}
 					onToggle={(): void => {
 						this.set("disable_net_clean",
@@ -207,8 +207,8 @@ export default class ConfigView extends React.Component<Props, State> {
 			<div className="layout horizontal">
 				<PageSwitch
 					disabled={this.state.disabled}
-					label="Disable browser open"
-					help="Disable automatic opening of browser for single sign-on authentication."
+					label="Tarayıcı açmayı devre dışı bırak"
+					help="Tek oturum açma kimlik doğrulaması için tarayıcının otomatik açılmasını devre dışı bırak."
 					checked={!!this.state.config.disable_browser}
 					onToggle={(): void => {
 						this.set("disable_browser",
@@ -219,8 +219,8 @@ export default class ConfigView extends React.Component<Props, State> {
 			<div className="layout horizontal">
 				<PageSwitch
 					disabled={this.state.disabled}
-					label="Transparent window"
-					help="Enable transparent window, should not be used for most configurations. Restart client for configuration to take effect."
+					label="Saydam pencere"
+					help="Saydam pencereyi etkinleştir; çoğu yapılandırma için kullanılmamalıdır. Değişikliğin uygulanması için istemciyi yeniden başlatın."
 					checked={!!transparentWindow}
 					onToggle={(): void => {
 						this.setState({
@@ -234,8 +234,8 @@ export default class ConfigView extends React.Component<Props, State> {
 			<div className="layout horizontal">
 				<PageSwitch
 					disabled={this.state.disabled}
-					label="Enable safe storage"
-					help="Enable encryption of profile keys with safe storage. May cause client to become unresponsive or connections to fail."
+					label="Güvenli depolamayı etkinleştir"
+					help="Profil anahtarlarının güvenli depolama ile şifrelenmesini etkinleştir. İstemcinin yanıt vermemesine veya bağlantıların başarısız olmasına neden olabilir."
 					checked={!!safeStorage}
 					onToggle={(): void => {
 						this.setState({
@@ -248,8 +248,8 @@ export default class ConfigView extends React.Component<Props, State> {
 			</div>
 			<div className="layout horizontal">
 				<PageNumInput
-					label="Interface Metric"
-					help="Configure the VPN interfaces metric on Windows. Set to 0 to leave interfaces unmodified."
+					label="Arayüz Metriği"
+					help="Windows'ta VPN arayüzlerinin metriğini yapılandır. Arayüzleri değiştirmeden bırakmak için 0 yapın."
 					min={0}
 					max={9999}
 					stepSize={1}
@@ -269,13 +269,13 @@ export default class ConfigView extends React.Component<Props, State> {
 						type="button"
 						disabled={this.state.disabled || !this.state.changed}
 						onClick={this.onCancel}
-					>Cancel</button>
+					>Vazgeç</button>
 					<button
 						className="bp5-button bp5-intent-success bp5-icon-tick"
 						type="button"
 						disabled={this.state.disabled || !this.state.changed}
 						onClick={this.onSave}
-					>Save</button>
+					>Kaydet</button>
 				</div>
 			</div>
 		</div>;

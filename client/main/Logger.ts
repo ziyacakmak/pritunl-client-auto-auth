@@ -6,7 +6,7 @@ import * as Constants from "./Constants";
 
 function push(level: string, err: any): void {
 	if (!err) {
-		err = "Undefined error"
+		err = "Tanımsız hata"
 	}
 
 	let time = new Date()
@@ -25,7 +25,7 @@ function push(level: string, err: any): void {
 			fs.unlink(pth, () => {
 				fs.appendFile(pth, msg + "\n", (err: Error): void => {
 					if (err) {
-						err = new Errors.WriteError(err, "Logger: Failed to write log",
+						err = new Errors.WriteError(err, "Günlükçü: Günlük yazılamadı",
 							{log_path: pth})
 						console.error(err)
 					}
@@ -34,7 +34,7 @@ function push(level: string, err: any): void {
 		} else {
 			fs.appendFile(pth, msg + "\n", (err: Error): void => {
 				if (err) {
-					err = new Errors.WriteError(err, "Logger: Failed to write log",
+					err = new Errors.WriteError(err, "Günlükçü: Günlük yazılamadı",
 						{log_path: pth})
 					console.error(err)
 				}

@@ -12,6 +12,7 @@ import LoadingBar from './LoadingBar';
 import Profiles from './Profiles';
 import Logs from './Logs';
 import ConfigView from './Config';
+import About from './About';
 import * as Blueprint from "@blueprintjs/core";
 import * as Alert from "../Alert";
 
@@ -21,6 +22,7 @@ interface State {
 	path: string
 	disabled: boolean
 	menu: boolean
+	about: boolean
 	showErrors: boolean
 }
 
@@ -118,6 +120,7 @@ export default class Main extends React.Component<{}, State> {
 			path: "/",
 			disabled: false,
 			menu: false,
+			about: false,
 			showErrors: false,
 		}
 	}
@@ -204,11 +207,11 @@ export default class Main extends React.Component<{}, State> {
 		})
 
 		if (Config.disable_tray_icon) {
-			Alert.success("Tray icon disabled, restart client " +
-				"for configuration to take effect")
+			Alert.success("Tepsi simgesi devre dışı bırakıldı. " +
+				"Değişikliğin uygulanması için istemciyi yeniden başlatın.")
 		} else {
-			Alert.success("Tray icon enabled, restart client " +
-				"for configuration to take effect")
+			Alert.success("Tepsi simgesi etkinleştirildi. " +
+				"Değişikliğin uygulanması için istemciyi yeniden başlatın.")
 		}
 	}
 
@@ -226,11 +229,11 @@ export default class Main extends React.Component<{}, State> {
 		})
 
 		if (Config.frameless) {
-			Alert.success("Window frame disabled, restart client " +
-				"for configuration to take effect")
+			Alert.success("Pencere çerçevesi devre dışı bırakıldı. " +
+				"Değişikliğin uygulanması için istemciyi yeniden başlatın.")
 		} else {
-			Alert.success("Window frame enabled, restart client " +
-				"for configuration to take effect")
+			Alert.success("Pencere çerçevesi etkinleştirildi. " +
+				"Değişikliğin uygulanması için istemciyi yeniden başlatın.")
 		}
 	}
 
@@ -251,7 +254,7 @@ export default class Main extends React.Component<{}, State> {
 
 			if (Constants.state.security) {
 					let updateElm: JSX.Element = <div>
-					<div><b>Important security update available, download the latest release below</b></div>
+					<div><b>Önemli bir güvenlik güncellemesi mevcut. En son sürümü aşağıdan indirin.</b></div>
 					<button
 						className="bp5-button bp5-intent-primary bp5-icon-download"
 						type="button"
@@ -259,13 +262,13 @@ export default class Main extends React.Component<{}, State> {
 						onClick={(): void => {
 							Electron.ipcRenderer.send("control", "download-update")
 						}}
-					>Download Update</button>
+					>Güncellemeyi İndir</button>
 				</div>
 
 				Alert.error(updateElm, 0)
 			} else {
 				let updateElm: JSX.Element = <div>
-					<div>Update available, download the latest release below</div>
+					<div>Bir güncelleme mevcut. En son sürümü aşağıdan indirin.</div>
 					<button
 						className="bp5-button bp5-intent-primary bp5-icon-download"
 						type="button"
@@ -273,7 +276,7 @@ export default class Main extends React.Component<{}, State> {
 						onClick={(): void => {
 							Electron.ipcRenderer.send("control", "download-update")
 						}}
-					>Download Update</button>
+					>Güncellemeyi İndir</button>
 				</div>
 
 				Alert.info(updateElm, 0)
@@ -285,35 +288,35 @@ export default class Main extends React.Component<{}, State> {
 		let themeLabel = ""
 		let themeIcon: Blueprint.IconName;
 		if (Theme.theme === "dark") {
-			themeLabel = "Light Theme"
+			themeLabel = "Açık Tema"
 			themeIcon = "flash"
 		} else {
-			themeLabel = "Dark Theme"
+			themeLabel = "Koyu Tema"
 			themeIcon = "moon"
 		}
 
 		let themeVerLabel = ""
 		let themeVerIcon: Blueprint.IconName;
 		if (Theme.themeVer === 3) {
-			themeVerLabel = "Square Theme"
+			themeVerLabel = "Köşeli Tema"
 			themeVerIcon = "style"
 		} else {
-			themeVerLabel = "Round Theme"
+			themeVerLabel = "Yuvarlak Tema"
 			themeVerIcon = "style"
 		}
 
 		let trayLabel = ""
 		if (Config.disable_tray_icon) {
-			trayLabel = "Enable Tray Icon"
+			trayLabel = "Tepsi Simgesini Etkinleştir"
 		} else {
-			trayLabel = "Disable Tray Icon"
+			trayLabel = "Tepsi Simgesini Devre Dışı Bırak"
 		}
 
 		let frameLabel = ""
 		if (this.frameless()) {
-			frameLabel = "Enable Window Frame"
+			frameLabel = "Pencere Çerçevesini Etkinleştir"
 		} else {
-			frameLabel = "Disable Window Frame"
+			frameLabel = "Pencere Çerçevesini Devre Dışı Bırak"
 		}
 
 		let profilesHidden = false
@@ -362,7 +365,7 @@ export default class Main extends React.Component<{}, State> {
 				<h6
 					className="bp5-heading"
 					style={css.menuLabel}
-				>{"Pritunl Client" + version}</h6>
+				>{"pritunl++" + version}</h6>
 			</li>
 			<Blueprint.MenuDivider/>
 			<Blueprint.MenuItem
@@ -394,7 +397,7 @@ export default class Main extends React.Component<{}, State> {
 				}}
 			/>
 			<Blueprint.MenuItem
-				text="Refresh"
+				text="Yenile"
 				icon="refresh"
 				hidden={true}
 				disabled={this.state.disabled}
@@ -427,7 +430,7 @@ export default class Main extends React.Component<{}, State> {
 				onClick={this.onWindowFrame}
 			/>
 			<Blueprint.MenuItem
-				text="View Logs"
+				text="Günlükleri Görüntüle"
 				icon="history"
 				onKeyDown={(evt): void => {
 					if (evt.key === "Enter") {
@@ -445,7 +448,7 @@ export default class Main extends React.Component<{}, State> {
 				}}
 			/>
 			<Blueprint.MenuItem
-				text="Reload App"
+				text="Uygulamayı Yeniden Yükle"
 				icon="refresh"
 				onKeyDown={(evt): void => {
 					if (evt.key === "Enter") {
@@ -456,8 +459,9 @@ export default class Main extends React.Component<{}, State> {
 					Electron.ipcRenderer.send("control", "reload")
 				}}
 			/>
+			<Blueprint.MenuDivider/>
 			<Blueprint.MenuItem
-				text="Advanced Settings"
+				text="Gelişmiş Ayarlar"
 				icon="cog"
 				onKeyDown={(evt): void => {
 					if (evt.key === "Enter") {
@@ -475,7 +479,26 @@ export default class Main extends React.Component<{}, State> {
 				}}
 			/>
 			<Blueprint.MenuItem
-				text="Reset DNS"
+				text="Hakkında"
+				icon="info-sign"
+				onKeyDown={(evt): void => {
+					if (evt.key === "Enter") {
+						this.setState({
+							...this.state,
+							about: true,
+						})
+					}
+				}}
+				onClick={(): void => {
+					this.setState({
+						...this.state,
+						about: true,
+					})
+				}}
+			/>
+			<Blueprint.MenuDivider/>
+			<Blueprint.MenuItem
+				text="DNS'i Sıfırla"
 				intent="warning"
 				icon="search"
 				onKeyDown={(evt): void => {
@@ -488,7 +511,7 @@ export default class Main extends React.Component<{}, State> {
 				}}
 			/>
 			<Blueprint.MenuItem
-				text="Reset Networking"
+				text="Ağ Ayarlarını Sıfırla"
 				intent="warning"
 				icon="globe-network"
 				onKeyDown={(evt): void => {
@@ -501,7 +524,7 @@ export default class Main extends React.Component<{}, State> {
 				}}
 			/>
 			<Blueprint.MenuItem
-				text="Reset Secure Enclave Key"
+				text="Güvenli Alan Anahtarını Sıfırla"
 				intent="danger"
 				icon="globe-network"
 				hidden={Constants.platform !== "darwin"}
@@ -515,7 +538,7 @@ export default class Main extends React.Component<{}, State> {
 				}}
 			/>
 			<Blueprint.MenuItem
-				text="Developer Tools"
+				text="Geliştirici Araçları"
 				intent="warning"
 				icon="code"
 				onClick={(): void => {
@@ -543,7 +566,7 @@ export default class Main extends React.Component<{}, State> {
 						className="bp5-navbar-heading"
 						style={process.platform === "darwin" ?
 							css.headingDarwin : css.heading}
-					>pritunl</div>
+					>pritunl++</div>
 				</div>
 				<div
 					className="bp5-navbar-group bp5-align-right"
@@ -574,7 +597,7 @@ export default class Main extends React.Component<{}, State> {
 							})
 						}}
 					>
-						Profiles
+						Profiller
 					</button>
 					<ProfileImport
 						style={css.link}
@@ -590,7 +613,7 @@ export default class Main extends React.Component<{}, State> {
 							})
 						}}
 					>
-						Logs
+						Günlükler
 					</button>
 					<div>
 						<Blueprint.Popover
@@ -636,6 +659,15 @@ export default class Main extends React.Component<{}, State> {
 					css.contentLinux : css.content}>
 				{page}
 			</div>
+			<About
+				isOpen={this.state.about}
+				onClose={(): void => {
+					this.setState({
+						...this.state,
+						about: false,
+					})
+				}}
+			/>
 		</div>
 	}
 }
