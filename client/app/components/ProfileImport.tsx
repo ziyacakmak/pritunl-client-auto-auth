@@ -41,8 +41,6 @@ const css = {
 		marginRight: "10px",
 	} as React.CSSProperties,
 	dialog: {
-		width: "340px",
-		position: "absolute",
 	} as React.CSSProperties,
 	group: {
 		margin: "0 0 15px 0",
@@ -171,8 +169,8 @@ export default class ProfileImport extends React.Component<Props, State> {
 		}
 
 		if (!cardSerial && !publicKeyPath) {
-			Alert.error("No SSH key selected, run \"ssh-keygen -t ed25519\" " +
-				"to create a key")
+			Alert.error("SSH anahtarı seçilmedi. Anahtar oluşturmak için " +
+				"\"ssh-keygen -t ed25519\" komutunu çalıştırın.")
 			return
 		}
 
@@ -195,9 +193,8 @@ export default class ProfileImport extends React.Component<Props, State> {
 			}
 
 			if (cardSerial) {
-				Alert.info("Smart Card must be registered with Pritunl " +
-					"Zero, use Register Card on the profile to register " +
-					"the device", 10)
+				Alert.info("Akıllı kartın Pritunl Zero'ya kaydedilmesi gerekir. " +
+					"Cihazı kaydetmek için profildeki Kart Kaydet'i kullanın.", 10)
 			}
 
 			this.setState({
@@ -264,7 +261,7 @@ export default class ProfileImport extends React.Component<Props, State> {
 
 		if (this.state.zeroCard) {
 			zeroKeyOptions.push(<option key="card" value="card">
-				{"Smart Card (" + this.state.zeroCard.serial + ")"}
+				{"Akıllı Kart (" + this.state.zeroCard.serial + ")"}
 			</option>)
 		}
 
@@ -274,7 +271,7 @@ export default class ProfileImport extends React.Component<Props, State> {
 
 		if (!zeroKeyOptions.length) {
 			zeroKeyOptions.push(<option key="" value="">
-				No SSH keys found
+				SSH anahtarı bulunamadı
 			</option>)
 		}
 
@@ -286,10 +283,11 @@ export default class ProfileImport extends React.Component<Props, State> {
 				disabled={this.state.disabled}
 				onClick={this.openDialog}
 			>
-				Import
+				İçe Aktar
 			</button>
 			<Blueprint.Dialog
-				title="Import Profile"
+				title="Profil İçe Aktar"
+				className="profile-import-dialog"
 				style={css.dialog}
 				isOpen={this.state.dialog}
 				usePortal={true}
@@ -325,10 +323,10 @@ export default class ProfileImport extends React.Component<Props, State> {
 					<div hidden={zeroMode}>
 						<PageInput
 							disabled={this.state.disabled}
-							label="Profile URI"
-							help="Profile URI as shown in the Pritunl server web console."
+							label="Profil URI'si"
+							help="Pritunl sunucu web konsolunda gösterilen profil URI'si."
 							type="text"
-							placeholder="Enter URI"
+							placeholder="URI girin"
 							value={this.state.uri}
 							onChange={(val: string): void => {
 								this.setState({
@@ -342,8 +340,8 @@ export default class ProfileImport extends React.Component<Props, State> {
 						/>
 						<PageInputFile
 							disabled={this.state.disabled}
-							label="Import Profile"
-							help="Select profile file in tar, zip, ovpn or conf format."
+							label="Profil İçe Aktar"
+							help="tar, zip, ovpn veya conf biçimindeki profil dosyasını seçin."
 							accept=".ovpn,.conf,.tar,.zip"
 							value={this.state.path}
 							onChange={(val: string): void => {
@@ -360,10 +358,10 @@ export default class ProfileImport extends React.Component<Props, State> {
 					<div hidden={!zeroMode}>
 						<PageInput
 							disabled={this.state.disabled}
-							label="Pritunl Zero Server"
-							help="Pritunl Zero user hostname as shown in the Pritunl Zero web console."
+							label="Pritunl Zero Sunucusu"
+							help="Pritunl Zero web konsolunda gösterilen Pritunl Zero kullanıcı ana bilgisayar adı."
 							type="text"
-							placeholder="Enter server hostname"
+							placeholder="Sunucu ana bilgisayar adını girin"
 							value={this.state.zeroServer}
 							onChange={(val: string): void => {
 								this.setState({
@@ -377,10 +375,10 @@ export default class ProfileImport extends React.Component<Props, State> {
 							className="bp5-label"
 							style={css.label}
 						>
-							SSH Key
+							SSH Anahtarı
 							<Help
-								title="SSH Key"
-								content="Select the SSH key or Smart Card device that will be signed by the Pritunl Zero server."
+								title="SSH Anahtarı"
+								content="Pritunl Zero sunucusu tarafından imzalanacak SSH anahtarını veya akıllı kart cihazını seçin."
 							/>
 							<div
 								className="bp5-html-select"
@@ -406,8 +404,8 @@ export default class ProfileImport extends React.Component<Props, State> {
 						</label>
 						<PageInputFile
 							disabled={this.state.disabled}
-							label="SSH Public Key File"
-							help="Select SSH public key file ending in .pub to use a key that is not in the SSH directory."
+							label="SSH Genel Anahtar Dosyası"
+							help="SSH dizininde olmayan bir anahtarı kullanmak için .pub ile biten SSH genel anahtar dosyasını seçin."
 							accept=".pub"
 							value={this.state.zeroPath}
 							onChange={(val: string): void => {
@@ -429,13 +427,13 @@ export default class ProfileImport extends React.Component<Props, State> {
 							type="button"
 							disabled={this.state.disabled}
 							onClick={this.closeDialog}
-						>Cancel</button>
+						>Vazgeç</button>
 						<button
 							className="bp5-button bp5-intent-success bp5-icon-tick"
 							type="button"
 							disabled={importDisabled}
 							onClick={this.onImport}
-						>Import</button>
+						>İçe Aktar</button>
 					</div>
 				</div>
 			</Blueprint.Dialog>

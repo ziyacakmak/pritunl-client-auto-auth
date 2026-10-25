@@ -5303,7 +5303,7 @@ function exec(path, ...args) {
     return new Promise((resolve) => {
         external_child_process_default().execFile(path, args, (err, stdout, stderr) => {
             if (err) {
-                err = new ExecError(err, "Utils: Exec error", { path: path, args: args, stdout: stdout, stderr: stderr });
+                err = new ExecError(err, "Yardımcılar: Komut çalıştırma hatası", { path: path, args: args, stdout: stdout, stderr: stderr });
             }
             resolve({
                 stdout: stdout,
@@ -5344,7 +5344,7 @@ function fileDelete(path) {
             }
             fs.unlink(path, (err) => {
                 if (err) {
-                    err = new Errors.WriteError(err, "Utils: Failed to delete file", { path: path });
+                    err = new Errors.WriteError(err, "Yardımcılar: Dosya silinemedi", { path: path });
                     reject(err);
                     return;
                 }
@@ -5357,7 +5357,7 @@ function fileRead(path) {
     return new Promise((resolve, reject) => {
         external_fs_default().readFile(path, "utf-8", (err, data) => {
             if (err) {
-                err = new ReadError(err, "Utils: Failed to read file", { path: path });
+                err = new ReadError(err, "Yardımcılar: Dosya okunamadı", { path: path });
                 reject(err);
                 return;
             }
@@ -5369,7 +5369,7 @@ function fileWrite(path, data) {
     return new Promise((resolve, reject) => {
         external_fs_default().writeFile(path, data, (err) => {
             if (err) {
-                err = new WriteError(err, "Utils: Failed to write file", { path: path });
+                err = new WriteError(err, "Yardımcılar: Dosya yazılamadı", { path: path });
                 reject(err);
                 return;
             }
@@ -5461,7 +5461,7 @@ const flatpakId = (external_process_default()).env.FLATPAK_ID || "com.pritunl.cl
 const flatpakRunDir = external_path_default().join((external_process_default()).env.XDG_RUNTIME_DIR || "", "app", flatpakId);
 let flatpakError = "";
 if (flatpak && !(external_process_default()).env.XDG_RUNTIME_DIR) {
-    flatpakError = "XDG_RUNTIME_DIR not defined in flatpak mode";
+    flatpakError = "flatpak kipinde XDG_RUNTIME_DIR tanımlı değil";
 }
 const unixPath = flatpak ?
     external_path_default().join(flatpakRunDir, "pritunl.sock") :
@@ -5495,7 +5495,7 @@ function setMainWindow(mainWin) {
 
 function push(level, err) {
     if (!err) {
-        err = "Undefined error";
+        err = "Tanımsız hata";
     }
     let time = new Date();
     let msg = err.message || err;
@@ -5509,7 +5509,7 @@ function push(level, err) {
             external_fs_default().unlink(pth, () => {
                 external_fs_default().appendFile(pth, msg + "\n", (err) => {
                     if (err) {
-                        err = new WriteError(err, "Logger: Failed to write log", { log_path: pth });
+                        err = new WriteError(err, "Günlükçü: Günlük yazılamadı", { log_path: pth });
                         console.error(err);
                     }
                 });
@@ -5518,7 +5518,7 @@ function push(level, err) {
         else {
             external_fs_default().appendFile(pth, msg + "\n", (err) => {
                 if (err) {
-                    err = new WriteError(err, "Logger: Failed to write log", { log_path: pth });
+                    err = new WriteError(err, "Günlükçü: Günlük yazılamadı", { log_path: pth });
                     console.error(err);
                 }
             });
@@ -5768,13 +5768,13 @@ class Request {
                     req = external_http_default().request(options, callback);
                 }
                 req.on("timeout", () => {
-                    let err = this.parseError(null, "Request: Timeout error");
+                    let err = this.parseError(null, "İstek: Zaman aşımı hatası");
                     req.destroy(err);
                     error(err);
                     reject(err);
                 });
                 req.on("error", (err) => {
-                    err = this.parseError(err, "Request:  Client error");
+                    err = this.parseError(err, "İstek: İstemci hatası");
                     error(err);
                     reject(err);
                 });
@@ -5784,7 +5784,7 @@ class Request {
                 req.end();
             }
             catch (err) {
-                err = this.parseError(err, "Request: Exception");
+                err = this.parseError(err, "İstek: Özel durum");
                 error(err);
                 reject(err);
             }
@@ -6031,85 +6031,76 @@ function formatDate(dateData) {
     }
     let str = '';
     let hours = date.getHours();
-    let period = 'AM';
-    if (hours > 12) {
-        period = 'PM';
-        hours -= 12;
-    }
-    else if (hours === 0) {
-        hours = 12;
-    }
     let day;
     switch (date.getDay()) {
         case 0:
-            day = 'Sun';
+            day = 'Paz';
             break;
         case 1:
-            day = 'Mon';
+            day = 'Pzt';
             break;
         case 2:
-            day = 'Tue';
+            day = 'Sal';
             break;
         case 3:
-            day = 'Wed';
+            day = 'Çar';
             break;
         case 4:
-            day = 'Thu';
+            day = 'Per';
             break;
         case 5:
-            day = 'Fri';
+            day = 'Cum';
             break;
         case 6:
-            day = 'Sat';
+            day = 'Cmt';
             break;
     }
     let month;
     switch (date.getMonth()) {
         case 0:
-            month = 'Jan';
+            month = 'Oca';
             break;
         case 1:
-            month = 'Feb';
+            month = 'Şub';
             break;
         case 2:
             month = 'Mar';
             break;
         case 3:
-            month = 'Apr';
+            month = 'Nis';
             break;
         case 4:
             month = 'May';
             break;
         case 5:
-            month = 'Jun';
+            month = 'Haz';
             break;
         case 6:
-            month = 'Jul';
+            month = 'Tem';
             break;
         case 7:
-            month = 'Aug';
+            month = 'Ağu';
             break;
         case 8:
-            month = 'Sep';
+            month = 'Eyl';
             break;
         case 9:
-            month = 'Oct';
+            month = 'Eki';
             break;
         case 10:
-            month = 'Nov';
+            month = 'Kas';
             break;
         case 11:
-            month = 'Dec';
+            month = 'Ara';
             break;
     }
     str += day + ' ';
     str += date.getDate() + ' ';
     str += month + ' ';
     str += date.getFullYear() + ', ';
-    str += hours + ':';
+    str += zeroPad(hours, 2) + ':';
     str += zeroPad(date.getMinutes(), 2) + ':';
-    str += zeroPad(date.getSeconds(), 2) + ' ';
-    str += period;
+    str += zeroPad(date.getSeconds(), 2);
     return str;
 }
 function formatDateLess(dateData) {
@@ -6126,59 +6117,50 @@ function formatDateLess(dateData) {
     }
     let str = '';
     let hours = date.getHours();
-    let period = 'AM';
-    if (hours > 12) {
-        period = 'PM';
-        hours -= 12;
-    }
-    else if (hours === 0) {
-        hours = 12;
-    }
     let month;
     switch (date.getMonth()) {
         case 0:
-            month = 'Jan';
+            month = 'Oca';
             break;
         case 1:
-            month = 'Feb';
+            month = 'Şub';
             break;
         case 2:
             month = 'Mar';
             break;
         case 3:
-            month = 'Apr';
+            month = 'Nis';
             break;
         case 4:
             month = 'May';
             break;
         case 5:
-            month = 'Jun';
+            month = 'Haz';
             break;
         case 6:
-            month = 'Jul';
+            month = 'Tem';
             break;
         case 7:
-            month = 'Aug';
+            month = 'Ağu';
             break;
         case 8:
-            month = 'Sep';
+            month = 'Eyl';
             break;
         case 9:
-            month = 'Oct';
+            month = 'Eki';
             break;
         case 10:
-            month = 'Nov';
+            month = 'Kas';
             break;
         case 11:
-            month = 'Dec';
+            month = 'Ara';
             break;
     }
     str += month + ' ';
     str += date.getDate() + ' ';
     str += date.getFullYear() + ', ';
-    str += hours + ':';
+    str += zeroPad(hours, 2) + ':';
     str += zeroPad(date.getMinutes(), 2);
-    str += period;
     return str;
 }
 function formatDateShort(dateData) {
@@ -6197,40 +6179,40 @@ function formatDateShort(dateData) {
     let month;
     switch (date.getMonth()) {
         case 0:
-            month = 'Jan';
+            month = 'Oca';
             break;
         case 1:
-            month = 'Feb';
+            month = 'Şub';
             break;
         case 2:
             month = 'Mar';
             break;
         case 3:
-            month = 'Apr';
+            month = 'Nis';
             break;
         case 4:
             month = 'May';
             break;
         case 5:
-            month = 'Jun';
+            month = 'Haz';
             break;
         case 6:
-            month = 'Jul';
+            month = 'Tem';
             break;
         case 7:
-            month = 'Aug';
+            month = 'Ağu';
             break;
         case 8:
-            month = 'Sep';
+            month = 'Eyl';
             break;
         case 9:
-            month = 'Oct';
+            month = 'Eki';
             break;
         case 10:
-            month = 'Nov';
+            month = 'Kas';
             break;
         case 11:
-            month = 'Dec';
+            month = 'Ara';
             break;
     }
     let str = month + ' ' + date.getDate();
@@ -6255,40 +6237,40 @@ function formatDateShortTime(dateData) {
     let month;
     switch (date.getMonth()) {
         case 0:
-            month = 'Jan';
+            month = 'Oca';
             break;
         case 1:
-            month = 'Feb';
+            month = 'Şub';
             break;
         case 2:
             month = 'Mar';
             break;
         case 3:
-            month = 'Apr';
+            month = 'Nis';
             break;
         case 4:
             month = 'May';
             break;
         case 5:
-            month = 'Jun';
+            month = 'Haz';
             break;
         case 6:
-            month = 'Jul';
+            month = 'Tem';
             break;
         case 7:
-            month = 'Aug';
+            month = 'Ağu';
             break;
         case 8:
-            month = 'Sep';
+            month = 'Eyl';
             break;
         case 9:
-            month = 'Oct';
+            month = 'Eki';
             break;
         case 10:
-            month = 'Nov';
+            month = 'Kas';
             break;
         case 11:
-            month = 'Dec';
+            month = 'Ara';
             break;
     }
     let str = month + ' ' + date.getDate();
@@ -6298,18 +6280,9 @@ function formatDateShortTime(dateData) {
     else if (date.getMonth() === curDate.getMonth() &&
         date.getDate() === curDate.getDate()) {
         let hours = date.getHours();
-        let period = 'AM';
-        if (hours > 12) {
-            period = 'PM';
-            hours -= 12;
-        }
-        else if (hours === 0) {
-            hours = 12;
-        }
-        str = hours + ':';
+        str = zeroPad(hours, 2) + ':';
         str += zeroPad(date.getMinutes(), 2) + ':';
-        str += zeroPad(date.getSeconds(), 2) + ' ';
-        str += period;
+        str += zeroPad(date.getSeconds(), 2);
     }
     return str;
 }
@@ -6317,7 +6290,7 @@ function MiscUtils_exec(path, ...args) {
     return new Promise((resolve) => {
         childProcess.execFile(path, args, (err, stdout, stderr) => {
             if (err) {
-                err = new MiscUtils_Errors.ExecError(err, "Utils: Exec error", { path: path, args: args, stdout: stdout, stderr: stderr });
+                err = new MiscUtils_Errors.ExecError(err, "Yardımcılar: Komut yürütme hatası", { path: path, args: args, stdout: stdout, stderr: stderr });
             }
             resolve({
                 stdout: stdout,
@@ -6358,7 +6331,7 @@ function MiscUtils_fileDelete(path) {
             }
             MiscUtils_fs.unlink(path, (err) => {
                 if (err) {
-                    err = new MiscUtils_Errors.WriteError(err, "Utils: Failed to delete file", { path: path });
+                    err = new MiscUtils_Errors.WriteError(err, "Yardımcılar: Dosya silinemedi", { path: path });
                     reject(err);
                     return;
                 }
@@ -6371,7 +6344,7 @@ function MiscUtils_fileRead(path) {
     return new Promise((resolve, reject) => {
         MiscUtils_fs.readFile(path, "utf-8", (err, data) => {
             if (err) {
-                err = new MiscUtils_Errors.ReadError(err, "Utils: Failed to read file", { path: path });
+                err = new MiscUtils_Errors.ReadError(err, "Yardımcılar: Dosya okunamadı", { path: path });
                 reject(err);
                 return;
             }
@@ -6383,7 +6356,7 @@ function MiscUtils_fileWrite(path, data) {
     return new Promise((resolve, reject) => {
         MiscUtils_fs.writeFile(path, data, (err) => {
             if (err) {
-                err = new MiscUtils_Errors.WriteError(err, "Utils: Failed to write file", { path: path });
+                err = new MiscUtils_Errors.WriteError(err, "Yardımcılar: Dosya yazılamadı", { path: path });
                 reject(err);
                 return;
             }
@@ -6421,7 +6394,7 @@ function fileChmod(pth, mode) {
     return new Promise((resolve, reject) => {
         MiscUtils_fs.chmod(pth, mode, (err) => {
             if (err) {
-                err = new MiscUtils_Errors.WriteError(err, "Utils: Failed to chmod file", { path: pth });
+                err = new MiscUtils_Errors.WriteError(err, "Yardımcılar: Dosya izinleri değiştirilemedi", { path: pth });
                 reject(err);
                 return;
             }
@@ -6433,7 +6406,7 @@ function dirMake(pth) {
     return new Promise((resolve, reject) => {
         MiscUtils_fs.mkdir(pth, { recursive: true }, (err) => {
             if (err) {
-                err = new MiscUtils_Errors.WriteError(err, "Utils: Failed to make directory", { path: pth });
+                err = new MiscUtils_Errors.WriteError(err, "Yardımcılar: Dizin oluşturulamadı", { path: pth });
                 reject(err);
                 return;
             }
@@ -6445,7 +6418,7 @@ function fileReaddir(pth) {
     return new Promise((resolve, reject) => {
         MiscUtils_fs.readdir(pth, (err, filenames) => {
             if (err) {
-                err = new MiscUtils_Errors.ReadError(err, "Utils: Failed to read directory", { path: pth });
+                err = new MiscUtils_Errors.ReadError(err, "Yardımcılar: Dizin okunamadı", { path: pth });
                 reject(err);
                 return;
             }
@@ -6480,23 +6453,23 @@ function MiscUtils_encryptAvailable() {
             let evt = electron.ipcRenderer.invoke("processing", "encryptable");
             evt.then((resp) => {
                 if (!resp) {
-                    let err = new MiscUtils_Errors.ParseError(null, "Utils: Failed to check encryption support e1");
+                    let err = new MiscUtils_Errors.ParseError(null, "Yardımcılar: Şifreleme desteği denetlenemedi e1");
                     reject(err);
                 }
                 else if (resp[0]) {
-                    let err = new MiscUtils_Errors.ParseError(resp[0], "Utils: Failed to check encryption support e2");
+                    let err = new MiscUtils_Errors.ParseError(resp[0], "Yardımcılar: Şifreleme desteği denetlenemedi e2");
                     reject(err);
                 }
                 else {
                     resolve(resp[1]);
                 }
             }).catch((err) => {
-                err = new MiscUtils_Errors.ParseError(err, "Utils: Failed to check encryption support e3");
+                err = new MiscUtils_Errors.ParseError(err, "Yardımcılar: Şifreleme desteği denetlenemedi e3");
                 reject(err);
             });
         }
         catch (err) {
-            err = new MiscUtils_Errors.ParseError(err, "Utils: Failed to check encryption support e4");
+            err = new MiscUtils_Errors.ParseError(err, "Yardımcılar: Şifreleme desteği denetlenemedi e4");
             reject(err);
         }
     });
@@ -6507,23 +6480,23 @@ function MiscUtils_encryptString(decData) {
             let evt = electron.ipcRenderer.invoke("processing", "encrypt", decData);
             evt.then((resp) => {
                 if (!resp) {
-                    let err = new MiscUtils_Errors.ParseError(null, "Utils: Failed to encrypt string e1");
+                    let err = new MiscUtils_Errors.ParseError(null, "Yardımcılar: Metin şifrelenemedi e1");
                     reject(err);
                 }
                 else if (resp[0]) {
-                    let err = new MiscUtils_Errors.ParseError(resp[0], "Utils: Failed to encrypt string e2");
+                    let err = new MiscUtils_Errors.ParseError(resp[0], "Yardımcılar: Metin şifrelenemedi e2");
                     reject(err);
                 }
                 else {
                     resolve(resp[1]);
                 }
             }).catch((err) => {
-                err = new MiscUtils_Errors.ParseError(err, "Utils: Failed to encrypt string e3");
+                err = new MiscUtils_Errors.ParseError(err, "Yardımcılar: Metin şifrelenemedi e3");
                 reject(err);
             });
         }
         catch (err) {
-            err = new MiscUtils_Errors.ParseError(err, "Utils: Failed to encrypt string e4");
+            err = new MiscUtils_Errors.ParseError(err, "Yardımcılar: Metin şifrelenemedi e4");
             reject(err);
         }
     });
@@ -6534,23 +6507,23 @@ function MiscUtils_decryptString(encData) {
             let evt = electron.ipcRenderer.invoke("processing", "decrypt", encData);
             evt.then((resp) => {
                 if (!resp) {
-                    let err = new MiscUtils_Errors.ParseError(null, "Utils: Failed to decrypt string e1");
+                    let err = new MiscUtils_Errors.ParseError(null, "Yardımcılar: Metnin şifresi çözülemedi e1");
                     reject(err);
                 }
                 else if (resp[0]) {
-                    let err = new MiscUtils_Errors.ParseError(resp[0], "Utils: Failed to decrypt string e2");
+                    let err = new MiscUtils_Errors.ParseError(resp[0], "Yardımcılar: Metnin şifresi çözülemedi e2");
                     reject(err);
                 }
                 else {
                     resolve(resp[1]);
                 }
             }).catch((err) => {
-                err = new MiscUtils_Errors.ParseError(err, "Utils: Failed to decrypt string e3");
+                err = new MiscUtils_Errors.ParseError(err, "Yardımcılar: Metnin şifresi çözülemedi e3");
                 reject(err);
             });
         }
         catch (err) {
-            err = new MiscUtils_Errors.ParseError(err, "Utils: Failed to decrypt string e4");
+            err = new MiscUtils_Errors.ParseError(err, "Yardımcılar: Metnin şifresi çözülemedi e4");
             reject(err);
         }
     });
@@ -6574,7 +6547,7 @@ function tarRead(pth) {
     }).then(() => {
         return files;
     }).catch((err) => {
-        throw new MiscUtils_Errors.ReadError(err, "Utils: Failed to read tar file", { path: pth });
+        throw new MiscUtils_Errors.ReadError(err, "Yardımcılar: Tar dosyası okunamadı", { path: pth });
     });
 }
 
@@ -6734,10 +6707,10 @@ function connect() {
                     dialogShown = true;
                     external_electron_default().dialog.showMessageBox(null, {
                         type: "error",
-                        buttons: ["Retry", "Exit"],
-                        title: "Pritunl - Service Error (6729",
-                        message: "Unable to authenticate communication with " +
-                            "background service, try restarting computer",
+                        buttons: ["Yeniden Dene", "Çık"],
+                        title: "Pritunl - Servis Hatası (6729",
+                        message: "Arka plan servisiyle kimlik doğrulaması yapılamadı, " +
+                            "bilgisayarı yeniden başlatmayı deneyin",
                     }).then(function (evt) {
                         if (evt.response == 0) {
                             authAttempts = 0;
@@ -6784,10 +6757,10 @@ function connect() {
                         dialogShown = true;
                         external_electron_default().dialog.showMessageBox(null, {
                             type: "error",
-                            buttons: ["Retry", "Exit"],
-                            title: "Pritunl - Service Error (8362)",
-                            message: "Unable to establish communication with " +
-                                "background service, try restarting computer",
+                            buttons: ["Yeniden Dene", "Çık"],
+                            title: "Pritunl - Servis Hatası (8362)",
+                            message: "Arka plan servisiyle bağlantı kurulamadı, " +
+                                "bilgisayarı yeniden başlatmayı deneyin",
                         }).then(function (evt) {
                             if (evt.response == 0) {
                                 authAttempts = 0;
@@ -6817,7 +6790,7 @@ function connect() {
             connAttempts = 0;
             if (showConnect) {
                 showConnect = false;
-                console.log("Events: Service reconnected");
+                console.log("Olaylar: Hizmete yeniden bağlanıldı");
                 if (mainWindow && !mainWindow.isDestroyed()) {
                     mainWindow.webContents.send("event.reconnected");
                 }
@@ -6830,7 +6803,7 @@ function connect() {
             if (mainWindow && !mainWindow.isDestroyed()) {
                 mainWindow.webContents.send("event.error", err.toString());
             }
-            console.error("Events: Socket error " + err);
+            console.error("Olaylar: Soket hatası " + err);
             showConnect = true;
             reconnect();
         });
@@ -6838,7 +6811,7 @@ function connect() {
             if (socketId !== curSocket) {
                 return;
             }
-            console.error("Events: Socket error " + err);
+            console.error("Olaylar: Soket hatası " + err);
             showConnect = true;
             reconnect();
         });
@@ -6932,7 +6905,7 @@ class ConfigData {
             external_fs_default().readFile(this.path(), "utf-8", (err, data) => {
                 if (err) {
                     if (err.code !== "ENOENT") {
-                        err = new ReadError(err, "Config: Read error");
+                        err = new ReadError(err, "Yapılandırma: Okuma hatası");
                         error(err);
                     }
                     resolve();
@@ -6944,7 +6917,7 @@ class ConfigData {
                         configData = JSON.parse(data);
                     }
                     catch (err) {
-                        err = new ReadError(err, "Config: Parse error");
+                        err = new ReadError(err, "Yapılandırma: Ayrıştırma hatası");
                         error(err);
                         configData = {};
                     }
@@ -6995,7 +6968,7 @@ class ConfigData {
                 this._load(data);
                 external_fs_default().writeFile(this.path(), JSON.stringify(data), (err) => {
                     if (err) {
-                        err = new ReadError(err, "Config: Write error");
+                        err = new ReadError(err, "Yapılandırma: Yazma hatası");
                         error(err);
                     }
                     resolve();
@@ -7040,7 +7013,7 @@ function claim(requestId) {
             return true;
         }
         if (resp.status !== 409 && resp.status !== 404) {
-            let err = new RequestError(null, "Tpm: Claim request error", {
+            let err = new RequestError(null, "Tpm: Talep isteği hatası", {
                 request_id: requestId,
                 reponse_status: resp.status,
                 data: resp.data,
@@ -7049,7 +7022,7 @@ function claim(requestId) {
         }
         return false;
     }, (err) => {
-        err = new RequestError(err, "Tpm: Claim request error", {
+        err = new RequestError(err, "Tpm: Talep isteği hatası", {
             request_id: requestId,
         });
         error(err);
@@ -7070,7 +7043,7 @@ function complete(requestId, result) {
         .end()
         .then((resp) => {
         if (resp.status != 200) {
-            let err = new RequestError(null, "Tpm: Result request error", {
+            let err = new RequestError(null, "Tpm: Sonuç isteği hatası", {
                 request_id: requestId,
                 reponse_status: resp.status,
                 data: resp.data,
@@ -7078,7 +7051,7 @@ function complete(requestId, result) {
             error(err);
         }
     }, (err) => {
-        err = new RequestError(err, "Tpm: Result request error", {
+        err = new RequestError(err, "Tpm: Sonuç isteği hatası", {
             request_id: requestId,
         });
         error(err);
@@ -7097,7 +7070,7 @@ function procWritable(proc) {
 }
 function handle(type, data) {
     if (!data || !data.request_id) {
-        let err = new RequestError(null, "Tpm: Secure enclave event missing request id", {
+        let err = new RequestError(null, "Tpm: Güvenli alan olayında istek kimliği eksik", {
             event_type: type,
         });
         error(err);
@@ -7113,7 +7086,7 @@ function handle(type, data) {
 function run(type, data) {
     let requestId = data.request_id;
     if (Object.keys(procs).length >= maxProcs) {
-        fail(requestId, new ProcessError(null, "Tpm: Too many secure enclave processes", {
+        fail(requestId, new ProcessError(null, "Tpm: Çok fazla güvenli alan süreci", {
             request_id: requestId,
             count: Object.keys(procs).length,
         }));
@@ -7128,7 +7101,7 @@ function run(type, data) {
         if (proc.exitCode !== null || proc.signalCode !== null) {
             return;
         }
-        let err = new ProcessError(null, "Tpm: Secure enclave process timed out", {
+        let err = new ProcessError(null, "Tpm: Güvenli alan süreci zaman aşımına uğradı", {
             request_id: requestId,
         });
         error(err);
@@ -7139,7 +7112,7 @@ function run(type, data) {
             return;
         }
         done = true;
-        fail(requestId, new ProcessError(err, "Tpm: Secure enclave exec error", {
+        fail(requestId, new ProcessError(err, "Tpm: Güvenli alan çalıştırma hatası", {
             request_id: requestId,
         }));
     });
@@ -7148,18 +7121,18 @@ function run(type, data) {
             return;
         }
         done = true;
-        fail(requestId, new ProcessError(err, "Tpm: Secure enclave stdin error", {
+        fail(requestId, new ProcessError(err, "Tpm: Güvenli alan giriş hatası", {
             request_id: requestId,
         }));
     });
     proc.stdout.on("error", (err) => {
-        err = new ProcessError(err, "Tpm: Secure enclave stdout error", {
+        err = new ProcessError(err, "Tpm: Güvenli alan çıkış hatası", {
             request_id: requestId,
         });
         error(err);
     });
     proc.stderr.on("error", (err) => {
-        err = new ProcessError(err, "Tpm: Secure enclave stderr error", {
+        err = new ProcessError(err, "Tpm: Güvenli alan hata çıkışı", {
             request_id: requestId,
         });
         error(err);
@@ -7179,7 +7152,7 @@ function run(type, data) {
             return;
         }
         done = true;
-        fail(requestId, new ProcessError(null, "Tpm: Secure enclave process exited without result", {
+        fail(requestId, new ProcessError(null, "Tpm: Güvenli alan süreci sonuç olmadan çıktı", {
             request_id: requestId,
             exit_code: code,
             signal: signal,
@@ -7202,7 +7175,7 @@ function run(type, data) {
             }
             catch {
                 done = true;
-                fail(requestId, new ParseError(null, "Tpm: Failed to parse secure enclave output", {
+                fail(requestId, new ParseError(null, "Tpm: Güvenli alan çıktısı ayrıştırılamadı", {
                     request_id: requestId,
                     line: line,
                 }));
@@ -7226,7 +7199,7 @@ function run(type, data) {
     });
     if (!procWritable(proc)) {
         done = true;
-        fail(requestId, new ProcessError(null, "Tpm: Secure enclave process not writable", {
+        fail(requestId, new ProcessError(null, "Tpm: Güvenli alan süreci yazılabilir değil", {
             request_id: requestId,
         }));
         return;
@@ -7325,13 +7298,13 @@ function showApproval() {
     approvalShown = true;
     external_electron_default().dialog.showMessageBox(null, {
         type: "info",
-        buttons: ["Open Login Items Settings"],
-        title: "Pritunl Client - Service Approval Required",
-        message: "The Pritunl background service must be enabled " +
-            "to use Pritunl Client. Approve the Background Items " +
-            "notification or open System Settings > " +
-            "General > Login Items & Extensions and enable Pritunl " +
-            "under Allow in the Background.",
+        buttons: ["Oturum Açma Öğeleri Ayarlarını Aç"],
+        title: "pritunl++ - Hizmet Onayı Gerekli",
+        message: "pritunl++ kullanmak için Pritunl arka plan hizmeti " +
+            "etkinleştirilmelidir. Arka Plan Öğeleri bildirimini onaylayın " +
+            "veya Sistem Ayarları > Genel > Oturum Açma Öğeleri ve " +
+            "Uzantılar bölümünü açıp Arka Planda İzin Ver altında " +
+            "Pritunl'u etkinleştirin.",
     }).then((evt) => {
         approvalShown = false;
         if (evt.response === 0) {
@@ -7350,15 +7323,15 @@ async function approve() {
 }
 async function restart() {
     if (!token || !await ping()) {
-        error("Daemon: Skipping service restart, " +
-            "service not running");
+        error("Daemon: Hizmet yeniden başlatılıyor, " +
+            "hizmet çalışmıyor");
         return;
     }
     await unregister();
     await Daemon_sleep(1000);
     await register();
     let state = await Daemon_status();
-    info("Daemon: Service state after restart '" + state + "'");
+    info("Daemon: Yeniden başlatma sonrası hizmet durumu '" + state + "'");
     if (state === "requiresApproval") {
         state = await approve();
     }
@@ -7372,40 +7345,40 @@ async function ensure() {
         return;
     }
     let state = await Daemon_status();
-    info("Daemon: Service state '" + state + "'");
+    info("Daemon: Hizmet durumu '" + state + "'");
     if (state === "") {
         return;
     }
     if (state === "notRegistered" || state === "notFound") {
         await register();
         state = await Daemon_status();
-        info("Daemon: Service register state '" + state + "'");
+        info("Daemon: Hizmet kayıt durumu '" + state + "'");
     }
     if (state === "requiresApproval") {
         state = await approve();
-        info("Daemon: Service approval state '" + state + "'");
+        info("Daemon: Hizmet onay durumu '" + state + "'");
     }
     if (state !== "enabled") {
-        error("Daemon: Failed to register service " +
-            "(state: " + state + ")");
+        error("Daemon: Hizmet kaydedilemedi " +
+            "(durum: " + state + ")");
         return;
     }
     if (await waitService(6000)) {
         return;
     }
-    warning("Daemon: Service enabled but not running, " +
-        "re-registering service");
+    warning("Daemon: Hizmet etkin ancak çalışmıyor, " +
+        "hizmet yeniden kaydediliyor");
     await register();
     state = await Daemon_status();
-    info("Daemon: Service run state '" + state + "'");
+    info("Daemon: Hizmet çalışma durumu '" + state + "'");
     if (state === "requiresApproval") {
         state = await approve();
     }
     if (await waitService(6000)) {
         return;
     }
-    warning("Daemon: Service enabled but not running, " +
-        "waiting for user approval");
+    warning("Daemon: Hizmet etkin ancak çalışmıyor, " +
+        "kullanıcı onayı bekleniyor");
     showApproval();
     for (let i = 0; i < 10; i++) {
         state = await Daemon_status();
@@ -7416,7 +7389,7 @@ async function ensure() {
             return;
         }
     }
-    error("Daemon: Timed out waiting for service to start");
+    error("Daemon: Hizmetin başlaması beklenirken zaman aşımı");
 }
 async function checkUpgrade() {
     if ((external_process_default()).platform !== "darwin" || !production ||
@@ -7429,8 +7402,8 @@ async function checkUpgrade() {
         return;
     }
     restarted = true;
-    info("Daemon: Service version mismatch, restarting service " +
-        "(app: " + appVer + " service: " + serviceVer + ")");
+    info("Daemon: Hizmet sürümü uyuşmuyor, hizmet yeniden başlatılıyor " +
+        "(uygulama: " + appVer + " hizmet: " + serviceVer + ")");
     await restart();
 }
 
@@ -7593,7 +7566,7 @@ function New(self) {
             if (platform === "darwin") {
                 let resp = await exec("/usr/bin/security", "find-generic-password", "-w", "-s", "pritunl", "-a", this.id);
                 if (resp.error) {
-                    let err = new ReadError(resp.error, "ProfileSync: Failed to get key from keychain");
+                    let err = new ReadError(resp.error, "Profil Eşitleme: Anahtar zincirinden anahtar alınamadı");
                     error(err);
                     return data;
                 }
@@ -7751,7 +7724,7 @@ function New(self) {
                 syncData = JSON.parse(bodyStr);
             }
             catch (err) {
-                err = new ReadError(err, "ProfileSync: Failed to parse sync body");
+                err = new ReadError(err, "Profil Eşitleme: Eşitleme gövdesi ayrıştırılamadı");
                 reject(err);
                 return;
             }
@@ -7761,7 +7734,7 @@ function New(self) {
             }
             let confSignature = external_crypto_default().createHmac("sha512", this.sync_secret).update(syncData.conf).digest("base64");
             if (confSignature !== syncData.signature) {
-                let err = new ReadError(null, "ProfileSync: Failed to sync profile, signature invalid");
+                let err = new ReadError(null, "Profil Eşitleme: Profil eşitlenemedi, imza geçersiz");
                 reject(err);
                 return;
             }
@@ -7782,19 +7755,19 @@ function New(self) {
                 await this._importSync(syncData);
             }
             catch (err) {
-                err = new ReadError(err, "ProfileSync: Failed to parse profile sync", { profile_id: this.id });
+                err = new ReadError(err, "Profil Eşitleme: Profil eşitlemesi ayrıştırılamadı", { profile_id: this.id });
                 error(err);
                 return;
             }
-            info("ProfileSync: Synced profile '" + this.id +
-                "' from gateway");
+            info("Profil Eşitleme: '" + this.id +
+                "' profili ağ geçidinden eşitlendi");
         }
     };
     return self;
 }
 function ProfileSync_handle(id, bodyStr) {
     handleSync(id, bodyStr).catch((err) => {
-        error(new ReadError(err, "ProfileSync: Failed to sync profile"));
+        error(new ReadError(err, "Profil Eşitleme: Profil eşitlenemedi"));
     });
 }
 async function handleSync(id, bodyStr) {
@@ -7813,7 +7786,7 @@ async function handleSync(id, bodyStr) {
         confData = JSON.parse(confStr);
     }
     catch (err) {
-        error(new ReadError(err, "ProfileSync: Failed to parse profile conf"));
+        error(new ReadError(err, "Profil Eşitleme: Profil yapılandırması ayrıştırılamadı"));
         return;
     }
     if (!confData.sync_secret) {
@@ -7861,9 +7834,9 @@ external_process_default().on("uncaughtException", function (error) {
     }
     external_electron_default().dialog.showMessageBox(null, {
         type: "error",
-        buttons: ["Exit"],
-        title: "Pritunl Client - Process Error",
-        message: "Error occured in main process:\n\n" + errorMsg,
+        buttons: ["Çıkış"],
+        title: "pritunl++ - Süreç Hatası",
+        message: "Ana süreçte bir hata oluştu:\n\n" + errorMsg,
     }).then(function () {
         external_electron_default().app.quit();
     });
@@ -7876,9 +7849,9 @@ external_process_default().on("unhandledRejection", function (error) {
     }
     external_electron_default().dialog.showMessageBox(null, {
         type: "error",
-        buttons: ["Exit"],
-        title: "Pritunl Client - Process Error",
-        message: "Error occured in main process:\n\n" + errorMsg,
+        buttons: ["Çıkış"],
+        title: "pritunl++ - Süreç Hatası",
+        message: "Ana süreçte bir hata oluştu:\n\n" + errorMsg,
     }).then(function () {
         external_electron_default().app.quit();
     });
@@ -7910,17 +7883,17 @@ external_electron_default().ipcMain.handle("processing", (evt, msg, data) => {
     else if (msg === "encryptable") {
         return [null, external_electron_default().safeStorage.isEncryptionAvailable()];
     }
-    let err = new Errors_ParseError(null, "Main: Unknown handler type");
+    let err = new Errors_ParseError(null, "Ana: Bilinmeyen işleyici türü");
     return [err, null];
 });
 external_electron_default().ipcMain.on("control", (evt, msg, data) => {
     if (msg === "service-auth-error") {
         external_electron_default().dialog.showMessageBox(null, {
             type: "error",
-            buttons: ["Exit"],
-            title: "Pritunl - Service Error (4827)",
-            message: "Failed to load service key. Restart " +
-                "computer and verify background service is running",
+            buttons: ["Çıkış"],
+            title: "pritunl++ - Hizmet Hatası (4827)",
+            message: "Hizmet anahtarı yüklenemedi. Bilgisayarı yeniden " +
+                "başlatın ve arka plan hizmetinin çalıştığını doğrulayın.",
         }).then(function () {
             external_electron_default().app.quit();
         });
@@ -7928,10 +7901,10 @@ external_electron_default().ipcMain.on("control", (evt, msg, data) => {
     else if (msg === "service-conn-error") {
         external_electron_default().dialog.showMessageBox(null, {
             type: "error",
-            buttons: ["Exit"],
-            title: "Pritunl - Service Error (2754)",
-            message: "Unable to establish communication with " +
-                "background service, try restarting computer",
+            buttons: ["Çıkış"],
+            title: "pritunl++ - Hizmet Hatası (2754)",
+            message: "Arka plan hizmetiyle iletişim kurulamadı. " +
+                "Bilgisayarı yeniden başlatmayı deneyin.",
         }).then(function () {
             external_electron_default().app.quit();
         });
@@ -8017,7 +7990,7 @@ class Main {
             minHeight = Math.round(minHeight * zoomFactor);
         }
         this.window = new (external_electron_default()).BrowserWindow({
-            title: "Pritunl Client",
+            title: "pritunl++",
             icon: external_path_default().join(__dirname, "..", "logo.png"),
             titleBarStyle: titleBarStyle,
             frame: !frameless,
@@ -8123,20 +8096,20 @@ function initTray() {
     });
     let trayMenu = external_electron_default().Menu.buildFromTemplate([
         {
-            label: "Open Pritunl Client",
+            label: "pritunl++ İstemcisini Aç",
             click: function () {
                 let main = new Main();
                 main.run();
             }
         },
         {
-            label: "Exit",
+            label: "Çıkış",
             click: function () {
                 external_electron_default().app.quit();
             }
         }
     ]);
-    tray.setToolTip("Pritunl Client");
+    tray.setToolTip("pritunl++");
     tray.setContextMenu(trayMenu);
     sync().then((status) => {
         if (tray) {
@@ -8147,18 +8120,18 @@ function initTray() {
 function initAppMenu() {
     let appMenu = external_electron_default().Menu.buildFromTemplate([
         {
-            label: "Pritunl",
+            label: "pritunl++",
             submenu: [
                 {
-                    label: "Pritunl Client",
+                    label: "pritunl++ İstemcisi",
                 },
                 {
-                    label: "Close",
+                    label: "Kapat",
                     accelerator: "CmdOrCtrl+W",
                     role: "close",
                 },
                 {
-                    label: "Exit",
+                    label: "Çıkış",
                     accelerator: "Cmd+Q",
                     click: function () {
                         external_electron_default().app.quit();
@@ -8167,15 +8140,15 @@ function initAppMenu() {
             ],
         },
         {
-            label: "Edit",
+            label: "Düzen",
             submenu: [
                 {
-                    label: "Undo",
+                    label: "Geri Al",
                     accelerator: "CmdOrCtrl+Z",
                     role: "undo",
                 },
                 {
-                    label: "Redo",
+                    label: "Yinele",
                     accelerator: "Shift+CmdOrCtrl+Z",
                     role: "redo",
                 },
@@ -8183,22 +8156,22 @@ function initAppMenu() {
                     type: "separator",
                 },
                 {
-                    label: "Cut",
+                    label: "Kes",
                     accelerator: "CmdOrCtrl+X",
                     role: "cut",
                 },
                 {
-                    label: "Copy",
+                    label: "Kopyala",
                     accelerator: "CmdOrCtrl+C",
                     role: "copy",
                 },
                 {
-                    label: "Paste",
+                    label: "Yapıştır",
                     accelerator: "CmdOrCtrl+V",
                     role: "paste",
                 },
                 {
-                    label: "Select All",
+                    label: "Tümünü Seç",
                     accelerator: "CmdOrCtrl+A",
                     role: "selectall",
                 },
@@ -8385,9 +8358,9 @@ external_electron_default().app.on("ready", () => {
         if (readyError) {
             external_electron_default().dialog.showMessageBox(null, {
                 type: "error",
-                buttons: ["Exit"],
-                title: "Pritunl Client - Process Error",
-                message: "Error occured in main process:\n\n" + readyError,
+                buttons: ["Çıkış"],
+                title: "pritunl++ - Süreç Hatası",
+                message: "Ana süreçte bir hata oluştu:\n\n" + readyError,
             }).then(function () {
                 external_electron_default().app.quit();
             });

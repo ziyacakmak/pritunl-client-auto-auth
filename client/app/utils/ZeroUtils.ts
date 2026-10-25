@@ -271,7 +271,7 @@ function validateCertData(certData: any): CertData {
 		Array.isArray(certData)) {
 
 		throw new Errors.ParseError(null,
-			"Zeros: Invalid certificate response received from server")
+			"Zero: Sunucudan geçersiz sertifika yanıtı alındı")
 	}
 
 	let certificates: string[] = []
@@ -280,13 +280,13 @@ function validateCertData(certData: any): CertData {
 		certsData.length > MAX_CERT_ENTRIES) {
 
 		throw new Errors.ParseError(null,
-			"Zeros: Invalid certificates received from server")
+			"Zero: Sunucudan geçersiz sertifikalar alındı")
 	}
 	for (let certItem of certsData) {
 		let cert = sanitizeCertificate(certItem)
 		if (!cert) {
 			throw new Errors.ParseError(null,
-				"Zeros: Invalid certificate received from server")
+				"Zero: Sunucudan geçersiz sertifika alındı")
 		}
 		certificates.push(cert)
 	}
@@ -297,13 +297,13 @@ function validateCertData(certData: any): CertData {
 		authoritiesData.length > MAX_CERT_ENTRIES) {
 
 		throw new Errors.ParseError(null,
-			"Zeros: Invalid certificate authorities received from server")
+			"Zero: Sunucudan geçersiz sertifika yetkilileri alındı")
 	}
 	for (let authorityItem of authoritiesData) {
 		let authority = sanitizeCertAuthority(authorityItem)
 		if (!authority) {
 			throw new Errors.ParseError(null,
-				"Zeros: Invalid certificate authority received from server")
+				"Zero: Sunucudan geçersiz sertifika yetkilisi alındı")
 		}
 		certificateAuthorities.push(authority)
 	}
@@ -314,13 +314,13 @@ function validateCertData(certData: any): CertData {
 		hostsData.length > MAX_CERT_ENTRIES) {
 
 		throw new Errors.ParseError(null,
-			"Zeros: Invalid hosts received from server")
+			"Zero: Sunucudan geçersiz ana bilgisayarlar alındı")
 	}
 	for (let hostItem of hostsData) {
 		let host = sanitizeHost(hostItem)
 		if (!host) {
 			throw new Errors.ParseError(null,
-				"Zeros: Invalid host received from server")
+				"Zero: Sunucudan geçersiz ana bilgisayar alındı")
 		}
 		hosts.push(host)
 	}
@@ -539,7 +539,7 @@ async function certValidTo(certPth: string): Promise<number> {
 	let resp = await MiscUtils.exec("ssh-keygen", "-L", "-f", certPth)
 	if (resp.error) {
 		Logger.warning(new Errors.ExecError(resp.error,
-			"Zeros: Failed to get certificate expiration",
+			"Zero: Sertifika bitiş tarihi alınamadı",
 			{cert_path: certPth}))
 		return 0
 	}
@@ -652,14 +652,14 @@ async function loadPubKey(zero: ZeroTypes.ZeroRo): Promise<string> {
 
 		if (!card) {
 			throw new Errors.ReadError(null,
-				"Zeros: Missing Smart Card, if card is connected " +
-				"try Reset GPG")
+				"Zero: Akıllı kart bulunamadı. Kart takılıysa GPG'yi " +
+				"Sıfırla'yı deneyin")
 		}
 
 		if (card.serial !== zero.ssh_card_serial) {
 			throw new Errors.ReadError(null,
-				"Zeros: Incorrect Smart Card serial, insert correct " +
-				"card and remove any other Smart Cards")
+				"Zero: Akıllı kart seri numarası yanlış. Doğru kartı takın " +
+				"ve diğer akıllı kartları çıkarın")
 		}
 
 		return card.pubKey
@@ -669,13 +669,13 @@ async function loadPubKey(zero: ZeroTypes.ZeroRo): Promise<string> {
 
 	if (!pubKeyPath.endsWith(".pub")) {
 		throw new Errors.ReadError(null,
-			"Zeros: SSH key path must end with .pub",
+			"Zero: SSH anahtar yolu .pub ile bitmelidir",
 			{public_key_path: zero.public_key_path})
 	}
 
 	if (!await MiscUtils.fileExists(pubKeyPath)) {
 		throw new Errors.ReadError(null,
-			"Zeros: Selected SSH key does not exist",
+			"Zero: Seçilen SSH anahtarı mevcut değil",
 			{public_key_path: zero.public_key_path})
 	}
 
@@ -693,7 +693,7 @@ export async function renew(zero: ZeroTypes.ZeroRo,
 	let secure = strictSsl(zero.server)
 
 	if (onStatus) {
-		onStatus("Requesting certificate")
+		onStatus("Sertifika isteniyor")
 	}
 
 	let resp: Request.Response
@@ -717,7 +717,7 @@ export async function renew(zero: ZeroTypes.ZeroRo,
 		}
 	} catch (err) {
 		throw new Errors.RequestError(err,
-			"Zeros: SSH challenge request failed")
+			"Zero: SSH doğrulama isteği başarısız oldu")
 	}
 
 	if (!resp || (controller && controller.cancelled)) {
@@ -727,10 +727,10 @@ export async function renew(zero: ZeroTypes.ZeroRo,
 	if (resp.status !== 200) {
 		let errMsg = respError(resp)
 		if (errMsg) {
-			throw new Errors.RequestError(null, "Zeros: " + errMsg)
+			throw new Errors.RequestError(null, "Zero: " + errMsg)
 		}
 		throw new Errors.RequestError(null,
-			"Zeros: SSH challenge request failed with status " +
+			"Zero: SSH doğrulama isteği şu durumla başarısız oldu: " +
 			resp.status)
 	}
 
@@ -739,14 +739,14 @@ export async function renew(zero: ZeroTypes.ZeroRo,
 		token = resp.json().token
 	} catch (err) {
 		throw new Errors.ParseError(err,
-			"Zeros: Failed to parse challenge response")
+			"Zero: Doğrulama yanıtı ayrıştırılamadı")
 	}
 
 	if (!token || typeof token !== "string" ||
 		token.length > MAX_TOKEN_LEN || !TOKEN_RE.test(token)) {
 
 		throw new Errors.ParseError(null,
-			"Zeros: Invalid token received from server")
+			"Zero: Sunucudan geçersiz belirteç alındı")
 	}
 
 	let tokenUrl = zero.server + "/ssh?ssh-token=" + token
@@ -755,7 +755,7 @@ export async function renew(zero: ZeroTypes.ZeroRo,
 	}
 
 	if (onStatus) {
-		onStatus("Complete verification in web browser")
+		onStatus("Doğrulamayı web tarayıcısında tamamlayın")
 	}
 
 	resp = null
@@ -801,20 +801,20 @@ export async function renew(zero: ZeroTypes.ZeroRo,
 
 	if (!resp || resp.status === 205) {
 		throw new Errors.RequestError(null,
-			"Zeros: SSH verification request timed out")
+			"Zero: SSH doğrulama isteği zaman aşımına uğradı")
 	} else if (resp.status === 401) {
 		throw new Errors.RequestError(null,
-			"Zeros: SSH verification request was denied")
+			"Zero: SSH doğrulama isteği reddedildi")
 	} else if (resp.status === 404) {
 		throw new Errors.RequestError(null,
-			"Zeros: SSH verification request has expired")
+			"Zero: SSH doğrulama isteğinin süresi doldu")
 	} else if (resp.status !== 200) {
 		let errMsg = respError(resp)
 		if (errMsg) {
-			throw new Errors.RequestError(null, "Zeros: " + errMsg)
+			throw new Errors.RequestError(null, "Zero: " + errMsg)
 		}
 		throw new Errors.RequestError(null,
-			"Zeros: SSH verification failed with status " + resp.status)
+			"Zero: SSH doğrulama şu durumla başarısız oldu: " + resp.status)
 	}
 
 	let certData: any
@@ -822,14 +822,14 @@ export async function renew(zero: ZeroTypes.ZeroRo,
 		certData = resp.json()
 	} catch (err) {
 		throw new Errors.ParseError(err,
-			"Zeros: Failed to parse certificate response")
+			"Zero: Sertifika yanıtı ayrıştırılamadı")
 	}
 
 	let validData = validateCertData(certData)
 
 	if (certData.token !== token) {
 		throw new Errors.ParseError(null,
-			"Zeros: Token mismatch in certificate response")
+			"Zero: Sertifika yanıtındaki belirteç uyuşmuyor")
 	}
 
 	let certificates = validData.certificates
@@ -839,7 +839,7 @@ export async function renew(zero: ZeroTypes.ZeroRo,
 	}
 
 	if (onStatus) {
-		onStatus("Writing certificates")
+		onStatus("Sertifikalar yazılıyor")
 	}
 
 	if (!await MiscUtils.fileExists(zero.confPath())) {
@@ -922,7 +922,7 @@ async function syncKnownHosts(zeros: ZeroTypes.Zeros,
 			let certAuthority = sanitizeCertAuthority(authorityData)
 			if (!certAuthority) {
 				Logger.warning(new Errors.ParseError(null,
-					"Zeros: Skipping invalid certificate authority",
+					"Zero: Geçersiz sertifika yetkilisi atlanıyor",
 					{zero_id: zero.id}))
 				continue
 			}
@@ -1000,7 +1000,7 @@ async function syncSshConfig(zeros: ZeroTypes.Zeros,
 			let certHost = sanitizeHost(certHostData)
 			if (!certHost) {
 				Logger.warning(new Errors.ParseError(null,
-					"Zeros: Skipping invalid host configuration",
+					"Zero: Geçersiz ana bilgisayar yapılandırması atlanıyor",
 					{zero_id: zero.id}))
 				continue
 			}
@@ -1128,14 +1128,14 @@ export async function registerUrl(zero: ZeroTypes.ZeroRo): Promise<string> {
 
 	if (!card) {
 		throw new Errors.ReadError(null,
-			"Zeros: Missing Smart Card, if card is connected " +
-			"try Reset GPG")
+			"Zero: Akıllı Kart bulunamadı; kart takılıysa " +
+			"GPG'yi Sıfırla seçeneğini deneyin")
 	}
 
 	if (zero.ssh_card_serial && card.serial !== zero.ssh_card_serial) {
 		throw new Errors.ReadError(null,
-			"Zeros: Incorrect Smart Card serial, insert correct " +
-			"card and remove any other Smart Cards")
+			"Zero: Akıllı Kart seri numarası yanlış; doğru kartı " +
+			"takın ve diğer tüm Akıllı Kartları çıkarın")
 	}
 
 	let deviceKey = Buffer.from(card.pubKey, "utf-8").toString("base64")

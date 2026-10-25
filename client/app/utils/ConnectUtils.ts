@@ -17,7 +17,7 @@ export async function connectProfile(prfl: ProfileTypes.ProfileRo,
 	}
 
 	if (!prfl.system) {
-		Logger.info("Profiles: Updating profile '" + prfl.id + "'")
+		Logger.info("Profiller: '" + prfl.id + "' profili güncelleniyor")
 		await prfl.writeData(data)
 	}
 

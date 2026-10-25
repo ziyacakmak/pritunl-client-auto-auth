@@ -33,7 +33,7 @@ export function sync(): Promise<void> {
 				}
 
 				err = new Errors.RequestError(err,
-					"Actions: Config load error")
+					"Eylemler: Yapılandırma yükleme hatası")
 				Logger.errorAlert(err)
 
 				resolve()
@@ -63,7 +63,7 @@ export function commit(config: ConfigTypes.Config): Promise<void> {
 				}
 
 				err = new Errors.RequestError(err,
-					"Actions: Config commit failed")
+					"Eylemler: Yapılandırma kaydedilemedi")
 				Logger.errorAlert(err)
 
 				resolve()

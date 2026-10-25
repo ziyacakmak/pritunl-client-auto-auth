@@ -120,7 +120,7 @@ export default class MetricChart extends React.Component<Props, State> {
 						type: 'time',
 						title: {
 							display: true,
-							text: 'Time',
+							text: 'Zaman',
 							color: Theme.chartColor1(),
 							padding: 0,
 							font: {

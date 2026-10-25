@@ -148,7 +148,7 @@ export function init() {
 				position: Blueprint.Position.BOTTOM,
 			}, document.getElementById("toaster"));
 		} else {
-			console.error("Failed to load toaster")
+			console.error("Bildirim katmanı yüklenemedi")
 		}
 	}
 	if (!toaster2) {
@@ -160,7 +160,7 @@ export function init() {
 				position: Blueprint.Position.TOP,
 			}, elmt);
 		} else {
-			console.error("Failed to load toaster2")
+			console.error("Bildirim katmanı yüklenemedi (2)")
 		}
 
 		observer.observe(elmt, {

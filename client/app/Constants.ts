@@ -94,7 +94,7 @@ function syncState(): void {
 			triggerChange()
 		}, (err) => {
 			err = new Errors.RequestError(err,
-				"Constants: Failed to load state")
+				"Sabitler: Durum yüklenemedi")
 			Logger.errorAlert2(err)
 		})
 }

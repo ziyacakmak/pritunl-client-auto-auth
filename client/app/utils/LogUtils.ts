@@ -18,7 +18,7 @@ export async function readServiceLog(): Promise<string> {
 		logData = resp.data
 	} catch (err) {
 		err = new Errors.RequestError(
-			err, "Logs: Service log request error")
+			err, "Günlükler: Hizmet günlüğü isteği hatası")
 		Logger.errorAlert2(err, 10)
 	}
 
@@ -32,7 +32,7 @@ export async function clearServiceLog(): Promise<void> {
 			.end()
 	} catch (err) {
 		err = new Errors.RequestError(
-			err, "Logs: Service log request error")
+			err, "Günlükler: Hizmet günlüğü isteği hatası")
 		Logger.errorAlert2(err, 10)
 	}
 }

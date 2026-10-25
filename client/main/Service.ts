@@ -170,10 +170,10 @@ export function connect(): Promise<void> {
 					dialogShown = true
 					electron.dialog.showMessageBox(null, {
 						type: "error",
-						buttons: ["Retry", "Exit"],
-						title: "Pritunl - Service Error (6729",
-						message: "Unable to authenticate communication with " +
-							"background service, try restarting computer",
+						buttons: ["Yeniden Dene", "Çık"],
+						title: "Pritunl - Servis Hatası (6729",
+						message: "Arka plan servisiyle kimlik doğrulaması yapılamadı, " +
+							"bilgisayarı yeniden başlatmayı deneyin",
 					}).then(function(evt) {
 						if (evt.response == 0) {
 							authAttempts = 0
@@ -222,10 +222,10 @@ export function connect(): Promise<void> {
 						dialogShown = true
 						electron.dialog.showMessageBox(null, {
 							type: "error",
-							buttons: ["Retry", "Exit"],
-							title: "Pritunl - Service Error (8362)",
-							message: "Unable to establish communication with " +
-								"background service, try restarting computer",
+							buttons: ["Yeniden Dene", "Çık"],
+							title: "Pritunl - Servis Hatası (8362)",
+							message: "Arka plan servisiyle bağlantı kurulamadı, " +
+								"bilgisayarı yeniden başlatmayı deneyin",
 						}).then(function (evt) {
 							if (evt.response == 0) {
 								authAttempts = 0
@@ -256,7 +256,7 @@ export function connect(): Promise<void> {
 			connAttempts = 0
 			if (showConnect) {
 				showConnect = false
-				console.log("Events: Service reconnected")
+				console.log("Olaylar: Hizmete yeniden bağlanıldı")
 				if (Constants.mainWindow && !Constants.mainWindow.isDestroyed()) {
 					Constants.mainWindow.webContents.send("event.reconnected")
 				}
@@ -272,7 +272,7 @@ export function connect(): Promise<void> {
 				Constants.mainWindow.webContents.send("event.error", err.toString())
 			}
 
-			console.error("Events: Socket error " + err)
+			console.error("Olaylar: Soket hatası " + err)
 			showConnect = true
 			reconnect()
 		})
@@ -282,7 +282,7 @@ export function connect(): Promise<void> {
 				return
 			}
 
-			console.error("Events: Socket error " + err)
+			console.error("Olaylar: Soket hatası " + err)
 			showConnect = true
 			reconnect()
 		})

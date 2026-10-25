@@ -278,7 +278,7 @@ export function New(self: Profile): Profile {
 
 				if (resp.error) {
 					let err = new Errors.ReadError(resp.error,
-						"ProfileSync: Failed to get key from keychain")
+						"Profil Eşitleme: Anahtar zincirinden anahtar alınamadı")
 					Logger.error(err)
 					return data
 				}
@@ -460,7 +460,7 @@ export function New(self: Profile): Profile {
 				syncData = JSON.parse(bodyStr)
 			} catch (err) {
 				err = new Errors.ReadError(err,
-					"ProfileSync: Failed to parse sync body")
+					"Profil Eşitleme: Eşitleme gövdesi ayrıştırılamadı")
 				reject(err)
 				return
 			}
@@ -476,7 +476,7 @@ export function New(self: Profile): Profile {
 
 			if (confSignature !== syncData.signature) {
 				let err = new Errors.ReadError(null,
-					"ProfileSync: Failed to sync profile, signature invalid")
+					"Profil Eşitleme: Profil eşitlenemedi, imza geçersiz")
 				reject(err)
 				return
 			}
@@ -499,14 +499,14 @@ export function New(self: Profile): Profile {
 				await this._importSync(syncData)
 			} catch (err) {
 				err = new Errors.ReadError(err,
-					"ProfileSync: Failed to parse profile sync",
+					"Profil Eşitleme: Profil eşitlemesi ayrıştırılamadı",
 					{profile_id: this.id})
 				Logger.error(err)
 				return
 			}
 
-			Logger.info("ProfileSync: Synced profile '" + this.id +
-				"' from gateway")
+			Logger.info("Profil Eşitleme: '" + this.id +
+				"' profili ağ geçidinden eşitlendi")
 		}
 	}
 
@@ -516,7 +516,7 @@ export function New(self: Profile): Profile {
 export function handle(id: string, bodyStr: string): void {
 	handleSync(id, bodyStr).catch((err): void => {
 		Logger.error(new Errors.ReadError(err,
-			"ProfileSync: Failed to sync profile"))
+			"Profil Eşitleme: Profil eşitlenemedi"))
 	})
 }
 
@@ -537,7 +537,7 @@ async function handleSync(id: string, bodyStr: string): Promise<void> {
 		confData = JSON.parse(confStr)
 	} catch (err) {
 		Logger.error(new Errors.ReadError(err,
-			"ProfileSync: Failed to parse profile conf"))
+			"Profil Eşitleme: Profil yapılandırması ayrıştırılamadı"))
 		return
 	}
 

@@ -38,9 +38,9 @@ process.on("uncaughtException", function (error) {
 
 	electron.dialog.showMessageBox(null, {
 		type: "error",
-		buttons: ["Exit"],
-		title: "Pritunl Client - Process Error",
-		message: "Error occured in main process:\n\n" + errorMsg,
+		buttons: ["Çıkış"],
+		title: "pritunl++ - Süreç Hatası",
+		message: "Ana süreçte bir hata oluştu:\n\n" + errorMsg,
 	}).then(function() {
 		electron.app.quit()
 	})
@@ -56,9 +56,9 @@ process.on("unhandledRejection", function (error) {
 
 	electron.dialog.showMessageBox(null, {
 		type: "error",
-		buttons: ["Exit"],
-		title: "Pritunl Client - Process Error",
-		message: "Error occured in main process:\n\n" + errorMsg,
+		buttons: ["Çıkış"],
+		title: "pritunl++ - Süreç Hatası",
+		message: "Ana süreçte bir hata oluştu:\n\n" + errorMsg,
 	}).then(function() {
 		electron.app.quit()
 	})
@@ -94,7 +94,7 @@ electron.ipcMain.handle(
 		} else if (msg === "encryptable") {
 			return [null, electron.safeStorage.isEncryptionAvailable()]
 		}
-		let err = new Errors.ParseError(null, "Main: Unknown handler type");
+		let err = new Errors.ParseError(null, "Ana: Bilinmeyen işleyici türü");
 		return [err, null]
 	},
 )
@@ -105,20 +105,20 @@ electron.ipcMain.on(
 		if (msg === "service-auth-error") {
 			electron.dialog.showMessageBox(null, {
 				type: "error",
-				buttons: ["Exit"],
-				title: "Pritunl - Service Error (4827)",
-				message: "Failed to load service key. Restart " +
-					"computer and verify background service is running",
+				buttons: ["Çıkış"],
+				title: "pritunl++ - Hizmet Hatası (4827)",
+				message: "Hizmet anahtarı yüklenemedi. Bilgisayarı yeniden " +
+					"başlatın ve arka plan hizmetinin çalıştığını doğrulayın.",
 			}).then(function() {
 				electron.app.quit()
 			})
 		} else if (msg === "service-conn-error") {
 			electron.dialog.showMessageBox(null, {
 				type: "error",
-				buttons: ["Exit"],
-				title: "Pritunl - Service Error (2754)",
-				message: "Unable to establish communication with " +
-					"background service, try restarting computer",
+				buttons: ["Çıkış"],
+				title: "pritunl++ - Hizmet Hatası (2754)",
+				message: "Arka plan hizmetiyle iletişim kurulamadı. " +
+					"Bilgisayarı yeniden başlatmayı deneyin.",
 			}).then(function() {
 				electron.app.quit()
 			})
@@ -210,7 +210,7 @@ class Main {
 		}
 
 		this.window = new electron.BrowserWindow({
-			title: "Pritunl Client",
+			title: "pritunl++",
 			icon: path.join(__dirname, "..", "logo.png"),
 			titleBarStyle: titleBarStyle as any,
 			frame: !frameless,
@@ -335,21 +335,21 @@ function initTray() {
 
 	let trayMenu = electron.Menu.buildFromTemplate([
 		{
-			label: "Open Pritunl Client",
+			label: "pritunl++ İstemcisini Aç",
 			click: function () {
 				let main = new Main()
 				main.run()
 			}
 		},
 		{
-			label: "Exit",
+			label: "Çıkış",
 			click: function() {
 				electron.app.quit()
 			}
 		}
 	])
 
-	tray.setToolTip("Pritunl Client")
+	tray.setToolTip("pritunl++")
 	tray.setContextMenu(trayMenu)
 
 	Service.sync().then((status: boolean): void => {
@@ -362,18 +362,18 @@ function initTray() {
 function initAppMenu() {
 	let appMenu = electron.Menu.buildFromTemplate([
 		{
-			label: "Pritunl",
+			label: "pritunl++",
 			submenu: [
 				{
-					label: "Pritunl Client",
+					label: "pritunl++ İstemcisi",
 				},
 				{
-					label: "Close",
+					label: "Kapat",
 					accelerator: "CmdOrCtrl+W",
 					role: "close",
 				},
 				{
-					label: "Exit",
+					label: "Çıkış",
 					accelerator: "Cmd+Q",
 					click: function() {
 						electron.app.quit()
@@ -382,15 +382,15 @@ function initAppMenu() {
 			],
 		},
 		{
-			label: "Edit",
+			label: "Düzen",
 			submenu: [
 				{
-					label: "Undo",
+					label: "Geri Al",
 					accelerator: "CmdOrCtrl+Z",
 					role: "undo",
 				},
 				{
-					label: "Redo",
+					label: "Yinele",
 					accelerator: "Shift+CmdOrCtrl+Z",
 					role: "redo",
 				},
@@ -398,22 +398,22 @@ function initAppMenu() {
 					type: "separator",
 				},
 				{
-					label: "Cut",
+					label: "Kes",
 					accelerator: "CmdOrCtrl+X",
 					role: "cut",
 				},
 				{
-					label: "Copy",
+					label: "Kopyala",
 					accelerator: "CmdOrCtrl+C",
 					role: "copy",
 				},
 				{
-					label: "Paste",
+					label: "Yapıştır",
 					accelerator: "CmdOrCtrl+V",
 					role: "paste",
 				},
 				{
-					label: "Select All",
+					label: "Tümünü Seç",
 					accelerator: "CmdOrCtrl+A",
 					role: "selectall",
 				},
@@ -610,9 +610,9 @@ electron.app.on("ready", (): void => {
 		if (readyError) {
 			electron.dialog.showMessageBox(null, {
 				type: "error",
-				buttons: ["Exit"],
-				title: "Pritunl Client - Process Error",
-				message: "Error occured in main process:\n\n" + readyError,
+				buttons: ["Çıkış"],
+				title: "pritunl++ - Süreç Hatası",
+				message: "Ana süreçte bir hata oluştu:\n\n" + readyError,
 			}).then(function() {
 				electron.app.quit()
 			})

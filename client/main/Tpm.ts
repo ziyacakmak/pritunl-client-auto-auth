@@ -51,7 +51,7 @@ function claim(requestId: string): Promise<boolean> {
 			if (resp.status !== 409 && resp.status !== 404) {
 				let err = new Errors.RequestError(
 					null,
-					"Tpm: Claim request error",
+					"Tpm: Talep isteği hatası",
 					{
 						request_id: requestId,
 						reponse_status: resp.status,
@@ -65,7 +65,7 @@ function claim(requestId: string): Promise<boolean> {
 		}, (err): boolean => {
 			err = new Errors.RequestError(
 				err,
-				"Tpm: Claim request error",
+				"Tpm: Talep isteği hatası",
 				{
 					request_id: requestId,
 				},
@@ -92,7 +92,7 @@ function complete(requestId: string, result: ResultData): void {
 			if (resp.status != 200) {
 				let err = new Errors.RequestError(
 					null,
-					"Tpm: Result request error",
+					"Tpm: Sonuç isteği hatası",
 					{
 						request_id: requestId,
 						reponse_status: resp.status,
@@ -104,7 +104,7 @@ function complete(requestId: string, result: ResultData): void {
 		}, (err) => {
 			err = new Errors.RequestError(
 				err,
-				"Tpm: Result request error",
+				"Tpm: Sonuç isteği hatası",
 				{
 					request_id: requestId,
 				},
@@ -130,7 +130,7 @@ export function handle(type: string, data: RequestData): void {
 	if (!data || !data.request_id) {
 		let err = new Errors.RequestError(
 			null,
-			"Tpm: Secure enclave event missing request id",
+			"Tpm: Güvenli alan olayında istek kimliği eksik",
 			{
 				event_type: type,
 			},
@@ -153,7 +153,7 @@ function run(type: string, data: RequestData): void {
 	if (Object.keys(procs).length >= maxProcs) {
 		fail(requestId, new Errors.ProcessError(
 			null,
-			"Tpm: Too many secure enclave processes",
+			"Tpm: Çok fazla güvenli alan süreci",
 			{
 				request_id: requestId,
 				count: Object.keys(procs).length,
@@ -175,7 +175,7 @@ function run(type: string, data: RequestData): void {
 
 		let err = new Errors.ProcessError(
 			null,
-			"Tpm: Secure enclave process timed out",
+			"Tpm: Güvenli alan süreci zaman aşımına uğradı",
 			{
 				request_id: requestId,
 			},
@@ -192,7 +192,7 @@ function run(type: string, data: RequestData): void {
 		done = true
 		fail(requestId, new Errors.ProcessError(
 			err,
-			"Tpm: Secure enclave exec error",
+			"Tpm: Güvenli alan çalıştırma hatası",
 			{
 				request_id: requestId,
 			},
@@ -206,7 +206,7 @@ function run(type: string, data: RequestData): void {
 		done = true
 		fail(requestId, new Errors.ProcessError(
 			err,
-			"Tpm: Secure enclave stdin error",
+			"Tpm: Güvenli alan giriş hatası",
 			{
 				request_id: requestId,
 			},
@@ -215,7 +215,7 @@ function run(type: string, data: RequestData): void {
 	proc.stdout.on("error", (err) => {
 		err = new Errors.ProcessError(
 			err,
-			"Tpm: Secure enclave stdout error",
+			"Tpm: Güvenli alan çıkış hatası",
 			{
 				request_id: requestId,
 			},
@@ -225,7 +225,7 @@ function run(type: string, data: RequestData): void {
 	proc.stderr.on("error", (err) => {
 		err = new Errors.ProcessError(
 			err,
-			"Tpm: Secure enclave stderr error",
+			"Tpm: Güvenli alan hata çıkışı",
 			{
 				request_id: requestId,
 			},
@@ -254,7 +254,7 @@ function run(type: string, data: RequestData): void {
 
 		fail(requestId, new Errors.ProcessError(
 			null,
-			"Tpm: Secure enclave process exited without result",
+			"Tpm: Güvenli alan süreci sonuç olmadan çıktı",
 			{
 				request_id: requestId,
 				exit_code: code,
@@ -284,7 +284,7 @@ function run(type: string, data: RequestData): void {
 				done = true
 				fail(requestId, new Errors.ParseError(
 					null,
-					"Tpm: Failed to parse secure enclave output",
+					"Tpm: Güvenli alan çıktısı ayrıştırılamadı",
 					{
 						request_id: requestId,
 						line: line,
@@ -313,7 +313,7 @@ function run(type: string, data: RequestData): void {
 		done = true
 		fail(requestId, new Errors.ProcessError(
 			null,
-			"Tpm: Secure enclave process not writable",
+			"Tpm: Güvenli alan süreci yazılabilir değil",
 			{
 				request_id: requestId,
 			},

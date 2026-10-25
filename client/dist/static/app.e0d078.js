@@ -47758,7 +47758,7 @@ function init() {
             }, document.getElementById("toaster"));
         }
         else {
-            console.error("Failed to load toaster");
+            console.error("Bildirim katmanı yüklenemedi");
         }
     }
     if (!toaster2) {
@@ -47770,7 +47770,7 @@ function init() {
             }, elmt);
         }
         else {
-            console.error("Failed to load toaster2");
+            console.error("Bildirim katmanı yüklenemedi (2)");
         }
         observer.observe(elmt, {
             childList: true,
@@ -47867,7 +47867,7 @@ class Response {
             return JSON.parse(this.data || null);
         }
         catch (err) {
-            err = new ReadError(err, "Request: JSON parse failed", { data: this.data });
+            err = new ReadError(err, "İstek: JSON ayrıştırma başarısız", { data: this.data });
             throw err;
         }
     }
@@ -48014,13 +48014,13 @@ class Request {
                     req = external_http_default().request(options, callback);
                 }
                 req.on("timeout", () => {
-                    let err = this.parseError(null, "Request: Timeout error");
+                    let err = this.parseError(null, "İstek: Zaman aşımı hatası");
                     req.destroy(err);
                     Logger_error(err);
                     reject(err);
                 });
                 req.on("error", (err) => {
-                    err = this.parseError(err, "Request:  Client error");
+                    err = this.parseError(err, "İstek: İstemci hatası");
                     Logger_error(err);
                     reject(err);
                 });
@@ -48030,7 +48030,7 @@ class Request {
                 req.end();
             }
             catch (err) {
-                err = this.parseError(err, "Request: Exception");
+                err = this.parseError(err, "İstek: Özel durum");
                 Logger_error(err);
                 reject(err);
             }
@@ -48160,85 +48160,76 @@ function formatDate(dateData) {
     }
     let str = '';
     let hours = date.getHours();
-    let period = 'AM';
-    if (hours > 12) {
-        period = 'PM';
-        hours -= 12;
-    }
-    else if (hours === 0) {
-        hours = 12;
-    }
     let day;
     switch (date.getDay()) {
         case 0:
-            day = 'Sun';
+            day = 'Paz';
             break;
         case 1:
-            day = 'Mon';
+            day = 'Pzt';
             break;
         case 2:
-            day = 'Tue';
+            day = 'Sal';
             break;
         case 3:
-            day = 'Wed';
+            day = 'Çar';
             break;
         case 4:
-            day = 'Thu';
+            day = 'Per';
             break;
         case 5:
-            day = 'Fri';
+            day = 'Cum';
             break;
         case 6:
-            day = 'Sat';
+            day = 'Cmt';
             break;
     }
     let month;
     switch (date.getMonth()) {
         case 0:
-            month = 'Jan';
+            month = 'Oca';
             break;
         case 1:
-            month = 'Feb';
+            month = 'Şub';
             break;
         case 2:
             month = 'Mar';
             break;
         case 3:
-            month = 'Apr';
+            month = 'Nis';
             break;
         case 4:
             month = 'May';
             break;
         case 5:
-            month = 'Jun';
+            month = 'Haz';
             break;
         case 6:
-            month = 'Jul';
+            month = 'Tem';
             break;
         case 7:
-            month = 'Aug';
+            month = 'Ağu';
             break;
         case 8:
-            month = 'Sep';
+            month = 'Eyl';
             break;
         case 9:
-            month = 'Oct';
+            month = 'Eki';
             break;
         case 10:
-            month = 'Nov';
+            month = 'Kas';
             break;
         case 11:
-            month = 'Dec';
+            month = 'Ara';
             break;
     }
     str += day + ' ';
     str += date.getDate() + ' ';
     str += month + ' ';
     str += date.getFullYear() + ', ';
-    str += hours + ':';
+    str += zeroPad(hours, 2) + ':';
     str += zeroPad(date.getMinutes(), 2) + ':';
-    str += zeroPad(date.getSeconds(), 2) + ' ';
-    str += period;
+    str += zeroPad(date.getSeconds(), 2);
     return str;
 }
 function formatDateLess(dateData) {
@@ -48255,59 +48246,50 @@ function formatDateLess(dateData) {
     }
     let str = '';
     let hours = date.getHours();
-    let period = 'AM';
-    if (hours > 12) {
-        period = 'PM';
-        hours -= 12;
-    }
-    else if (hours === 0) {
-        hours = 12;
-    }
     let month;
     switch (date.getMonth()) {
         case 0:
-            month = 'Jan';
+            month = 'Oca';
             break;
         case 1:
-            month = 'Feb';
+            month = 'Şub';
             break;
         case 2:
             month = 'Mar';
             break;
         case 3:
-            month = 'Apr';
+            month = 'Nis';
             break;
         case 4:
             month = 'May';
             break;
         case 5:
-            month = 'Jun';
+            month = 'Haz';
             break;
         case 6:
-            month = 'Jul';
+            month = 'Tem';
             break;
         case 7:
-            month = 'Aug';
+            month = 'Ağu';
             break;
         case 8:
-            month = 'Sep';
+            month = 'Eyl';
             break;
         case 9:
-            month = 'Oct';
+            month = 'Eki';
             break;
         case 10:
-            month = 'Nov';
+            month = 'Kas';
             break;
         case 11:
-            month = 'Dec';
+            month = 'Ara';
             break;
     }
     str += month + ' ';
     str += date.getDate() + ' ';
     str += date.getFullYear() + ', ';
-    str += hours + ':';
+    str += zeroPad(hours, 2) + ':';
     str += zeroPad(date.getMinutes(), 2);
-    str += period;
     return str;
 }
 function formatDateShort(dateData) {
@@ -48326,40 +48308,40 @@ function formatDateShort(dateData) {
     let month;
     switch (date.getMonth()) {
         case 0:
-            month = 'Jan';
+            month = 'Oca';
             break;
         case 1:
-            month = 'Feb';
+            month = 'Şub';
             break;
         case 2:
             month = 'Mar';
             break;
         case 3:
-            month = 'Apr';
+            month = 'Nis';
             break;
         case 4:
             month = 'May';
             break;
         case 5:
-            month = 'Jun';
+            month = 'Haz';
             break;
         case 6:
-            month = 'Jul';
+            month = 'Tem';
             break;
         case 7:
-            month = 'Aug';
+            month = 'Ağu';
             break;
         case 8:
-            month = 'Sep';
+            month = 'Eyl';
             break;
         case 9:
-            month = 'Oct';
+            month = 'Eki';
             break;
         case 10:
-            month = 'Nov';
+            month = 'Kas';
             break;
         case 11:
-            month = 'Dec';
+            month = 'Ara';
             break;
     }
     let str = month + ' ' + date.getDate();
@@ -48384,40 +48366,40 @@ function formatDateShortTime(dateData) {
     let month;
     switch (date.getMonth()) {
         case 0:
-            month = 'Jan';
+            month = 'Oca';
             break;
         case 1:
-            month = 'Feb';
+            month = 'Şub';
             break;
         case 2:
             month = 'Mar';
             break;
         case 3:
-            month = 'Apr';
+            month = 'Nis';
             break;
         case 4:
             month = 'May';
             break;
         case 5:
-            month = 'Jun';
+            month = 'Haz';
             break;
         case 6:
-            month = 'Jul';
+            month = 'Tem';
             break;
         case 7:
-            month = 'Aug';
+            month = 'Ağu';
             break;
         case 8:
-            month = 'Sep';
+            month = 'Eyl';
             break;
         case 9:
-            month = 'Oct';
+            month = 'Eki';
             break;
         case 10:
-            month = 'Nov';
+            month = 'Kas';
             break;
         case 11:
-            month = 'Dec';
+            month = 'Ara';
             break;
     }
     let str = month + ' ' + date.getDate();
@@ -48427,18 +48409,9 @@ function formatDateShortTime(dateData) {
     else if (date.getMonth() === curDate.getMonth() &&
         date.getDate() === curDate.getDate()) {
         let hours = date.getHours();
-        let period = 'AM';
-        if (hours > 12) {
-            period = 'PM';
-            hours -= 12;
-        }
-        else if (hours === 0) {
-            hours = 12;
-        }
-        str = hours + ':';
+        str = zeroPad(hours, 2) + ':';
         str += zeroPad(date.getMinutes(), 2) + ':';
-        str += zeroPad(date.getSeconds(), 2) + ' ';
-        str += period;
+        str += zeroPad(date.getSeconds(), 2);
     }
     return str;
 }
@@ -48446,7 +48419,7 @@ function exec(path, ...args) {
     return new Promise((resolve) => {
         external_child_process_default().execFile(path, args, (err, stdout, stderr) => {
             if (err) {
-                err = new ExecError(err, "Utils: Exec error", { path: path, args: args, stdout: stdout, stderr: stderr });
+                err = new ExecError(err, "Yardımcılar: Komut yürütme hatası", { path: path, args: args, stdout: stdout, stderr: stderr });
             }
             resolve({
                 stdout: stdout,
@@ -48487,7 +48460,7 @@ function fileDelete(path) {
             }
             external_fs_default().unlink(path, (err) => {
                 if (err) {
-                    err = new WriteError(err, "Utils: Failed to delete file", { path: path });
+                    err = new WriteError(err, "Yardımcılar: Dosya silinemedi", { path: path });
                     reject(err);
                     return;
                 }
@@ -48500,7 +48473,7 @@ function fileRead(path) {
     return new Promise((resolve, reject) => {
         external_fs_default().readFile(path, "utf-8", (err, data) => {
             if (err) {
-                err = new ReadError(err, "Utils: Failed to read file", { path: path });
+                err = new ReadError(err, "Yardımcılar: Dosya okunamadı", { path: path });
                 reject(err);
                 return;
             }
@@ -48512,7 +48485,7 @@ function fileWrite(path, data) {
     return new Promise((resolve, reject) => {
         external_fs_default().writeFile(path, data, (err) => {
             if (err) {
-                err = new WriteError(err, "Utils: Failed to write file", { path: path });
+                err = new WriteError(err, "Yardımcılar: Dosya yazılamadı", { path: path });
                 reject(err);
                 return;
             }
@@ -48550,7 +48523,7 @@ function fileChmod(pth, mode) {
     return new Promise((resolve, reject) => {
         external_fs_default().chmod(pth, mode, (err) => {
             if (err) {
-                err = new WriteError(err, "Utils: Failed to chmod file", { path: pth });
+                err = new WriteError(err, "Yardımcılar: Dosya izinleri değiştirilemedi", { path: pth });
                 reject(err);
                 return;
             }
@@ -48562,7 +48535,7 @@ function dirMake(pth) {
     return new Promise((resolve, reject) => {
         external_fs_default().mkdir(pth, { recursive: true }, (err) => {
             if (err) {
-                err = new WriteError(err, "Utils: Failed to make directory", { path: pth });
+                err = new WriteError(err, "Yardımcılar: Dizin oluşturulamadı", { path: pth });
                 reject(err);
                 return;
             }
@@ -48574,7 +48547,7 @@ function fileReaddir(pth) {
     return new Promise((resolve, reject) => {
         external_fs_default().readdir(pth, (err, filenames) => {
             if (err) {
-                err = new ReadError(err, "Utils: Failed to read directory", { path: pth });
+                err = new ReadError(err, "Yardımcılar: Dizin okunamadı", { path: pth });
                 reject(err);
                 return;
             }
@@ -48609,23 +48582,23 @@ function encryptAvailable() {
             let evt = external_electron_default().ipcRenderer.invoke("processing", "encryptable");
             evt.then((resp) => {
                 if (!resp) {
-                    let err = new ParseError(null, "Utils: Failed to check encryption support e1");
+                    let err = new ParseError(null, "Yardımcılar: Şifreleme desteği denetlenemedi e1");
                     reject(err);
                 }
                 else if (resp[0]) {
-                    let err = new ParseError(resp[0], "Utils: Failed to check encryption support e2");
+                    let err = new ParseError(resp[0], "Yardımcılar: Şifreleme desteği denetlenemedi e2");
                     reject(err);
                 }
                 else {
                     resolve(resp[1]);
                 }
             }).catch((err) => {
-                err = new ParseError(err, "Utils: Failed to check encryption support e3");
+                err = new ParseError(err, "Yardımcılar: Şifreleme desteği denetlenemedi e3");
                 reject(err);
             });
         }
         catch (err) {
-            err = new ParseError(err, "Utils: Failed to check encryption support e4");
+            err = new ParseError(err, "Yardımcılar: Şifreleme desteği denetlenemedi e4");
             reject(err);
         }
     });
@@ -48636,23 +48609,23 @@ function encryptString(decData) {
             let evt = external_electron_default().ipcRenderer.invoke("processing", "encrypt", decData);
             evt.then((resp) => {
                 if (!resp) {
-                    let err = new ParseError(null, "Utils: Failed to encrypt string e1");
+                    let err = new ParseError(null, "Yardımcılar: Metin şifrelenemedi e1");
                     reject(err);
                 }
                 else if (resp[0]) {
-                    let err = new ParseError(resp[0], "Utils: Failed to encrypt string e2");
+                    let err = new ParseError(resp[0], "Yardımcılar: Metin şifrelenemedi e2");
                     reject(err);
                 }
                 else {
                     resolve(resp[1]);
                 }
             }).catch((err) => {
-                err = new ParseError(err, "Utils: Failed to encrypt string e3");
+                err = new ParseError(err, "Yardımcılar: Metin şifrelenemedi e3");
                 reject(err);
             });
         }
         catch (err) {
-            err = new ParseError(err, "Utils: Failed to encrypt string e4");
+            err = new ParseError(err, "Yardımcılar: Metin şifrelenemedi e4");
             reject(err);
         }
     });
@@ -48663,23 +48636,23 @@ function decryptString(encData) {
             let evt = external_electron_default().ipcRenderer.invoke("processing", "decrypt", encData);
             evt.then((resp) => {
                 if (!resp) {
-                    let err = new ParseError(null, "Utils: Failed to decrypt string e1");
+                    let err = new ParseError(null, "Yardımcılar: Metnin şifresi çözülemedi e1");
                     reject(err);
                 }
                 else if (resp[0]) {
-                    let err = new ParseError(resp[0], "Utils: Failed to decrypt string e2");
+                    let err = new ParseError(resp[0], "Yardımcılar: Metnin şifresi çözülemedi e2");
                     reject(err);
                 }
                 else {
                     resolve(resp[1]);
                 }
             }).catch((err) => {
-                err = new ParseError(err, "Utils: Failed to decrypt string e3");
+                err = new ParseError(err, "Yardımcılar: Metnin şifresi çözülemedi e3");
                 reject(err);
             });
         }
         catch (err) {
-            err = new ParseError(err, "Utils: Failed to decrypt string e4");
+            err = new ParseError(err, "Yardımcılar: Metnin şifresi çözülemedi e4");
             reject(err);
         }
     });
@@ -48703,7 +48676,7 @@ function tarRead(pth) {
     }).then(() => {
         return files;
     }).catch((err) => {
-        throw new ReadError(err, "Utils: Failed to read tar file", { path: pth });
+        throw new ReadError(err, "Yardımcılar: Tar dosyası okunamadı", { path: pth });
     });
 }
 
@@ -48864,7 +48837,7 @@ function syncState() {
         state = (resp.json() || {});
         triggerChange();
     }, (err) => {
-        err = new RequestError(err, "Constants: Failed to load state");
+        err = new RequestError(err, "Sabitler: Durum yüklenemedi");
         errorAlert2(err);
     });
 }
@@ -48922,7 +48895,7 @@ function zeros() {
 
 function push(level, err) {
     if (!err) {
-        err = "Undefined error";
+        err = "Tanımsız hata";
     }
     let time = new Date();
     let msg = err.message || err;
@@ -48936,7 +48909,7 @@ function push(level, err) {
             external_fs_default().unlink(pth, () => {
                 external_fs_default().appendFile(pth, msg + "\n", (err) => {
                     if (err) {
-                        err = new WriteError(err, "Logger: Failed to write log", { log_path: pth });
+                        err = new WriteError(err, "Günlükleyici: Günlük yazılamadı", { log_path: pth });
                         error2(err.message, 10);
                     }
                 });
@@ -48945,7 +48918,7 @@ function push(level, err) {
         else {
             external_fs_default().appendFile(pth, msg + "\n", (err) => {
                 if (err) {
-                    err = new WriteError(err, "Logger: Failed to write log", { log_path: pth });
+                    err = new WriteError(err, "Günlükleyici: Günlük yazılamadı", { log_path: pth });
                     error2(err.message, 10);
                 }
             });
@@ -48963,14 +48936,14 @@ function Logger_error(err) {
 }
 function errorAlert(err, timeout) {
     if (!err) {
-        err = "Undefined error";
+        err = "Tanımsız hata";
     }
     push("ERROR", err);
     error(err.message || err, timeout);
 }
 function errorAlert2(err, timeout) {
     if (!err) {
-        err = "Undefined error";
+        err = "Tanımsız hata";
     }
     push("ERROR", err);
     error2(err.message || err, timeout);
@@ -49028,7 +49001,7 @@ class ConfigData {
             external_fs_default().readFile(Paths_config(), "utf-8", (err, data) => {
                 if (err) {
                     if (err.code !== "ENOENT") {
-                        err = new ReadError(err, "Config: Read error", { path: Paths_config() });
+                        err = new ReadError(err, "Yapılandırma: Okuma hatası", { path: Paths_config() });
                         errorAlert(err, 10);
                     }
                     resolve();
@@ -49040,7 +49013,7 @@ class ConfigData {
                         configData = JSON.parse(data);
                     }
                     catch (err) {
-                        err = new ReadError(err, "Config: Parse error", { path: Paths_config() });
+                        err = new ReadError(err, "Yapılandırma: Ayrıştırma hatası", { path: Paths_config() });
                         errorAlert(err, 10);
                         configData = {};
                     }
@@ -49092,7 +49065,7 @@ class ConfigData {
                 this._load(data);
                 external_fs_default().writeFile(Paths_config(), JSON.stringify(data), (err) => {
                     if (err) {
-                        err = new ReadError(err, "Config: Write error", { path: Paths_config() });
+                        err = new ReadError(err, "Yapılandırma: Yazma hatası", { path: Paths_config() });
                         errorAlert(err);
                     }
                     triggerChange();
@@ -52601,7 +52574,7 @@ function connect(prfl, noLoading) {
             if (loader) {
                 loader.done();
             }
-            err = new RequestError(err, "Profiles: Profile connect failed");
+            err = new RequestError(err, "Profiller: Profile bağlanılamadı");
             errorAlert(err);
             resolve();
             return;
@@ -52625,7 +52598,7 @@ function disconnect(prfl, noLoading) {
             if (loader) {
                 loader.done();
             }
-            err = new RequestError(err, "Profiles: Profile disconnect failed");
+            err = new RequestError(err, "Profiller: Profil bağlantısı kesilemedi");
             errorAlert(err);
             resolve();
             return;
@@ -52653,7 +52626,7 @@ async function tokenUpdate(prfl, noLoading) {
         })
             .end();
         if (resp.status !== 200) {
-            let err = new RequestError(null, "Profiles: Token update request error " + resp.status);
+            let err = new RequestError(null, "Profiller: Belirteç güncelleme isteği hatası " + resp.status);
             errorAlert(err, 10);
         }
         else {
@@ -52664,7 +52637,7 @@ async function tokenUpdate(prfl, noLoading) {
         }
     }
     catch (err) {
-        err = new RequestError(err, "Profiles: Token update request failed");
+        err = new RequestError(err, "Profiller: Belirteç güncelleme isteği başarısız");
         errorAlert(err, 10);
     }
     if (loader) {
@@ -52682,7 +52655,7 @@ async function tokenDelete(prfl, noLoading) {
             .end();
     }
     catch (err) {
-        err = new RequestError(err, "Profiles: Token update request failed");
+        err = new RequestError(err, "Profiller: Belirteç güncelleme isteği başarısız");
         errorAlert(err, 10);
     }
     if (loader) {
@@ -52703,19 +52676,19 @@ function resetDns(noLoading) {
                 loader.done();
             }
             if (resp.status !== 200) {
-                let err = new RequestError(null, "System: DNS reset failed", {
+                let err = new RequestError(null, "Sistem: DNS sıfırlanamadı", {
                     status: resp.status.toString()
                 });
                 errorAlert(err);
                 return;
             }
-            success("System: DNS reset successful");
+            success("Sistem: DNS sıfırlandı");
             resolve();
         }, (err) => {
             if (loader) {
                 loader.done();
             }
-            err = new RequestError(err, "System: DNS reset failed");
+            err = new RequestError(err, "Sistem: DNS sıfırlanamadı");
             errorAlert(err);
             resolve();
             return;
@@ -52736,19 +52709,19 @@ function resetAll(noLoading) {
                 loader.done();
             }
             if (resp.status !== 200) {
-                let err = new RequestError(null, "System: Network reset failed", {
+                let err = new RequestError(null, "Sistem: Ağ ayarları sıfırlanamadı", {
                     status: resp.status.toString()
                 });
                 errorAlert(err);
                 return;
             }
-            success("System: Network reset successful");
+            success("Sistem: Ağ ayarları sıfırlandı");
             resolve();
         }, (err) => {
             if (loader) {
                 loader.done();
             }
-            err = new RequestError(err, "System: Network reset failed");
+            err = new RequestError(err, "Sistem: Ağ ayarları sıfırlanamadı");
             errorAlert(err);
             resolve();
             return;
@@ -52769,19 +52742,19 @@ function resetEnclave(noLoading) {
                 loader.done();
             }
             if (resp.status !== 200) {
-                let err = new RequestError(null, "System: Secure Enclave reset failed", {
+                let err = new RequestError(null, "Sistem: Güvenli Alan anahtarı sıfırlanamadı", {
                     status: resp.status.toString()
                 });
                 errorAlert(err);
                 return;
             }
-            success("System: Secure Enclave reset successful");
+            success("Sistem: Güvenli Alan anahtarı sıfırlandı");
             resolve();
         }, (err) => {
             if (loader) {
                 loader.done();
             }
-            err = new RequestError(err, "System: Secure Enclave reset failed");
+            err = new RequestError(err, "Sistem: Güvenli Alan anahtarı sıfırlanamadı");
             errorAlert(err);
             resolve();
             return;
@@ -52829,26 +52802,26 @@ function New(self) {
     self.formattedStatus = function () {
         if (!this.status) {
             if (this.system && this.state) {
-                return "Connecting";
+                return "Bağlanıyor";
             }
-            return "Disconnected";
+            return "Bağlantı Kesildi";
         }
         switch (this.status) {
             case "connected":
-                return "Connected";
+                return "Bağlı";
             case "connecting":
-                return "Connecting";
+                return "Bağlanıyor";
             case "disconnected":
-                return "Disconnected";
+                return "Bağlantı Kesildi";
             case "authenticating":
-                return "Authenticating";
+                return "Kimlik Doğrulanıyor";
             case "reconnecting":
-                return "Reconnecting";
+                return "Yeniden Bağlanıyor";
             case "disconnecting":
                 if (this.system && this.state) {
-                    return "Reconnecting";
+                    return "Yeniden Bağlanıyor";
                 }
-                return "Disconnecting";
+                return "Bağlantı Kesiliyor";
             default:
                 return this.status;
         }
@@ -52867,36 +52840,20 @@ function New(self) {
             hasDays = true;
             units = Math.floor(uptime / 86400);
             uptime -= units * 86400;
-            unitStr = units + " day";
-            if (units > 1) {
-                unitStr += "s";
-            }
-            uptimeItems.push(unitStr);
+            uptimeItems.push(units + " gün");
         }
         if (uptime > 3600) {
             units = Math.floor(uptime / 3600);
             uptime -= units * 3600;
-            unitStr = units + " hour";
-            if (units > 1) {
-                unitStr += "s";
-            }
-            uptimeItems.push(unitStr);
+            uptimeItems.push(units + " saat");
         }
         if (uptime > 60) {
             units = Math.floor(uptime / 60);
             uptime -= units * 60;
-            unitStr = units + " min";
-            if (units > 1) {
-                unitStr += "s";
-            }
-            uptimeItems.push(unitStr);
+            uptimeItems.push(units + " dk");
         }
         if (uptime && !hasDays) {
-            unitStr = uptime + " sec";
-            if (uptime > 1) {
-                unitStr += "s";
-            }
-            uptimeItems.push(unitStr);
+            uptimeItems.push(uptime + " sn");
         }
         return uptimeItems.join(" ");
     };
@@ -53007,7 +52964,7 @@ function New(self) {
             if (platform === "darwin") {
                 let resp = await exec("/usr/bin/security", "find-generic-password", "-w", "-s", "pritunl", "-a", this.id);
                 if (resp.error) {
-                    let err = new ReadError(resp.error, "Profiles: Failed to get key from keychain");
+                    let err = new ReadError(resp.error, "Profiller: Anahtar zincirinden anahtar alınamadı");
                     errorAlert(err);
                     return data;
                 }
@@ -53183,7 +53140,7 @@ function New(self) {
                 .end();
         }
         catch (err) {
-            err = new RequestError(err, "Profiles: Failed to save system profile");
+            err = new RequestError(err, "Profiller: Sistem profili kaydedilemedi");
             errorAlert(err);
             sync();
             return;
@@ -53196,7 +53153,7 @@ function New(self) {
             return;
         }
         if (this.force_connect) {
-            let err = new WriteError(null, "Profiles: Profile autostart enforced by server", { profile_id: this.id });
+            let err = new WriteError(null, "Profiller: Profil otomatik başlatması sunucu tarafından zorunlu kılınmış", { profile_id: this.id });
             errorAlert(err, 10);
             return;
         }
@@ -53210,7 +53167,7 @@ function New(self) {
                 .end();
         }
         catch (err) {
-            err = new RequestError(err, "Profiles: Failed to delete system profile");
+            err = new RequestError(err, "Profiller: Sistem profili silinemedi");
             errorAlert(err);
             sync();
             return;
@@ -53232,7 +53189,7 @@ function New(self) {
                     resolve();
                     sync();
                 }, (err) => {
-                    err = new RequestError(err, "Profiles: Failed to save system profile");
+                    err = new RequestError(err, "Profiller: Sistem profili kaydedilemedi");
                     errorAlert(err);
                     resolve();
                     return;
@@ -53243,7 +53200,7 @@ function New(self) {
             let profilePath = this.confPath();
             external_fs_default().writeFile(profilePath, this.exportConf(), (err) => {
                 if (err) {
-                    err = new ReadError(err, "Profiles: Profile write error", { profile_path: profilePath });
+                    err = new ReadError(err, "Profiller: Profil yazma hatası", { profile_path: profilePath });
                     errorAlert(err, 10);
                     resolve();
                     return;
@@ -53292,7 +53249,7 @@ function New(self) {
                     resolve();
                     sync();
                 }, (err) => {
-                    err = new RequestError(err, "Profiles: Failed to save system profile");
+                    err = new RequestError(err, "Profiller: Sistem profili kaydedilemedi");
                     errorAlert(err);
                     resolve();
                     return;
@@ -53305,7 +53262,7 @@ function New(self) {
                 this.extractKey(data).then((newData) => {
                     external_fs_default().writeFile(profilePath, newData, (err) => {
                         if (err) {
-                            err = new WriteError(err, "Profiles: Profile write error", { profile_path: profilePath });
+                            err = new WriteError(err, "Profiller: Profil yazma hatası", { profile_path: profilePath });
                             errorAlert(err, 10);
                             resolve();
                             return;
@@ -53318,7 +53275,7 @@ function New(self) {
                 this.encryptKey(data).then((newData) => {
                     external_fs_default().writeFile(profilePath, newData, (err) => {
                         if (err) {
-                            err = new WriteError(err, "Profiles: Profile write error", { profile_path: profilePath });
+                            err = new WriteError(err, "Profiller: Profil yazma hatası", { profile_path: profilePath });
                             errorAlert(err, 10);
                             resolve();
                             return;
@@ -53337,7 +53294,7 @@ function New(self) {
             logData = resp.data;
         }
         catch (err) {
-            err = new RequestError(err, "Profiles: Profile log request error");
+            err = new RequestError(err, "Profiller: Profil günlük isteği hatası");
             errorAlert(err, 10);
         }
         return logData;
@@ -53348,7 +53305,7 @@ function New(self) {
                 .end();
         }
         catch (err) {
-            err = new RequestError(err, "Profiles: Profile log request error");
+            err = new RequestError(err, "Profiller: Profil günlük isteği hatası");
             errorAlert(err, 10);
         }
     };
@@ -53518,18 +53475,18 @@ function New(self) {
                     let err;
                     switch (resp.status) {
                         case 480:
-                            Logger_info("Profiles: Skipping profile sync, requires subscription");
+                            Logger_info("Profiller: Profil eşitlemesi atlanıyor, abonelik gerekli");
                             break;
                         case 404:
-                            err = new RequestError(null, "Profiles: Failed to sync profile, user not found");
+                            err = new RequestError(null, "Profiller: Profil eşitlenemedi, kullanıcı bulunamadı");
                             reject(err);
                             return;
                         case 401:
-                            err = new RequestError(null, "Profiles: Failed to sync profile, authentication failed");
+                            err = new RequestError(null, "Profiller: Profil eşitlenemedi, kimlik doğrulama başarısız");
                             reject(err);
                             return;
                         default:
-                            err = new RequestError(null, "Profiles: Failed to sync profile, status: " + resp.status);
+                            err = new RequestError(null, "Profiller: Profil eşitlenemedi, durum: " + resp.status);
                             reject(err);
                             return;
                     }
@@ -53550,13 +53507,13 @@ function New(self) {
                 }
                 let confSignature = external_crypto_default().createHmac("sha512", this.sync_secret).update(syncData.conf).digest("base64");
                 if (confSignature !== syncData.signature) {
-                    let err = new ParseError(null, "Profiles: Failed to sync profile, signature invalid");
+                    let err = new ParseError(null, "Profiller: Profil eşitlenemedi, imza geçersiz");
                     reject(err);
                     return;
                 }
                 resolve(syncData.conf);
             }, (err) => {
-                err = new RequestError(err, "Profiles: Failed to sync profile configuration");
+                err = new RequestError(err, "Profiller: Profil yapılandırması eşitlenemedi");
                 reject(err);
                 return;
             });
@@ -53606,7 +53563,7 @@ function New(self) {
                 await this._importSync(syncData);
             }
             catch (err) {
-                err = new ParseError(err, "Profiles: Failed to parse profile sync", { profile_id: this.id });
+                err = new ParseError(err, "Profiller: Profil eşitlemesi ayrıştırılamadı", { profile_id: this.id });
                 Logger_error(err);
                 this.sync_time = -1;
                 await this.writeConf();
@@ -53819,14 +53776,14 @@ function loadSystemProfiles() {
             .end()
             .then((resp) => {
             if (resp.status !== 200) {
-                let err = new ReadError(null, "Profiles: Failed to load service profiles", { body: resp.data });
+                let err = new ReadError(null, "Profiller: Hizmet profilleri yüklenemedi", { body: resp.data });
                 Logger_error(err);
                 resolve([]);
                 return;
             }
             resolve(resp.json());
         }, (err) => {
-            err = new RequestError(err, "Profiles: Service load error");
+            err = new RequestError(err, "Profiller: Hizmet yükleme hatası");
             errorAlert2(err);
             resolve([]);
             return;
@@ -53847,14 +53804,14 @@ function loadProfile(prflId, prflPath) {
                     mode = (stats.mode & 0o777).toString(8);
                 }
                 catch (err) {
-                    err = new ReadError(err, "Profiles: Failed to stat profile", { profile_path: prflPath });
+                    err = new ReadError(err, "Profiller: Profil bilgisi alınamadı", { profile_path: prflPath });
                     errorAlert(err);
                     return;
                 }
                 if (mode !== "600") {
                     external_fs_default().chmod(prflPath, 0o600, function (err) {
                         if (err) {
-                            err = new ReadError(err, "Profiles: Failed to stat profile", { profile_path: prflPath });
+                            err = new ReadError(err, "Profiller: Profil bilgisi alınamadı", { profile_path: prflPath });
                             errorAlert(err);
                         }
                     });
@@ -53869,14 +53826,14 @@ function loadProfile(prflId, prflPath) {
                     mode = (stats.mode & 0o777).toString(8);
                 }
                 catch (err) {
-                    err = new ReadError(err, "Profiles: Failed to stat profile ovpn", { profile_ovpn_path: ovpnPath });
+                    err = new ReadError(err, "Profiller: OVPN profil bilgisi alınamadı", { profile_ovpn_path: ovpnPath });
                     errorAlert(err);
                     return;
                 }
                 if (mode !== "600") {
                     external_fs_default().chmod(ovpnPath, 0o600, function (err) {
                         if (err) {
-                            err = new ReadError(err, "Profiles: Failed to stat profile ovpn", { profile_ovpn_path: ovpnPath });
+                            err = new ReadError(err, "Profiller: OVPN profil bilgisi alınamadı", { profile_ovpn_path: ovpnPath });
                             errorAlert(err);
                         }
                     });
@@ -53891,14 +53848,14 @@ function loadProfile(prflId, prflPath) {
                     mode = (stats.mode & 0o777).toString(8);
                 }
                 catch (err) {
-                    err = new ReadError(err, "Profiles: Failed to stat profile log", { profile_log_path: logPath });
+                    err = new ReadError(err, "Profiller: Profil günlük bilgisi alınamadı", { profile_log_path: logPath });
                     errorAlert(err);
                     return;
                 }
                 if (mode !== "600") {
                     external_fs_default().chmod(logPath, 0o600, function (err) {
                         if (err) {
-                            err = new ReadError(err, "Profiles: Failed to stat profile log", { profile_log_path: logPath });
+                            err = new ReadError(err, "Profiller: Profil günlük bilgisi alınamadı", { profile_log_path: logPath });
                             errorAlert(err);
                         }
                     });
@@ -53907,7 +53864,7 @@ function loadProfile(prflId, prflPath) {
         }
         external_fs_default().readFile(prflPath, "utf-8", (err, data) => {
             if (err) {
-                err = new ReadError(err, "Profiles: Failed to read profile", { profile_log_path: logPath });
+                err = new ReadError(err, "Profiller: Profil okunamadı", { profile_log_path: logPath });
                 reject(err);
                 return;
             }
@@ -53917,13 +53874,13 @@ function loadProfile(prflId, prflPath) {
                 prfl.id = prflId;
             }
             catch (err) {
-                err = new ParseError(err, "Profiles: Failed to parse profile configuration", { profile_path: prflPath });
+                err = new ParseError(err, "Profiller: Profil yapılandırması ayrıştırılamadı", { profile_path: prflPath });
                 reject(err);
                 return;
             }
             external_fs_default().readFile(ovpnPath, "utf-8", (err, data) => {
                 if (err) {
-                    err = new ReadError(err, "Profiles: Failed to read profile", { profile_log_path: logPath });
+                    err = new ReadError(err, "Profiller: Profil okunamadı", { profile_log_path: logPath });
                     reject(err);
                     return;
                 }
@@ -53939,7 +53896,7 @@ function loadProfiles() {
         external_fs_default().stat(profilesPath, (err, stats) => {
             if (err) {
                 if (err.code !== "ENOENT") {
-                    err = new ReadError(err, "Profiles: Read error", { profiles_path: profilesPath });
+                    err = new ReadError(err, "Profiller: Okuma hatası", { profiles_path: profilesPath });
                     errorAlert(err);
                 }
                 resolve([]);
@@ -53947,7 +53904,7 @@ function loadProfiles() {
             }
             external_fs_default().readdir(profilesPath, async (err, filenames) => {
                 if (err) {
-                    err = new ReadError(err, "Profiles: Read error", { profiles_path: profilesPath });
+                    err = new ReadError(err, "Profiller: Okuma hatası", { profiles_path: profilesPath });
                     errorAlert(err);
                     resolve([]);
                     return;
@@ -53984,7 +53941,7 @@ function loadProfilesState() {
             .then((resp) => {
             resolve(resp.json());
         }, (err) => {
-            err = new RequestError(err, "Profiles: Status error");
+            err = new RequestError(err, "Profiller: Durum hatası");
             errorAlert2(err);
             resolve({});
             return;
@@ -54050,14 +54007,14 @@ function chart(prflId, resource, period, interval) {
             .end()
             .then((resp) => {
             if (resp.status !== 200) {
-                let err = new ReadError(null, "Profiles: Failed to load profile chart", { body: resp.data });
+                let err = new ReadError(null, "Profiller: Profil grafiği yüklenemedi", { body: resp.data });
                 errorAlert2(err);
                 reject(err);
                 return;
             }
             resolve(resp.json());
         }, (err) => {
-            err = new RequestError(err, "Profiles: Chart load error");
+            err = new RequestError(err, "Profiller: Grafik yükleme hatası");
             errorAlert2(err);
             reject(err);
             return;
@@ -54081,122 +54038,121 @@ dispatcher_EventDispatcher.register((action) => {
             if (action.data) {
                 let prfl = stores_ProfilesStore.profile(action.data.id);
                 if (prfl) {
-                    error("Failed to authenticate to " +
+                    error("Kimlik doğrulanamadı: " +
                         prfl.formattedName());
                     return;
                 }
             }
-            error("Failed to authenticate");
+            error("Kimlik doğrulama başarısız oldu");
             break;
         case "flatpak_tpm_missing":
             if (action.data) {
                 let prfl = stores_ProfilesStore.profile(action.data.id);
                 if (prfl) {
-                    error("Flatpak missing TPM access for device " +
-                        "authentication on " + prfl.formattedName() +
-                        ". Flatpak must have device access for " +
-                        "device authentication.");
+                    error("Flatpak'te cihaz doğrulaması için TPM erişimi " +
+                        "yok: " + prfl.formattedName() +
+                        ". Cihaz doğrulaması için Flatpak'ın cihaz erişimine " +
+                        "sahip olması gerekir.");
                     return;
                 }
             }
-            error("Flatpak missing TPM access for device " +
-                "authentication. Flatpak must have device access for " +
-                "device authentication.");
+            error("Flatpak'te cihaz doğrulaması için TPM erişimi yok. " +
+                "Cihaz doğrulaması için Flatpak'ın cihaz erişimine sahip " +
+                "olması gerekir.");
             break;
         case "flatpak_tpm_unauthorized":
             if (action.data) {
                 let prfl = stores_ProfilesStore.profile(action.data.id);
                 if (prfl) {
-                    error("Permission denied accessing TPM for device " +
-                        "authentication on " + prfl.formattedName() +
-                        ". Flatpak has access to the TPM device but " +
-                        "does not have permission to open it. Update the " +
-                        "udev rules to provide access.");
+                    error("Cihaz doğrulaması için TPM'e erişim izni " +
+                        "reddedildi: " + prfl.formattedName() +
+                        ". Flatpak TPM cihazına erişebiliyor ancak açma izni " +
+                        "yok. Erişim sağlamak için udev kurallarını " +
+                        "güncelleyin.");
                     return;
                 }
             }
-            error("Permission denied accessing TPM for device " +
-                "authentication. Flatpak has access to the TPM device but " +
-                "does not have permission to open it. Update the udev rules to " +
-                "provide access.");
+            error("Cihaz doğrulaması için TPM'e erişim izni reddedildi. " +
+                "Flatpak TPM cihazına erişebiliyor ancak açma izni yok. " +
+                "Erişim sağlamak için udev kurallarını güncelleyin.");
             break;
         case "inactive":
             if (action.data) {
                 let prfl = stores_ProfilesStore.profile(action.data.id);
                 if (prfl) {
-                    error("Disconnected due to inactivity on " +
+                    error("Hareketsizlik nedeniyle bağlantı kesildi: " +
                         prfl.formattedName());
                     return;
                 }
             }
-            error("Disconnected due to inactivity");
+            error("Hareketsizlik nedeniyle bağlantı kesildi");
             break;
         case "timeout_error":
             if (action.data) {
                 let prfl = stores_ProfilesStore.profile(action.data.id);
                 if (prfl) {
-                    error("Connection timed out on " +
+                    error("Bağlantı zaman aşımına uğradı: " +
                         prfl.formattedName());
                     return;
                 }
             }
-            error("Connection timed out");
+            error("Bağlantı zaman aşımına uğradı");
             break;
         case "offline_error":
             if (action.data) {
                 let prfl = stores_ProfilesStore.profile(action.data.id);
                 if (prfl) {
-                    error("Server is offline on " +
+                    error("Sunucu çevrimdışı: " +
                         prfl.formattedName());
                     return;
                 }
             }
-            error("Connection timed out");
+            error("Bağlantı zaman aşımına uğradı");
             break;
         case "connection_error":
             if (action.data) {
                 let prfl = stores_ProfilesStore.profile(action.data.id);
                 if (prfl) {
-                    error("Failed to connect to " +
+                    error("Bağlanılamadı: " +
                         prfl.formattedName());
                     return;
                 }
             }
-            error("Failed to connect");
+            error("Bağlantı kurulamadı");
             break;
         case "handshake_timeout":
             if (action.data) {
                 let prfl = stores_ProfilesStore.profile(action.data.id);
                 if (prfl) {
-                    error("Handshake timeout on " +
+                    error("El sıkışma zaman aşımı: " +
                         prfl.formattedName());
                     return;
                 }
             }
-            error("Handshake timeout");
+            error("El sıkışma zaman aşımı");
             break;
         case "configuration_error":
             if (action.data) {
                 let prfl = stores_ProfilesStore.profile(action.data.id);
                 if (prfl) {
-                    error("Configuration error on " +
+                    error("Yapılandırma hatası: " +
                         prfl.formattedName());
                     return;
                 }
             }
-            error("Handshake timeout");
+            error("El sıkışma zaman aşımı");
             break;
         case "sso_auth":
-            let ssoAuthMsg = "Connection requires single sign-on authentication. " +
-                "Complete authentication in web browser. Copy the link below if " +
-                "the web browser did not open.";
+            let ssoAuthMsg = "Bağlantı tek oturum açma kimlik doğrulaması " +
+                "gerektiriyor. Kimlik doğrulamayı web tarayıcısında tamamlayın. " +
+                "Tarayıcı açılmadıysa aşağıdaki bağlantıyı kopyalayın.";
             if (action.data) {
                 let prfl = stores_ProfilesStore.profile(action.data.id);
                 if (prfl) {
-                    ssoAuthMsg = "Connection to \"" +
-                        prfl.formattedName() + "\" requires single sign-on " +
-                        "authentication. Complete authentication in web browser. " +
-                        "Copy the link below if the web browser did not open.";
+                    ssoAuthMsg = "\"" + prfl.formattedName() + "\" bağlantısı " +
+                        "tek oturum açma kimlik doğrulaması gerektiriyor. Kimlik " +
+                        "doğrulamayı web tarayıcısında tamamlayın. Tarayıcı " +
+                        "açılmadıysa aşağıdaki bağlantıyı kopyalayın.";
                 }
             }
             let ssoAuthElm = react.createElement("div", null,
@@ -54205,8 +54161,8 @@ dispatcher_EventDispatcher.register((action) => {
                         external_electron_default().ipcRenderer.send("control", "copy", action.data.url);
                         evt.currentTarget.className = "bp5-button bp5-intent-success " +
                             "bp5-icon-link";
-                        evt.currentTarget.innerText = "Link Copied";
-                    } }, "Copy Single Sign-On Link"));
+                        evt.currentTarget.innerText = "Bağlantı Kopyalandı";
+                    } }, "Tek Oturum A\u00E7ma Ba\u011Flant\u0131s\u0131n\u0131 Kopyala"));
             info(ssoAuthElm, 5);
             break;
         case "registration_required":
@@ -54217,12 +54173,12 @@ dispatcher_EventDispatcher.register((action) => {
                         prfl.registration_key = action.data.registration_key;
                         prfl.writeConf();
                     }
-                    error("Device registration required for " +
+                    error("Cihaz kaydı gerekli: " +
                         prfl.formattedName());
                     return;
                 }
             }
-            error("Failed to authenticate");
+            error("Kimlik doğrulama başarısız oldu");
             break;
         case "registration_pass":
             if (action.data) {
@@ -54270,7 +54226,7 @@ function ConfigActions_sync() {
             if (loader) {
                 loader.done();
             }
-            err = new RequestError(err, "Actions: Config load error");
+            err = new RequestError(err, "Eylemler: Yapılandırma yükleme hatası");
             errorAlert(err);
             resolve();
         });
@@ -54293,7 +54249,7 @@ function ConfigActions_commit(config) {
             if (loader) {
                 loader.done();
             }
-            err = new RequestError(err, "Actions: Config commit failed");
+            err = new RequestError(err, "Eylemler: Yapılandırma kaydedilemedi");
             errorAlert(err);
             resolve();
             ConfigActions_sync();
@@ -54325,7 +54281,7 @@ function ZeroTypes_New(self) {
         }
         let keyName;
         if (this.ssh_card_serial) {
-            keyName = "Smart Card";
+            keyName = "Akıllı Kart";
         }
         else {
             keyName = external_path_default().basename(this.public_key_path || "");
@@ -54351,18 +54307,18 @@ function ZeroTypes_New(self) {
     };
     self.formattedKey = function () {
         if (this.ssh_card_serial) {
-            return "Smart Card (" + this.ssh_card_serial + ")";
+            return "Akıllı Kart (" + this.ssh_card_serial + ")";
         }
         return this.public_key_path || "-";
     };
     self.formattedStatus = function () {
         if (!this.cert_paths || !this.cert_paths.length) {
-            return "No Certificate";
+            return "Sertifika Yok";
         }
         if (this.certValid()) {
-            return "Valid";
+            return "Geçerli";
         }
-        return "Expired";
+        return "Süresi Dolmuş";
     };
     self.formattedExpires = function () {
         if (!this.cert_paths || !this.cert_paths.length ||
@@ -54424,7 +54380,7 @@ function ZeroTypes_New(self) {
             }
         }
         catch (err) {
-            err = new WriteError(err, "Zero: SSH write error", { zero_path: zeroPath });
+            err = new WriteError(err, "Zero: SSH yazma hatası", { zero_path: zeroPath });
             errorAlert(err, 10);
         }
     };
@@ -54637,18 +54593,18 @@ function sanitizeHost(hostData) {
 function validateCertData(certData) {
     if (!certData || typeof certData !== "object" ||
         Array.isArray(certData)) {
-        throw new ParseError(null, "Zeros: Invalid certificate response received from server");
+        throw new ParseError(null, "Zero: Sunucudan geçersiz sertifika yanıtı alındı");
     }
     let certificates = [];
     let certsData = certData.certificates || [];
     if (!Array.isArray(certsData) ||
         certsData.length > MAX_CERT_ENTRIES) {
-        throw new ParseError(null, "Zeros: Invalid certificates received from server");
+        throw new ParseError(null, "Zero: Sunucudan geçersiz sertifikalar alındı");
     }
     for (let certItem of certsData) {
         let cert = sanitizeCertificate(certItem);
         if (!cert) {
-            throw new ParseError(null, "Zeros: Invalid certificate received from server");
+            throw new ParseError(null, "Zero: Sunucudan geçersiz sertifika alındı");
         }
         certificates.push(cert);
     }
@@ -54656,12 +54612,12 @@ function validateCertData(certData) {
     let authoritiesData = certData.certificate_authorities || [];
     if (!Array.isArray(authoritiesData) ||
         authoritiesData.length > MAX_CERT_ENTRIES) {
-        throw new ParseError(null, "Zeros: Invalid certificate authorities received from server");
+        throw new ParseError(null, "Zero: Sunucudan geçersiz sertifika yetkilileri alındı");
     }
     for (let authorityItem of authoritiesData) {
         let authority = sanitizeCertAuthority(authorityItem);
         if (!authority) {
-            throw new ParseError(null, "Zeros: Invalid certificate authority received from server");
+            throw new ParseError(null, "Zero: Sunucudan geçersiz sertifika yetkilisi alındı");
         }
         certificateAuthorities.push(authority);
     }
@@ -54669,12 +54625,12 @@ function validateCertData(certData) {
     let hostsData = certData.hosts || [];
     if (!Array.isArray(hostsData) ||
         hostsData.length > MAX_CERT_ENTRIES) {
-        throw new ParseError(null, "Zeros: Invalid hosts received from server");
+        throw new ParseError(null, "Zero: Sunucudan geçersiz ana bilgisayarlar alındı");
     }
     for (let hostItem of hostsData) {
         let host = sanitizeHost(hostItem);
         if (!host) {
-            throw new ParseError(null, "Zeros: Invalid host received from server");
+            throw new ParseError(null, "Zero: Sunucudan geçersiz ana bilgisayar alındı");
         }
         hosts.push(host);
     }
@@ -54844,7 +54800,7 @@ async function certFilePaths(zero) {
 async function certValidTo(certPth) {
     let resp = await exec("ssh-keygen", "-L", "-f", certPth);
     if (resp.error) {
-        Logger_warning(new ExecError(resp.error, "Zeros: Failed to get certificate expiration", { cert_path: certPth }));
+        Logger_warning(new ExecError(resp.error, "Zero: Sertifika bitiş tarihi alınamadı", { cert_path: certPth }));
         return 0;
     }
     for (let line of resp.stdout.split("\n")) {
@@ -54937,21 +54893,21 @@ async function loadPubKey(zero) {
     if (zero.ssh_card_serial) {
         let card = await getSmartCard();
         if (!card) {
-            throw new ReadError(null, "Zeros: Missing Smart Card, if card is connected " +
-                "try Reset GPG");
+            throw new ReadError(null, "Zero: Akıllı kart bulunamadı. Kart takılıysa GPG'yi " +
+                "Sıfırla'yı deneyin");
         }
         if (card.serial !== zero.ssh_card_serial) {
-            throw new ReadError(null, "Zeros: Incorrect Smart Card serial, insert correct " +
-                "card and remove any other Smart Cards");
+            throw new ReadError(null, "Zero: Akıllı kart seri numarası yanlış. Doğru kartı takın " +
+                "ve diğer akıllı kartları çıkarın");
         }
         return card.pubKey;
     }
     let pubKeyPath = expandPath(zero.public_key_path || "");
     if (!pubKeyPath.endsWith(".pub")) {
-        throw new ReadError(null, "Zeros: SSH key path must end with .pub", { public_key_path: zero.public_key_path });
+        throw new ReadError(null, "Zero: SSH anahtar yolu .pub ile bitmelidir", { public_key_path: zero.public_key_path });
     }
     if (!await fileExists(pubKeyPath)) {
-        throw new ReadError(null, "Zeros: Selected SSH key does not exist", { public_key_path: zero.public_key_path });
+        throw new ReadError(null, "Zero: Seçilen SSH anahtarı mevcut değil", { public_key_path: zero.public_key_path });
     }
     let pubKeyData = await fileRead(pubKeyPath);
     return pubKeyData.trim();
@@ -54960,7 +54916,7 @@ async function renew(zero, onStatus, onApproval, controller) {
     let pubKeyData = await loadPubKey(zero);
     let secure = strictSsl(zero.server);
     if (onStatus) {
-        onStatus("Requesting certificate");
+        onStatus("Sertifika isteniyor");
     }
     let resp;
     try {
@@ -54983,7 +54939,7 @@ async function renew(zero, onStatus, onApproval, controller) {
         }
     }
     catch (err) {
-        throw new RequestError(err, "Zeros: SSH challenge request failed");
+        throw new RequestError(err, "Zero: SSH doğrulama isteği başarısız oldu");
     }
     if (!resp || (controller && controller.cancelled)) {
         return false;
@@ -54991,9 +54947,9 @@ async function renew(zero, onStatus, onApproval, controller) {
     if (resp.status !== 200) {
         let errMsg = respError(resp);
         if (errMsg) {
-            throw new RequestError(null, "Zeros: " + errMsg);
+            throw new RequestError(null, "Zero: " + errMsg);
         }
-        throw new RequestError(null, "Zeros: SSH challenge request failed with status " +
+        throw new RequestError(null, "Zero: SSH doğrulama isteği şu durumla başarısız oldu: " +
             resp.status);
     }
     let token;
@@ -55001,18 +54957,18 @@ async function renew(zero, onStatus, onApproval, controller) {
         token = resp.json().token;
     }
     catch (err) {
-        throw new ParseError(err, "Zeros: Failed to parse challenge response");
+        throw new ParseError(err, "Zero: Doğrulama yanıtı ayrıştırılamadı");
     }
     if (!token || typeof token !== "string" ||
         token.length > MAX_TOKEN_LEN || !TOKEN_RE.test(token)) {
-        throw new ParseError(null, "Zeros: Invalid token received from server");
+        throw new ParseError(null, "Zero: Sunucudan geçersiz belirteç alındı");
     }
     let tokenUrl = zero.server + "/ssh?ssh-token=" + token;
     if (onApproval) {
         onApproval(tokenUrl);
     }
     if (onStatus) {
-        onStatus("Complete verification in web browser");
+        onStatus("Doğrulamayı web tarayıcısında tamamlayın");
     }
     resp = null;
     for (let i = 0; i < 10; i++) {
@@ -55053,38 +55009,38 @@ async function renew(zero, onStatus, onApproval, controller) {
         break;
     }
     if (!resp || resp.status === 205) {
-        throw new RequestError(null, "Zeros: SSH verification request timed out");
+        throw new RequestError(null, "Zero: SSH doğrulama isteği zaman aşımına uğradı");
     }
     else if (resp.status === 401) {
-        throw new RequestError(null, "Zeros: SSH verification request was denied");
+        throw new RequestError(null, "Zero: SSH doğrulama isteği reddedildi");
     }
     else if (resp.status === 404) {
-        throw new RequestError(null, "Zeros: SSH verification request has expired");
+        throw new RequestError(null, "Zero: SSH doğrulama isteğinin süresi doldu");
     }
     else if (resp.status !== 200) {
         let errMsg = respError(resp);
         if (errMsg) {
-            throw new RequestError(null, "Zeros: " + errMsg);
+            throw new RequestError(null, "Zero: " + errMsg);
         }
-        throw new RequestError(null, "Zeros: SSH verification failed with status " + resp.status);
+        throw new RequestError(null, "Zero: SSH doğrulama şu durumla başarısız oldu: " + resp.status);
     }
     let certData;
     try {
         certData = resp.json();
     }
     catch (err) {
-        throw new ParseError(err, "Zeros: Failed to parse certificate response");
+        throw new ParseError(err, "Zero: Sertifika yanıtı ayrıştırılamadı");
     }
     let validData = validateCertData(certData);
     if (certData.token !== token) {
-        throw new ParseError(null, "Zeros: Token mismatch in certificate response");
+        throw new ParseError(null, "Zero: Sertifika yanıtındaki belirteç uyuşmuyor");
     }
     let certificates = validData.certificates;
     if (controller && controller.cancelled) {
         return false;
     }
     if (onStatus) {
-        onStatus("Writing certificates");
+        onStatus("Sertifikalar yazılıyor");
     }
     if (!await fileExists(zero.confPath())) {
         return false;
@@ -55152,7 +55108,7 @@ async function syncKnownHosts(zeros, knownHostsPth) {
         for (let authorityData of zero.certificate_authorities || []) {
             let certAuthority = sanitizeCertAuthority(authorityData);
             if (!certAuthority) {
-                Logger_warning(new ParseError(null, "Zeros: Skipping invalid certificate authority", { zero_id: zero.id }));
+                Logger_warning(new ParseError(null, "Zero: Geçersiz sertifika yetkilisi atlanıyor", { zero_id: zero.id }));
                 continue;
             }
             let line = certAuthority + " # pritunl-zero\n";
@@ -55213,7 +55169,7 @@ async function syncSshConfig(zeros, configPth) {
         for (let certHostData of zero.hosts || []) {
             let certHost = sanitizeHost(certHostData);
             if (!certHost) {
-                Logger_warning(new ParseError(null, "Zeros: Skipping invalid host configuration", { zero_id: zero.id }));
+                Logger_warning(new ParseError(null, "Zero: Geçersiz ana bilgisayar yapılandırması atlanıyor", { zero_id: zero.id }));
                 continue;
             }
             if (!certHost.strict_host_checking && !certHost.proxy_host) {
@@ -55311,12 +55267,12 @@ async function syncSshState(zeros, extra) {
 async function registerUrl(zero) {
     let card = await getSmartCard();
     if (!card) {
-        throw new ReadError(null, "Zeros: Missing Smart Card, if card is connected " +
-            "try Reset GPG");
+        throw new ReadError(null, "Zero: Akıllı Kart bulunamadı; kart takılıysa " +
+            "GPG'yi Sıfırla seçeneğini deneyin");
     }
     if (zero.ssh_card_serial && card.serial !== zero.ssh_card_serial) {
-        throw new ReadError(null, "Zeros: Incorrect Smart Card serial, insert correct " +
-            "card and remove any other Smart Cards");
+        throw new ReadError(null, "Zero: Akıllı Kart seri numarası yanlış; doğru kartı " +
+            "takın ve diğer tüm Akıllı Kartları çıkarın");
     }
     let deviceKey = Buffer.from(card.pubKey, "utf-8").toString("base64")
         .replace(/\+/g, "-").replace(/\//g, "_");
@@ -55356,7 +55312,7 @@ function loadZero(zeroId, zeroPath) {
     return new Promise((resolve, reject) => {
         external_fs_default().readFile(zeroPath, "utf-8", (err, data) => {
             if (err) {
-                err = new ReadError(err, "Zeros: Failed to read zero", { zero_path: zeroPath });
+                err = new ReadError(err, "Zero: Zero yapılandırması okunamadı", { zero_path: zeroPath });
                 reject(err);
                 return;
             }
@@ -55366,7 +55322,7 @@ function loadZero(zeroId, zeroPath) {
                 zero.id = zeroId;
             }
             catch (err) {
-                err = new ParseError(err, "Zeros: Failed to parse zero configuration", { zero_path: zeroPath });
+                err = new ParseError(err, "Zero: Zero yapılandırması ayrıştırılamadı", { zero_path: zeroPath });
                 reject(err);
                 return;
             }
@@ -55380,7 +55336,7 @@ function loadZeros() {
         external_fs_default().stat(zerosPath, (err, stats) => {
             if (err) {
                 if (err.code !== "ENOENT") {
-                    err = new ReadError(err, "Zeros: Read error", { zeros_path: zerosPath });
+                    err = new ReadError(err, "Zero: Okuma hatası", { zeros_path: zerosPath });
                     errorAlert(err);
                 }
                 resolve([]);
@@ -55388,7 +55344,7 @@ function loadZeros() {
             }
             external_fs_default().readdir(zerosPath, async (err, filenames) => {
                 if (err) {
-                    err = new ReadError(err, "Zeros: Read error", { zeros_path: zerosPath });
+                    err = new ReadError(err, "Zero: Okuma hatası", { zeros_path: zerosPath });
                     errorAlert(err);
                     resolve([]);
                     return;
@@ -55477,8 +55433,8 @@ function openLinkAlert(url, message) {
                 external_electron_default().ipcRenderer.send("control", "copy", url);
                 evt.currentTarget.className = "bp5-button bp5-intent-success " +
                     "bp5-icon-link";
-                evt.currentTarget.innerText = "Link Copied";
-            } }, "Copy Link"));
+                evt.currentTarget.innerText = "Bağlantı Kopyalandı";
+            } }, "Ba\u011Flant\u0131y\u0131 Kopyala"));
     return info(linkElm, 30);
 }
 function cancelRenew(zero) {
@@ -55497,24 +55453,24 @@ async function ZeroActions_renew(zero, onStatus) {
     let alertId;
     try {
         let renewed = await renew(zero, onStatus, (url) => {
-            alertId = openLinkAlert(url, "Complete SSH certificate " +
-                "verification in web browser. Copy the link below if " +
-                "the web browser did not open.");
+            alertId = openLinkAlert(url, "SSH sertifikası doğrulamasını " +
+                "web tarayıcısında tamamlayın. Tarayıcı açılmadıysa " +
+                "aşağıdaki bağlantıyı kopyalayın.");
         }, controller);
         dismiss(alertId);
         if (renewed) {
             let zeros = await loadZerosModels();
             await syncSshState(zeros);
-            success("Successfully renewed SSH certificate", 3);
+            success("SSH sertifikası başarıyla yenilendi", 3);
         }
         else if (controller.cancelled) {
-            info("SSH certificate renewal cancelled", 3);
+            info("SSH sertifikası yenileme iptal edildi", 3);
         }
     }
     catch (err) {
         dismiss(alertId);
         if (controller.cancelled) {
-            info("SSH certificate renewal cancelled", 3);
+            info("SSH sertifikası yenileme iptal edildi", 3);
         }
         else {
             errorAlert(err, 10);
@@ -55547,7 +55503,7 @@ async function removeZero(zero) {
 async function importZero(data) {
     let serverUri = (data.server || "").trim();
     if (!serverUri) {
-        error("Enter Pritunl Zero server hostname");
+        error("Pritunl Zero sunucu ana bilgisayar adını girin");
         return false;
     }
     if (serverUri.indexOf("://") === -1) {
@@ -55559,18 +55515,18 @@ async function importZero(data) {
         server = "https://" + serverUrl.host;
     }
     catch {
-        error("Invalid Pritunl Zero server hostname");
+        error("Geçersiz Pritunl Zero sunucu ana bilgisayar adı");
         return false;
     }
     let publicKeyPath = "";
     if (!data.cardSerial) {
         publicKeyPath = collapsePath(data.publicKeyPath || "");
         if (!publicKeyPath.endsWith(".pub")) {
-            error("SSH key path must end with .pub");
+            error("SSH anahtar yolu .pub ile bitmelidir");
             return false;
         }
         if (!await fileExists(expandPath(publicKeyPath))) {
-            error("Selected SSH key does not exist");
+            error("Seçilen SSH anahtarı mevcut değil");
             return false;
         }
     }
@@ -55597,16 +55553,16 @@ async function importZero(data) {
     zero.public_key_path = publicKeyPath || null;
     zero.ssh_card_serial = data.cardSerial || null;
     await zero.writeConf();
-    success("Successfully imported Pritunl Zero profile");
+    success("Pritunl Zero profili başarıyla içe aktarıldı");
     await ZeroActions_sync();
     return true;
 }
 async function registerCard(zero) {
     try {
         let url = await registerUrl(zero);
-        openLinkAlert(url, "Complete Smart Card registration in " +
-            "web browser. Copy the link below if the web browser " +
-            "did not open.");
+        openLinkAlert(url, "Akıllı kart kaydını web tarayıcısında " +
+            "tamamlayın. Tarayıcı açılmadıysa aşağıdaki bağlantıyı " +
+            "kopyalayın.");
     }
     catch (err) {
         errorAlert(err, 10);
@@ -55614,7 +55570,7 @@ async function registerCard(zero) {
 }
 async function ZeroActions_resetGpg() {
     await resetGpg();
-    success("GPG agent reset");
+    success("GPG aracısı sıfırlandı");
 }
 async function listKeys() {
     let card = null;
@@ -55860,7 +55816,7 @@ class Help extends react.Component {
                                         ...this.state,
                                         popover: !this.state.popover,
                                     });
-                                } }, "Close"))));
+                                } }, "Kapat"))));
             }
             else {
                 helpElm = react.createElement("span", { className: "bp5-popover-target", style: Help_css.popoverTarget },
@@ -55956,7 +55912,7 @@ const PageInputFile_css = {
 };
 class PageInputFile extends react.Component {
     render() {
-        let label = this.props.value || "Choose profile file...";
+        let label = this.props.value || "Profil dosyası seçin...";
         return react.createElement("div", null,
             react.createElement("label", { className: "bp5-label", style: PageInputFile_css.label, hidden: this.props.hidden },
                 this.props.label,
@@ -56111,7 +56067,7 @@ class Importer {
             }
         }
         catch (e) {
-            let err = new ParseError(null, "Importer: Json parse error", { path: pth });
+            let err = new ParseError(null, "İçe Aktarıcı: JSON ayrıştırma hatası", { path: pth });
             Logger_error(err);
             confData = null;
         }
@@ -56163,7 +56119,7 @@ async function importFile(pth) {
         let imptr = new Importer();
         let size = await fileSize(pth);
         if (size > 3000000) {
-            error("Importer: File too large");
+            error("İçe Aktarıcı: Dosya çok büyük");
             return;
         }
         switch (external_path_default().extname(pth)) {
@@ -56175,7 +56131,7 @@ async function importFile(pth) {
                 await imptr.addTar(pth);
                 break;
             default:
-                let err = new ParseError(null, "Importer: Unsupported file type", { path: pth });
+                let err = new ParseError(null, "İçe Aktarıcı: Desteklenmeyen dosya türü", { path: pth });
                 errorAlert(err);
                 return;
         }
@@ -56223,16 +56179,16 @@ async function importUri(prflUri) {
         return;
     }
     if (resp.status === 404) {
-        error("Invalid or expired profile URI", 15);
+        error("Geçersiz veya süresi dolmuş profil URI'si", 15);
         return;
     }
     if (resp.status !== 200) {
-        error("HTTP error status " + resp.status + " received", 15);
+        error("HTTP hata durumu alındı: " + resp.status, 15);
         return;
     }
     let data = resp.jsonPassive();
     if (!data) {
-        error("No data received from server", 15);
+        error("Sunucudan veri alınamadı", 15);
         return;
     }
     for (let name in data) {
@@ -56267,10 +56223,7 @@ const ProfileImport_css = {
     button: {
         marginRight: "10px",
     },
-    dialog: {
-        width: "340px",
-        position: "absolute",
-    },
+    dialog: {},
     group: {
         margin: "0 0 15px 0",
     },
@@ -56372,8 +56325,8 @@ class ProfileImport extends react.Component {
                     this.state.zeroSelectedKey;
             }
             if (!cardSerial && !publicKeyPath) {
-                error("No SSH key selected, run \"ssh-keygen -t ed25519\" " +
-                    "to create a key");
+                error("SSH anahtarı seçilmedi. Anahtar oluşturmak için " +
+                    "\"ssh-keygen -t ed25519\" komutunu çalıştırın.");
                 return;
             }
             this.setState({
@@ -56393,9 +56346,8 @@ class ProfileImport extends react.Component {
                     return;
                 }
                 if (cardSerial) {
-                    info("Smart Card must be registered with Pritunl " +
-                        "Zero, use Register Card on the profile to register " +
-                        "the device", 10);
+                    info("Akıllı kartın Pritunl Zero'ya kaydedilmesi gerekir. " +
+                        "Cihazı kaydetmek için profildeki Kart Kaydet'i kullanın.", 10);
                 }
                 this.setState({
                     ...this.state,
@@ -56471,17 +56423,17 @@ class ProfileImport extends react.Component {
         }
         let zeroKeyOptions = [];
         if (this.state.zeroCard) {
-            zeroKeyOptions.push(react.createElement("option", { key: "card", value: "card" }, "Smart Card (" + this.state.zeroCard.serial + ")"));
+            zeroKeyOptions.push(react.createElement("option", { key: "card", value: "card" }, "Akıllı Kart (" + this.state.zeroCard.serial + ")"));
         }
         for (let key of this.state.zeroKeys) {
             zeroKeyOptions.push(react.createElement("option", { key: key, value: key }, key));
         }
         if (!zeroKeyOptions.length) {
-            zeroKeyOptions.push(react.createElement("option", { key: "", value: "" }, "No SSH keys found"));
+            zeroKeyOptions.push(react.createElement("option", { key: "", value: "" }, "SSH anahtar\u0131 bulunamad\u0131"));
         }
         return react.createElement("div", { style: ProfileImport_css.box },
-            react.createElement("button", { className: "bp5-button bp5-minimal bp5-icon-import", style: this.props.style, type: "button", disabled: this.state.disabled, onClick: this.openDialog }, "Import"),
-            react.createElement(Dialog, { title: "Import Profile", style: ProfileImport_css.dialog, isOpen: this.state.dialog, usePortal: true, portalContainer: document.body, onClose: this.closeDialog },
+            react.createElement("button", { className: "bp5-button bp5-minimal bp5-icon-import", style: this.props.style, type: "button", disabled: this.state.disabled, onClick: this.openDialog }, "\u0130\u00E7e Aktar"),
+            react.createElement(Dialog, { title: "Profil \u0130\u00E7e Aktar", className: "profile-import-dialog", style: ProfileImport_css.dialog, isOpen: this.state.dialog, usePortal: true, portalContainer: document.body, onClose: this.closeDialog },
                 react.createElement("div", { className: "bp5-dialog-body" },
                     react.createElement("div", { className: "bp5-button-group bp5-fill", style: ProfileImport_css.group, hidden: process.platform === 'win32' ||
                             !this.state.zeroAvailable },
@@ -56494,7 +56446,7 @@ class ProfileImport extends react.Component {
                                 this.setMode("zero");
                             } }, "Pritunl Zero")),
                     react.createElement("div", { hidden: zeroMode },
-                        react.createElement(PageInput, { disabled: this.state.disabled, label: "Profile URI", help: "Profile URI as shown in the Pritunl server web console.", type: "text", placeholder: "Enter URI", value: this.state.uri, onChange: (val) => {
+                        react.createElement(PageInput, { disabled: this.state.disabled, label: "Profil URI'si", help: "Pritunl sunucu web konsolunda g\u00F6sterilen profil URI'si.", type: "text", placeholder: "URI girin", value: this.state.uri, onChange: (val) => {
                                 this.setState({
                                     ...this.state,
                                     changed: true,
@@ -56503,7 +56455,7 @@ class ProfileImport extends react.Component {
                                     fullPath: "",
                                 });
                             } }),
-                        react.createElement(PageInputFile, { disabled: this.state.disabled, label: "Import Profile", help: "Select profile file in tar, zip, ovpn or conf format.", accept: ".ovpn,.conf,.tar,.zip", value: this.state.path, onChange: (val) => {
+                        react.createElement(PageInputFile, { disabled: this.state.disabled, label: "Profil \u0130\u00E7e Aktar", help: "tar, zip, ovpn veya conf bi\u00E7imindeki profil dosyas\u0131n\u0131 se\u00E7in.", accept: ".ovpn,.conf,.tar,.zip", value: this.state.path, onChange: (val) => {
                                 this.setState({
                                     ...this.state,
                                     changed: true,
@@ -56513,7 +56465,7 @@ class ProfileImport extends react.Component {
                                 });
                             } })),
                     react.createElement("div", { hidden: !zeroMode },
-                        react.createElement(PageInput, { disabled: this.state.disabled, label: "Pritunl Zero Server", help: "Pritunl Zero user hostname as shown in the Pritunl Zero web console.", type: "text", placeholder: "Enter server hostname", value: this.state.zeroServer, onChange: (val) => {
+                        react.createElement(PageInput, { disabled: this.state.disabled, label: "Pritunl Zero Sunucusu", help: "Pritunl Zero web konsolunda g\u00F6sterilen Pritunl Zero kullan\u0131c\u0131 ana bilgisayar ad\u0131.", type: "text", placeholder: "Sunucu ana bilgisayar ad\u0131n\u0131 girin", value: this.state.zeroServer, onChange: (val) => {
                                 this.setState({
                                     ...this.state,
                                     changed: true,
@@ -56521,8 +56473,8 @@ class ProfileImport extends react.Component {
                                 });
                             } }),
                         react.createElement("label", { className: "bp5-label", style: ProfileImport_css.label },
-                            "SSH Key",
-                            react.createElement(Help, { title: "SSH Key", content: "Select the SSH key or Smart Card device that will be signed by the Pritunl Zero server." }),
+                            "SSH Anahtar\u0131",
+                            react.createElement(Help, { title: "SSH Anahtar\u0131", content: "Pritunl Zero sunucusu taraf\u0131ndan imzalanacak SSH anahtar\u0131n\u0131 veya ak\u0131ll\u0131 kart cihaz\u0131n\u0131 se\u00E7in." }),
                             react.createElement("div", { className: "bp5-html-select", style: ProfileImport_css.selectBox },
                                 react.createElement("select", { style: ProfileImport_css.select, disabled: this.state.disabled, value: this.state.zeroSelectedKey, onChange: (evt) => {
                                         this.setState({
@@ -56533,7 +56485,7 @@ class ProfileImport extends react.Component {
                                             zeroFullPath: "",
                                         });
                                     } }, zeroKeyOptions))),
-                        react.createElement(PageInputFile, { disabled: this.state.disabled, label: "SSH Public Key File", help: "Select SSH public key file ending in .pub to use a key that is not in the SSH directory.", accept: ".pub", value: this.state.zeroPath, onChange: (val) => {
+                        react.createElement(PageInputFile, { disabled: this.state.disabled, label: "SSH Genel Anahtar Dosyas\u0131", help: "SSH dizininde olmayan bir anahtar\u0131 kullanmak i\u00E7in .pub ile biten SSH genel anahtar dosyas\u0131n\u0131 se\u00E7in.", accept: ".pub", value: this.state.zeroPath, onChange: (val) => {
                                 this.setState({
                                     ...this.state,
                                     changed: true,
@@ -56544,8 +56496,8 @@ class ProfileImport extends react.Component {
                             } }))),
                 react.createElement("div", { className: "bp5-dialog-footer" },
                     react.createElement("div", { className: "bp5-dialog-footer-actions" },
-                        react.createElement("button", { className: "bp5-button bp5-intent-danger bp5-icon-cross", type: "button", disabled: this.state.disabled, onClick: this.closeDialog }, "Cancel"),
-                        react.createElement("button", { className: "bp5-button bp5-intent-success bp5-icon-tick", type: "button", disabled: importDisabled, onClick: this.onImport }, "Import")))));
+                        react.createElement("button", { className: "bp5-button bp5-intent-danger bp5-icon-cross", type: "button", disabled: this.state.disabled, onClick: this.closeDialog }, "Vazge\u00E7"),
+                        react.createElement("button", { className: "bp5-button bp5-intent-success bp5-icon-tick", type: "button", disabled: importDisabled, onClick: this.onImport }, "\u0130\u00E7e Aktar")))));
     }
 }
 
@@ -60368,9 +60320,9 @@ class ConfirmButton extends react.Component {
         let confirmInput;
         if (this.props.confirmInput && !this.state.force) {
             confirmInput = react.createElement("label", { className: "bp5-label", style: ConfirmButton_css.label },
-                "Enter \"delete\" to confirm:",
-                react.createElement("input", { className: "bp5-input", style: ConfirmButton_css.input, disabled: this.props.disabled, autoCapitalize: "off", spellCheck: false, placeholder: 'Enter "delete" to confirm', value: this.state.input, onKeyDown: (evt) => {
-                        if (evt.key === "Enter" && this.state.input === 'delete') {
+                "Onaylamak i\u00E7in \"sil\" yaz\u0131n:",
+                react.createElement("input", { className: "bp5-input", style: ConfirmButton_css.input, disabled: this.props.disabled, autoCapitalize: "off", spellCheck: false, placeholder: 'Onaylamak i\u00E7in "sil" yaz\u0131n', value: this.state.input, onKeyDown: (evt) => {
+                        if (evt.key === "Enter" && this.state.input === 'sil') {
                             this.closeDialogConfirm();
                         }
                     }, onChange: (evt) => {
@@ -60382,7 +60334,7 @@ class ConfirmButton extends react.Component {
         }
         if (dialog) {
             let confirmMsg = this.props.confirmMsg ? this.props.confirmMsg :
-                'Confirm ' + (this.props.label || '');
+                'Onayla: ' + (this.props.label || '');
             let itemsList;
             if (this.props.items) {
                 let items = [];
@@ -60391,16 +60343,16 @@ class ConfirmButton extends react.Component {
                 }
                 itemsList = react.createElement("ul", null, items);
             }
-            let dialogElem = react.createElement(Dialog, { title: "Confirm", style: ConfirmButton_css.dialog, isOpen: this.state.dialog, usePortal: true, portalContainer: document.body, onClose: this.closeDialog },
+            let dialogElem = react.createElement(Dialog, { title: "Onayla", style: ConfirmButton_css.dialog, isOpen: this.state.dialog, usePortal: true, portalContainer: document.body, onClose: this.closeDialog },
                 react.createElement("div", { className: "bp5-dialog-body" },
                     confirmMsg,
                     itemsList,
                     confirmInput),
                 react.createElement("div", { className: "bp5-dialog-footer" },
                     react.createElement("div", { className: "bp5-dialog-footer-actions" },
-                        react.createElement("button", { className: "bp5-button", type: "button", onClick: this.closeDialog }, "Cancel"),
+                        react.createElement("button", { className: "bp5-button", type: "button", onClick: this.closeDialog }, "Vazge\u00E7"),
                         react.createElement("button", { className: 'bp5-button ' + dialogClassName, type: "button", disabled: this.props.confirmInput && !this.state.force &&
-                                this.state.input !== 'delete', onClick: this.closeDialogConfirm }, this.props.dialogLabel || this.props.label))));
+                                this.state.input !== 'sil', onClick: this.closeDialogConfirm }, this.props.dialogLabel || this.props.label))));
             if (this.props.menuItem) {
                 return react.createElement("div", null,
                     react.createElement(MenuItem, { key: "menu-new-unit", className: className, disabled: this.props.disabled, hidden: this.props.hidden, onClick: (evt) => {
@@ -60671,7 +60623,7 @@ function base32Decode(secret) {
     for (let i = 0; i < secret.length; i++) {
         let idx = base32Alphabet.indexOf(secret.charAt(i));
         if (idx === -1) {
-            throw new Error("Invalid base32 secret");
+            throw new Error("Geçersiz base32 anahtarı");
         }
         value = (value << 5) | idx;
         bits += 5;
@@ -60734,7 +60686,7 @@ function normalize(data) {
     };
 }
 function storageName() {
-    return isWindows ? "Windows DPAPI" : "macOS Keychain";
+    return isWindows ? "Windows DPAPI" : "macOS Anahtar Zinciri";
 }
 function windowsAuthPath(profileId) {
     let appData = {}.APPDATA;
@@ -60913,7 +60865,7 @@ async function connectProfile(prfl, mode, username, password, data) {
         return false;
     }
     if (!prfl.system) {
-        Logger_info("Profiles: Updating profile '" + prfl.id + "'");
+        Logger_info("Profiller: '" + prfl.id + "' profili güncelleniyor");
         await prfl.writeData(data);
     }
     let serverPubKey = "";
@@ -61005,10 +60957,7 @@ const ProfileConnect_css = {
         marginTop: "0",
         marginRight: "5px",
     },
-    dialog: {
-        width: "340px",
-        position: "absolute",
-    },
+    dialog: {},
     label: {
         width: "100%",
         maxWidth: "220px",
@@ -61331,11 +61280,11 @@ class ProfileConnect extends react.Component {
         let buttonLabel = "";
         if (connected) {
             buttonClass = "bp5-intent-danger bp5-icon-delete";
-            buttonLabel = "Disconnect";
+            buttonLabel = "Bağlantıyı Kes";
         }
         else {
             buttonClass = "bp5-intent-success bp5-icon-link";
-            buttonLabel = "Connect";
+            buttonLabel = "Bağlan";
         }
         let cssButton = ProfileConnect_css.button;
         let minimalButton = "";
@@ -61352,21 +61301,21 @@ class ProfileConnect extends react.Component {
                 } }, this.props.minimal ? "OVPN" : "OpenVPN"),
             react.createElement("button", { className: "bp5-button bp5-intent-primary bp5-icon-link" + minimalButton, style: cssButton, type: "button", hidden: !hasWg || connected, disabled: this.state.disabled, onClick: () => {
                     this.onConnect("wg");
-                } }, hideOvpn ? "Connect" : (this.props.minimal ? "WG" : "WireGuard")),
-            react.createElement(Dialog, { title: "Profile Connect", style: ProfileConnect_css.dialog, isOpen: this.state.dialog, usePortal: true, portalContainer: document.body, onClose: this.closeDialog },
+                } }, hideOvpn ? "Bağlan" : (this.props.minimal ? "WG" : "WireGuard")),
+            react.createElement(Dialog, { title: "Profile Ba\u011Flan", className: "profile-connect-dialog", style: ProfileConnect_css.dialog, isOpen: this.state.dialog, usePortal: true, portalContainer: document.body, onClose: this.closeDialog },
                 react.createElement("div", { className: "bp5-dialog-body" },
                     react.createElement("h3", { style: ProfileConnect_css.header },
-                        "Connecting to ",
-                        this.props.profile.formattedName()),
+                        this.props.profile.formattedName(),
+                        " profiline ba\u011Flan\u0131l\u0131yor"),
                     react.createElement("div", { style: ProfileConnect_css.preConnect, hidden: !this.props.profile.pre_connect_msg }, this.props.profile.pre_connect_msg),
-                    react.createElement(PageInput, { disabled: this.state.disabled, hidden: !this.state.hasUsername, label: "Username", help: "Enter profile username.", type: "text", placeholder: "Enter username", value: this.state.username, onChange: (val) => {
+                    react.createElement(PageInput, { disabled: this.state.disabled, hidden: !this.state.hasUsername, label: "Kullan\u0131c\u0131 Ad\u0131", help: "Profil kullan\u0131c\u0131 ad\u0131n\u0131 girin.", type: "text", placeholder: "Kullan\u0131c\u0131 ad\u0131 girin", value: this.state.username, onChange: (val) => {
                             this.setState({
                                 ...this.state,
                                 changed: true,
                                 username: val,
                             });
                         } }),
-                    react.createElement(PageInput, { disabled: this.state.disabled, hidden: !this.state.hasPassword, autoFocus: this.state.autoFocus === "password", label: "Password", help: "Enter profile password.", type: "password", placeholder: "Enter password", value: this.state.password, onKeyUp: (key) => {
+                    react.createElement(PageInput, { disabled: this.state.disabled, hidden: !this.state.hasPassword, autoFocus: this.state.autoFocus === "password", label: "Parola", help: "Profil parolas\u0131n\u0131 girin.", type: "password", placeholder: "Parola girin", value: this.state.password, onKeyUp: (key) => {
                             if (key === "Enter") {
                                 this.closeDialogConfirm();
                             }
@@ -61377,7 +61326,7 @@ class ProfileConnect extends react.Component {
                                 password: val,
                             });
                         } }),
-                    react.createElement(PageInput, { disabled: this.state.disabled, hidden: !this.state.hasPin, autoFocus: this.state.autoFocus === "pin", label: "Pin", help: "Enter profile pin.", type: "password", placeholder: "Enter pin", value: this.state.pin, onKeyUp: (key) => {
+                    react.createElement(PageInput, { disabled: this.state.disabled, hidden: !this.state.hasPin, autoFocus: this.state.autoFocus === "pin", label: "PIN", help: "Profil PIN'ini girin.", type: "password", placeholder: "PIN girin", value: this.state.pin, onKeyUp: (key) => {
                             if (key === "Enter") {
                                 this.closeDialogConfirm();
                             }
@@ -61388,7 +61337,7 @@ class ProfileConnect extends react.Component {
                                 pin: val,
                             });
                         } }),
-                    react.createElement(PageInput, { disabled: this.state.disabled, hidden: !this.state.hasDuo, autoFocus: this.state.autoFocus === "duo", label: "Duo Passcode", help: "Enter profile Duo passcode from Duo authenticator.", type: "text", placeholder: "Enter passcode", value: this.state.duo, onKeyUp: (key) => {
+                    react.createElement(PageInput, { disabled: this.state.disabled, hidden: !this.state.hasDuo, autoFocus: this.state.autoFocus === "duo", label: "Duo \u015Eifresi", help: "Duo do\u011Frulay\u0131c\u0131dan profil Duo \u015Fifresini girin.", type: "text", placeholder: "\u015Eifre girin", value: this.state.duo, onKeyUp: (key) => {
                             if (key === "Enter") {
                                 this.closeDialogConfirm();
                             }
@@ -61399,7 +61348,7 @@ class ProfileConnect extends react.Component {
                                 duo: val,
                             });
                         } }),
-                    react.createElement(PageInput, { disabled: this.state.disabled, hidden: !this.state.hasOnelogin, autoFocus: this.state.autoFocus === "onelogin", label: "OneLogin Passcode", help: "Enter profile OneLogin passcode from OneLogin authenticator app.", type: "text", placeholder: "Enter passcode", value: this.state.onelogin, onKeyUp: (key) => {
+                    react.createElement(PageInput, { disabled: this.state.disabled, hidden: !this.state.hasOnelogin, autoFocus: this.state.autoFocus === "onelogin", label: "OneLogin \u015Eifresi", help: "OneLogin do\u011Frulay\u0131c\u0131 uygulamas\u0131ndan profil OneLogin \u015Fifresini girin.", type: "text", placeholder: "\u015Eifre girin", value: this.state.onelogin, onKeyUp: (key) => {
                             if (key === "Enter") {
                                 this.closeDialogConfirm();
                             }
@@ -61410,7 +61359,7 @@ class ProfileConnect extends react.Component {
                                 onelogin: val,
                             });
                         } }),
-                    react.createElement(PageInput, { disabled: this.state.disabled, hidden: !this.state.hasOkta, autoFocus: this.state.autoFocus === "okta", label: "Okta Passcode", help: "Enter profile Okta passcode from Okta authenticator app.", type: "text", placeholder: "Enter passcode", value: this.state.okta, onKeyUp: (key) => {
+                    react.createElement(PageInput, { disabled: this.state.disabled, hidden: !this.state.hasOkta, autoFocus: this.state.autoFocus === "okta", label: "Okta \u015Eifresi", help: "Okta do\u011Frulay\u0131c\u0131 uygulamas\u0131ndan profil Okta \u015Fifresini girin.", type: "text", placeholder: "\u015Eifre girin", value: this.state.okta, onKeyUp: (key) => {
                             if (key === "Enter") {
                                 this.closeDialogConfirm();
                             }
@@ -61421,7 +61370,7 @@ class ProfileConnect extends react.Component {
                                 okta: val,
                             });
                         } }),
-                    react.createElement(PageInput, { disabled: this.state.disabled, hidden: !this.state.hasOtp, autoFocus: this.state.autoFocus === "otp", label: "Authenticator Passcode", help: "Enter profile passcode from authenticator app.", type: "text", placeholder: "Enter passcode", value: this.state.otp, onKeyUp: (key) => {
+                    react.createElement(PageInput, { disabled: this.state.disabled, hidden: !this.state.hasOtp, autoFocus: this.state.autoFocus === "otp", label: "Do\u011Frulay\u0131c\u0131 \u015Eifresi", help: "Do\u011Frulay\u0131c\u0131 uygulamas\u0131ndan profil \u015Fifresini girin.", type: "text", placeholder: "\u015Eifre girin", value: this.state.otp, onKeyUp: (key) => {
                             if (key === "Enter") {
                                 this.closeDialogConfirm();
                             }
@@ -61432,7 +61381,7 @@ class ProfileConnect extends react.Component {
                                 otp: val,
                             });
                         } }),
-                    react.createElement(PageInput, { disabled: this.state.disabled, hidden: !this.state.hasYubikey, autoFocus: this.state.autoFocus === "yubikey", label: "YubiKey", help: "Select field and push button on YubiKey device to fill passcode.", type: "text", placeholder: "Activate YubiKey", value: this.state.yubikey, onKeyUp: (key) => {
+                    react.createElement(PageInput, { disabled: this.state.disabled, hidden: !this.state.hasYubikey, autoFocus: this.state.autoFocus === "yubikey", label: "YubiKey", help: "\u015Eifreyi doldurmak i\u00E7in alan\u0131 se\u00E7in ve YubiKey cihaz\u0131ndaki d\u00FC\u011Fmeye bas\u0131n.", type: "text", placeholder: "YubiKey'i etkinle\u015Ftirin", value: this.state.yubikey, onKeyUp: (key) => {
                             if (key === "Enter") {
                                 this.closeDialogConfirm();
                             }
@@ -61445,9 +61394,9 @@ class ProfileConnect extends react.Component {
                         } })),
                 react.createElement("div", { className: "bp5-dialog-footer" },
                     react.createElement("div", { className: "bp5-dialog-footer-actions" },
-                        react.createElement("button", { className: "bp5-button bp5-intent-danger bp5-icon-cross", type: "button", onClick: this.closeDialog }, "Cancel"),
+                        react.createElement("button", { className: "bp5-button bp5-intent-danger bp5-icon-cross", type: "button", onClick: this.closeDialog }, "Vazge\u00E7"),
                         react.createElement("button", { className: "bp5-button bp5-intent-success bp5-icon-link", type: "button", disabled: this.state.disabled || (!this.state.changed &&
-                                !this.state.preConnMsgOnly), onClick: this.closeDialogConfirm }, "Connect")))));
+                                !this.state.preConnMsgOnly), onClick: this.closeDialogConfirm }, "Ba\u011Flan")))));
     }
 }
 
@@ -61491,50 +61440,32 @@ const ProfileSettings_css = {
         marginTop: "10px",
         marginRight: "10px",
     },
-    dialog: {
-        width: "340px",
-        position: "absolute",
-    },
     dialogBody: {
         marginBottom: "0",
     },
-    dialogFooter: {
-        marginTop: "10px",
+    dataInfoBox: {
+        maxHeight: "220px",
+        overflowY: "auto",
+        padding: "10px 12px",
+        border: "1px solid rgba(16, 22, 26, 0.2)",
+        borderRadius: "4px",
+        background: "rgba(16, 22, 26, 0.03)",
     },
     info: {
         marginBottom: "0",
     },
-    label: {
-        width: "100%",
-        maxWidth: "220px",
-        margin: "18px 0 0 0",
-    },
-    input: {
-        width: "100%",
-    },
-    toggleDataBtn: {
-        opacity: "0.5",
-    },
-    dataInfoBox: {
-        height: "100px",
-        overflowY: "scroll",
-        border: "1px solid rgba(16, 22, 26, 0.4)",
-        borderRadius: "2px",
-    },
-    sectionTitle: {
-        margin: "18px 0 0 0",
-    },
-    autoAuthTest: {
-        marginLeft: "6px",
-        opacity: "0.8",
+    autoAuthNote: {
+        margin: "6px 0 10px 0",
+        fontSize: "12px",
+        opacity: "0.7",
+        lineHeight: "1.45",
     },
     autoAuthError: {
         marginTop: "8px",
         color: "#cd4246",
     },
-    autoAuthNote: {
-        marginTop: "8px",
-        opacity: "0.7",
+    toggleDataBtn: {
+        opacity: "0.75",
     },
 };
 class ProfileSettings extends react.Component {
@@ -61556,7 +61487,8 @@ class ProfileSettings extends react.Component {
                 if (!saved) {
                     this.setState({
                         ...this.state,
-                        autoAuthError: "Failed to save to " + storageName(),
+                        autoAuthError: "Şuraya kaydedilemedi: " +
+                            storageName(),
                     });
                     return;
                 }
@@ -61571,7 +61503,7 @@ class ProfileSettings extends react.Component {
                     prfl.disabled = !this.state.setAutoStart;
                 }
                 if (prfl.force_connect && prfl.disabled) {
-                    let err = new WriteError(null, "Profiles: Profile autostart enforced by server", { profile_id: prfl.id });
+                    let err = new WriteError(null, "Profiller: Profil otomatik başlatması sunucu tarafından zorunlu kılınmış", { profile_id: prfl.id });
                     errorAlert(err, 10);
                     prfl.disabled = false;
                     this.setState({
@@ -61732,13 +61664,13 @@ class ProfileSettings extends react.Component {
         }
         let modes = (profile.password_mode || "").split("_");
         if (modes.indexOf("username") !== -1 && !auto.username) {
-            return "Username is required";
+            return "Kullanıcı adı gerekli";
         }
         if (auto.secret && !isValidSecret(auto.secret)) {
-            return "Enter a valid base32 TOTP secret";
+            return "Geçerli bir base32 TOTP anahtarı girin";
         }
         if (!auto.pin && !auto.password && !auto.secret) {
-            return "Enter a PIN, password, or TOTP secret";
+            return "Bir PIN, parola veya TOTP anahtarı girin";
         }
         return "";
     }
@@ -61756,13 +61688,13 @@ class ProfileSettings extends react.Component {
         let syncHosts = profile.formatedHosts();
         let lastSync = "";
         if (profile.sync_time === -1) {
-            lastSync = "Failed to sync";
+            lastSync = "Eşitlenemedi";
         }
         else if (profile.sync_time) {
             lastSync = formatDateLess(profile.sync_time);
         }
         else {
-            lastSync = "Never";
+            lastSync = "Hiçbir zaman";
         }
         let auto = this.state.autoAuth || empty();
         let authModes = (profile.password_mode || "").split("_");
@@ -61776,19 +61708,19 @@ class ProfileSettings extends react.Component {
             dataInfo = react.createElement("div", { style: ProfileSettings_css.dataInfoBox },
                 react.createElement(PageInfo, { fields: [
                         {
-                            label: 'Configuration Sync Hosts',
+                            label: 'Yapılandırma Eşitleme Sunucuları',
                             value: syncHosts,
                         },
                         {
-                            label: 'System',
+                            label: 'Sistem',
                             value: profile.system,
                         },
                         {
-                            label: 'UV Name',
+                            label: 'UV Adı',
                             value: profile.uv_name,
                         },
                         {
-                            label: 'State',
+                            label: 'Durum',
                             value: profile.state,
                         },
                         {
@@ -61796,234 +61728,244 @@ class ProfileSettings extends react.Component {
                             value: profile.wg,
                         },
                         {
-                            label: 'Last Mode',
+                            label: 'Son Mod',
                             value: profile.last_mode,
                         },
                         {
-                            label: 'Organization ID',
+                            label: 'Kuruluş Kimliği',
                             value: profile.organization_id,
                         },
                         {
-                            label: 'Organization',
+                            label: 'Kuruluş',
                             value: profile.organization,
                         },
                         {
-                            label: 'Server ID',
+                            label: 'Sunucu Kimliği',
                             value: profile.server_id,
                         },
                         {
-                            label: 'Server',
+                            label: 'Sunucu',
                             value: profile.server,
                         },
                         {
-                            label: 'User ID',
+                            label: 'Kullanıcı Kimliği',
                             value: profile.user_id,
                         },
                         {
-                            label: 'User',
+                            label: 'Kullanıcı',
                             value: profile.user,
                         },
                         {
-                            label: 'Pre Connect Message',
+                            label: 'Bağlantı Öncesi Mesaj',
                             value: profile.pre_connect_msg,
                         },
                         {
-                            label: 'Disable Reconnect',
+                            label: 'Yeniden Bağlanmayı Devre Dışı Bırak',
                             value: profile.disable_reconnect,
                         },
                         {
-                            label: 'Disable Reconnect Local',
+                            label: 'Yerel Yeniden Bağlanmayı Devre Dışı Bırak',
                             value: profile.disable_reconnect_local,
                         },
                         {
-                            label: 'Restrict Client',
+                            label: 'İstemciyi Kısıtla',
                             value: profile.restrict_client,
                         },
                         {
-                            label: 'Remotes Data',
+                            label: 'Uzak Sunucu Verileri',
                             value: JSON.stringify(profile.remotes_data),
                         },
                         {
-                            label: 'Hide OpenVPN',
+                            label: 'OpenVPN\'i Gizle',
                             value: profile.hide_ovpn,
                         },
                         {
-                            label: 'Dynamic Firewall',
+                            label: 'Dinamik Güvenlik Duvarı',
                             value: profile.dynamic_firewall,
                         },
                         {
-                            label: 'Geo Sort',
+                            label: 'Coğrafi Sıralama',
                             value: profile.geo_sort,
                         },
                         {
-                            label: 'Force Connect',
+                            label: 'Bağlantıyı Zorla',
                             value: profile.force_connect,
                         },
                         {
-                            label: 'Device Auth',
+                            label: 'Cihaz Doğrulama',
                             value: profile.device_auth,
                         },
                         {
-                            label: 'Disable Gateway',
+                            label: 'Ağ Geçidini Devre Dışı Bırak',
                             value: profile.disable_gateway,
                         },
                         {
-                            label: 'Disable DNS',
+                            label: 'DNS\'i Devre Dışı Bırak',
                             value: profile.disable_dns,
                         },
                         {
-                            label: 'Disable IPv6',
+                            label: 'IPv6\'yı Devre Dışı Bırak',
                             value: profile.disable_ipv6,
                         },
                         {
-                            label: 'Data Channel Offload',
+                            label: 'Veri Kanalı Boşaltma',
                             value: profile.dco,
                         },
                         {
-                            label: 'Debug Output',
+                            label: 'Hata Ayıklama Çıktısı',
                             value: profile.debug_output,
                         },
                         {
-                            label: 'Force DNS',
+                            label: 'DNS\'i Zorla',
                             value: profile.force_dns,
                         },
                         {
-                            label: 'SSO Auth',
+                            label: 'SSO Doğrulama',
                             value: profile.sso_auth,
                         },
                         {
-                            label: 'Password Mode',
+                            label: 'Parola Modu',
                             value: profile.password_mode,
                         },
                         {
-                            label: 'Token',
+                            label: 'Belirteç',
                             value: profile.token,
                         },
                         {
-                            label: 'Token TTL',
+                            label: 'Belirteç Geçerlilik Süresi',
                             value: profile.token_ttl,
                         },
                         {
-                            label: 'Sync Hash',
+                            label: 'Eşitleme Özeti',
                             value: profile.sync_hash,
                         },
                     ] }));
         }
         return react.createElement("div", { style: ProfileSettings_css.box },
-            react.createElement("button", { className: "bp5-button bp5-icon-cog", style: ProfileSettings_css.button, type: "button", disabled: this.state.disabled, onClick: this.openDialog }, "Settings"),
-            react.createElement(Dialog, { title: "Profile Settings", style: ProfileSettings_css.dialog, isOpen: this.state.dialog, usePortal: true, portalContainer: document.body, onClose: this.closeDialog },
+            react.createElement("button", { className: "bp5-button bp5-icon-cog", style: ProfileSettings_css.button, type: "button", disabled: this.state.disabled, onClick: this.openDialog }, "Ayarlar"),
+            react.createElement(Dialog, { title: "Profil Ayarlar\u0131", className: "profile-settings-dialog", isOpen: this.state.dialog, usePortal: true, portalContainer: document.body, onClose: this.closeDialog },
                 react.createElement("div", { className: "bp5-dialog-body", style: ProfileSettings_css.dialogBody },
-                    react.createElement(PageInput, { disabled: this.state.disabled, label: "Name", help: "Profile name.", type: "text", placeholder: "Enter name", value: profile.name || "", onChange: (val) => {
-                            this.set("name", val);
-                        } }),
-                    react.createElement(PageSwitch, { disabled: this.state.disabled, label: "System Profile", help: "Automatically start profile with system service. Autostart profiles will run for all users.", checked: system, onToggle: () => {
-                            let profile;
-                            if (this.state.changed) {
-                                profile = {
-                                    ...this.state.profile,
-                                };
-                            }
-                            else {
-                                profile = {
-                                    ...this.props.profile,
-                                };
-                            }
-                            if (!system && this.state.setAutoStart === null) {
-                                this.setState({
-                                    ...this.state,
-                                    changed: true,
-                                    profile: profile,
-                                    setSystem: !system,
-                                    setAutoStart: true,
-                                });
-                            }
-                            else {
-                                this.setState({
-                                    ...this.state,
-                                    changed: true,
-                                    profile: profile,
-                                    setSystem: !system,
-                                });
-                            }
-                        } }),
-                    react.createElement(PageSwitch, { disabled: this.state.disabled || !system, label: "Autostart", help: "Automatically start profile with system service. Autostart profiles will run for all users. Must be system profile to use autostart.", checked: autostart && system, onToggle: () => {
-                            this.set("disabled", !!autostart);
-                        } }),
-                    react.createElement(PageSwitch, { label: "Disable Auto Reconnect", help: "Disable automatically reconnecting on disconnect.", hidden: !!system || profile.restrict_client, checked: !!profile.disable_reconnect_local, onToggle: () => {
-                            this.set("disable_reconnect_local", !profile.disable_reconnect_local);
-                        } }),
-                    autoAuthSupported ? react.createElement("div", null,
-                        react.createElement("h4", { style: ProfileSettings_css.sectionTitle }, "Auto Auth"),
-                        react.createElement(PageSwitch, { disabled: this.state.disabled || !this.state.autoAuthLoaded, label: "Enable Auto Auth", help: "Store the profile credentials in the " + storageName() + " and connect without prompting.", checked: !!auto.enabled, onToggle: () => {
+                    react.createElement("div", { className: "settings-section" },
+                        react.createElement("div", { className: "settings-section-title" }, "Profil"),
+                        react.createElement(PageInput, { disabled: this.state.disabled, label: "Ad", help: "Profil ad\u0131.", type: "text", placeholder: "Ad girin", value: profile.name || "", onChange: (val) => {
+                                this.set("name", val);
+                            } }),
+                        react.createElement(PageSwitch, { disabled: this.state.disabled, label: "Sistem Profili", help: "Profili sistem hizmetiyle otomatik olarak ba\u015Flat. Otomatik ba\u015Flat\u0131lan profiller t\u00FCm kullan\u0131c\u0131lar i\u00E7in \u00E7al\u0131\u015F\u0131r.", checked: system, onToggle: () => {
+                                let profile;
+                                if (this.state.changed) {
+                                    profile = {
+                                        ...this.state.profile,
+                                    };
+                                }
+                                else {
+                                    profile = {
+                                        ...this.props.profile,
+                                    };
+                                }
+                                if (!system && this.state.setAutoStart === null) {
+                                    this.setState({
+                                        ...this.state,
+                                        changed: true,
+                                        profile: profile,
+                                        setSystem: !system,
+                                        setAutoStart: true,
+                                    });
+                                }
+                                else {
+                                    this.setState({
+                                        ...this.state,
+                                        changed: true,
+                                        profile: profile,
+                                        setSystem: !system,
+                                    });
+                                }
+                            } }),
+                        react.createElement(PageSwitch, { disabled: this.state.disabled || !system, label: "Otomatik Ba\u015Flat", help: "Profili sistem hizmetiyle otomatik olarak ba\u015Flat. Otomatik ba\u015Flat\u0131lan profiller t\u00FCm kullan\u0131c\u0131lar i\u00E7in \u00E7al\u0131\u015F\u0131r. Otomatik ba\u015Flatma i\u00E7in profil sistem profili olmal\u0131d\u0131r.", checked: autostart && system, onToggle: () => {
+                                this.set("disabled", !!autostart);
+                            } })),
+                    autoAuthSupported ? react.createElement("div", { className: "settings-section" },
+                        react.createElement("div", { className: "settings-section-title" }, "Otomatik PIN ve OTP"),
+                        react.createElement(PageSwitch, { disabled: this.state.disabled || !this.state.autoAuthLoaded, label: "Otomatik Giri\u015Fi Etkinle\u015Ftir", help: "Profil kimlik bilgilerini " + storageName() + " içinde sakla ve istemeden bağlan.", checked: !!auto.enabled, onToggle: () => {
                                 this.setAutoAuth("enabled", !auto.enabled);
                             } }),
-                        react.createElement("div", { style: ProfileSettings_css.autoAuthNote, hidden: !auto.enabled }, "Enter the PIN, the TOTP secret, or both. Only the fields you fill in are sent."),
+                        react.createElement("div", { style: ProfileSettings_css.autoAuthNote, hidden: !auto.enabled }, "PIN, TOTP anahtar\u0131 veya her ikisini girin. Yaln\u0131zca doldurdu\u011Funuz alanlar g\u00F6nderilir."),
                         react.createElement(PageInput, { disabled: this.state.disabled || !this.state.autoAuthLoaded, hidden: !auto.enabled ||
-                                authModes.indexOf("password") === -1, label: "Password", help: "VPN account password. Leave empty to skip it.", type: "password", placeholder: "Enter password", value: auto.password, onChange: (val) => {
+                                authModes.indexOf("password") === -1, label: "Parola", help: "VPN hesap parolas\u0131. Atlamak i\u00E7in bo\u015F b\u0131rak\u0131n.", type: "password", placeholder: "Parola girin", value: auto.password, onChange: (val) => {
                                 this.setAutoAuth("password", val);
                             } }),
                         react.createElement(PageInput, { disabled: this.state.disabled || !this.state.autoAuthLoaded, hidden: !auto.enabled ||
-                                authModes.indexOf("pin") === -1, label: "Pin", help: "VPN pin. Leave empty to send only the TOTP code.", type: "password", placeholder: "Enter pin", value: auto.pin, onChange: (val) => {
+                                authModes.indexOf("pin") === -1, label: "PIN", help: "VPN PIN'i. Yaln\u0131zca TOTP kodu g\u00F6ndermek i\u00E7in bo\u015F b\u0131rak\u0131n.", type: "password", placeholder: "PIN girin", value: auto.pin, onChange: (val) => {
                                 this.setAutoAuth("pin", val);
                             } }),
                         react.createElement(PageInput, { disabled: this.state.disabled || !this.state.autoAuthLoaded, hidden: !auto.enabled ||
-                                authModes.indexOf("username") === -1, label: "Username", help: "VPN username.", type: "text", placeholder: "Enter username", value: auto.username, onChange: (val) => {
+                                authModes.indexOf("username") === -1, label: "Kullan\u0131c\u0131 Ad\u0131", help: "VPN kullan\u0131c\u0131 ad\u0131.", type: "text", placeholder: "Kullan\u0131c\u0131 ad\u0131 girin", value: auto.username, onChange: (val) => {
                                 this.setAutoAuth("username", val);
                             } }),
                         react.createElement(PageInput, { disabled: this.state.disabled || !this.state.autoAuthLoaded, hidden: !auto.enabled ||
-                                authModes.indexOf("otp") === -1, label: "TOTP Secret", help: "Optional. Base32 secret from the authenticator QR code. Leave empty to send only the PIN.", type: "password", placeholder: "Enter base32 secret", value: auto.secret, onChange: (val) => {
+                                authModes.indexOf("otp") === -1, label: "TOTP Anahtar\u0131", help: "\u0130ste\u011Fe ba\u011Fl\u0131. Do\u011Frulay\u0131c\u0131 QR kodundaki base32 anahtar\u0131. Yaln\u0131zca PIN g\u00F6ndermek i\u00E7in bo\u015F b\u0131rak\u0131n.", type: "password", placeholder: "Base32 anahtar\u0131 girin", value: auto.secret, onChange: (val) => {
                                 this.setAutoAuth("secret", val);
                             } }),
-                        react.createElement(PageSwitch, { disabled: this.state.disabled || !this.state.autoAuthLoaded, hidden: !auto.enabled, label: "Connect on App Start", help: "Automatically connect this profile when the app starts.", checked: !!auto.auto_connect, onToggle: () => {
+                        react.createElement(PageSwitch, { disabled: this.state.disabled || !this.state.autoAuthLoaded, hidden: !auto.enabled, label: "Uygulama A\u00E7\u0131l\u0131\u015F\u0131nda Ba\u011Flan", help: "Uygulama ba\u015Flad\u0131\u011F\u0131nda bu profile otomatik olarak ba\u011Flan.", checked: !!auto.auto_connect, onToggle: () => {
                                 this.setAutoAuth("auto_connect", !auto.auto_connect);
                             } }),
-                        react.createElement("div", { hidden: !auto.enabled ||
+                        react.createElement("div", { className: "settings-test-row", hidden: !auto.enabled ||
                                 authModes.indexOf("otp") === -1 },
                             react.createElement("button", { className: "bp5-button bp5-minimal bp5-icon-key", type: "button", disabled: this.state.disabled ||
                                     !isValidSecret(auto.secret), onClick: () => {
                                     this.setState({
                                         ...this.state,
                                         autoAuthTest: generateCode(auto.secret) +
-                                            " (" + secondsRemaining() + "s)",
+                                            " (" + secondsRemaining() + " sn)",
                                     });
-                                } }, "Test Code"),
-                            react.createElement("span", { style: ProfileSettings_css.autoAuthTest }, this.state.autoAuthTest)),
+                                } }, "Kodu Test Et"),
+                            react.createElement("span", { className: "settings-test-code" }, this.state.autoAuthTest)),
                         react.createElement("div", { style: ProfileSettings_css.autoAuthError, hidden: !this.state.autoAuthError }, this.state.autoAuthError)) : null,
-                    react.createElement(PageSwitch, { label: "Disable Default Gateway", help: "Disable routing internet traffic through the VPN connection.", hidden: profile.restrict_client, checked: !!profile.disable_gateway, onToggle: () => {
-                            this.set("disable_gateway", !profile.disable_gateway);
-                        } }),
-                    react.createElement(PageSwitch, { label: "Disable DNS", help: "Disable configuring the DNS configuration provided by the server on this profile.", hidden: profile.restrict_client, checked: !!profile.disable_dns, onToggle: () => {
-                            this.set("disable_dns", !profile.disable_dns);
-                        } }),
-                    react.createElement(PageSwitch, { label: "Disable IPv6", help: "Ignore the IPv6 configuration provided by the server on this profile. Use when the host has IPv6 disabled to prevent connection failures applying IPv6 addresses and routes.", hidden: profile.restrict_client && !profile.disable_ipv6, checked: !!profile.disable_ipv6, onToggle: () => {
-                            this.set("disable_ipv6", !profile.disable_ipv6);
-                        } }),
-                    react.createElement(PageSwitch, { label: "Data Channel Offload", help: "Enable Data Channel Offload for improved performance. Requires server support and configuration changes.", hidden: profile.restrict_client, checked: !!profile.dco, onToggle: () => {
-                            this.set("dco", !profile.dco);
-                        } }),
-                    react.createElement(PageSwitch, { label: "Debug Output", help: "Enable debug output logging for this profile.", hidden: profile.restrict_client, checked: !!profile.debug_output, onToggle: () => {
-                            this.set("debug_output", !profile.debug_output);
-                        } }),
-                    react.createElement(PageSwitch, { label: "Force DNS configuration", help: "Configure only one DNS server to correct issues with macOS DNS server priority. This is not recommended unless required and will cause networking compatibility issues.", hidden: !profile.force_dns &&
-                            (platform !== "darwin" || !this.state.showData), checked: !!profile.force_dns, onToggle: () => {
-                            this.set("force_dns", !profile.force_dns);
-                        } }),
-                    react.createElement(PageInfo, { style: ProfileSettings_css.info, fields: [
-                            {
-                                label: 'ID',
-                                value: profile.id || '-',
-                            },
-                            {
-                                label: 'Last Configuration Sync',
-                                value: lastSync,
-                            },
-                        ] }),
-                    dataInfo),
-                react.createElement("div", { className: "bp5-dialog-footer", style: ProfileSettings_css.dialogFooter },
+                    react.createElement("div", { className: "settings-section" },
+                        react.createElement("div", { className: "settings-section-title" }, "A\u011F"),
+                        react.createElement("div", { className: "settings-grid" },
+                            react.createElement(PageSwitch, { label: "Otomatik Yeniden Ba\u011Flanmay\u0131 Devre D\u0131\u015F\u0131 B\u0131rak", help: "Ba\u011Flant\u0131 koptu\u011Funda otomatik yeniden ba\u011Flanmay\u0131 devre d\u0131\u015F\u0131 b\u0131rak.", hidden: !!system || profile.restrict_client, checked: !!profile.disable_reconnect_local, onToggle: () => {
+                                    this.set("disable_reconnect_local", !profile.disable_reconnect_local);
+                                } }),
+                            react.createElement(PageSwitch, { label: "Varsay\u0131lan A\u011F Ge\u00E7idini Devre D\u0131\u015F\u0131 B\u0131rak", help: "\u0130nternet trafi\u011Fini VPN ba\u011Flant\u0131s\u0131 \u00FCzerinden y\u00F6nlendirmeyi devre d\u0131\u015F\u0131 b\u0131rak.", hidden: profile.restrict_client, checked: !!profile.disable_gateway, onToggle: () => {
+                                    this.set("disable_gateway", !profile.disable_gateway);
+                                } }),
+                            react.createElement(PageSwitch, { label: "DNS'i Devre D\u0131\u015F\u0131 B\u0131rak", help: "Sunucunun bu profil i\u00E7in sa\u011Flad\u0131\u011F\u0131 DNS yap\u0131land\u0131rmas\u0131n\u0131n uygulanmas\u0131n\u0131 devre d\u0131\u015F\u0131 b\u0131rak.", hidden: profile.restrict_client, checked: !!profile.disable_dns, onToggle: () => {
+                                    this.set("disable_dns", !profile.disable_dns);
+                                } }),
+                            react.createElement(PageSwitch, { label: "IPv6'y\u0131 Devre D\u0131\u015F\u0131 B\u0131rak", help: "Sunucunun bu profil i\u00E7in sa\u011Flad\u0131\u011F\u0131 IPv6 yap\u0131land\u0131rmas\u0131n\u0131 yoksay. IPv6 devre d\u0131\u015F\u0131 olan makinelerde IPv6 adres ve rotalar\u0131n\u0131n uygulanmas\u0131ndan kaynaklanan ba\u011Flant\u0131 hatalar\u0131n\u0131 \u00F6nlemek i\u00E7in kullan\u0131n.", hidden: profile.restrict_client && !profile.disable_ipv6, checked: !!profile.disable_ipv6, onToggle: () => {
+                                    this.set("disable_ipv6", !profile.disable_ipv6);
+                                } }),
+                            react.createElement(PageSwitch, { label: "Veri Kanal\u0131 Bo\u015Faltma", help: "Daha iyi performans i\u00E7in Veri Kanal\u0131 Bo\u015Faltma'y\u0131 etkinle\u015Ftir. Sunucu deste\u011Fi ve yap\u0131land\u0131rma de\u011Fi\u015Fiklikleri gerektirir.", hidden: profile.restrict_client, checked: !!profile.dco, onToggle: () => {
+                                    this.set("dco", !profile.dco);
+                                } }),
+                            react.createElement(PageSwitch, { label: "DNS Yap\u0131land\u0131rmas\u0131n\u0131 Zorla", help: "macOS'taki DNS sunucusu \u00F6nceli\u011Fi sorunlar\u0131n\u0131 gidermek i\u00E7in yaln\u0131zca tek bir DNS sunucusu yap\u0131land\u0131r. Gerekli de\u011Filse \u00F6nerilmez ve a\u011F uyumlulu\u011Fu sorunlar\u0131na yol a\u00E7abilir.", hidden: !profile.force_dns &&
+                                    (platform !== "darwin" || !this.state.showData), checked: !!profile.force_dns, onToggle: () => {
+                                    this.set("force_dns", !profile.force_dns);
+                                } }))),
+                    react.createElement("div", { className: "settings-section" },
+                        react.createElement("div", { className: "settings-section-title" }, "Hata Ay\u0131klama"),
+                        react.createElement("div", { className: "settings-grid" },
+                            react.createElement(PageSwitch, { label: "Hata Ay\u0131klama \u00C7\u0131kt\u0131s\u0131", help: "Bu profil i\u00E7in hata ay\u0131klama g\u00FCnl\u00FC\u011F\u00FCn\u00FC etkinle\u015Ftir.", hidden: profile.restrict_client, checked: !!profile.debug_output, onToggle: () => {
+                                    this.set("debug_output", !profile.debug_output);
+                                } }))),
+                    react.createElement("div", { className: "settings-section" },
+                        react.createElement("div", { className: "settings-section-title" }, "Bilgi"),
+                        react.createElement(PageInfo, { style: ProfileSettings_css.info, fields: [
+                                {
+                                    label: 'Kimlik',
+                                    value: profile.id || '-',
+                                },
+                                {
+                                    label: 'Son Yapılandırma Eşitlemesi',
+                                    value: lastSync,
+                                },
+                            ] }),
+                        dataInfo)),
+                react.createElement("div", { className: "bp5-dialog-footer" },
                     react.createElement("div", { className: "bp5-dialog-footer-actions" },
-                        react.createElement("button", { className: "bp5-button bp5-icon-console", type: "button", style: ProfileSettings_css.toggleDataBtn, disabled: this.state.disabled, onClick: this.toggleData }, "Debugging"),
-                        react.createElement("button", { className: "bp5-button bp5-intent-danger bp5-icon-cross", type: "button", disabled: this.state.disabled, onClick: this.closeDialog }, "Cancel"),
-                        react.createElement("button", { className: "bp5-button bp5-intent-success bp5-icon-tick", type: "button", disabled: this.state.disabled || !this.state.changed, onClick: this.onSave }, "Save")))));
+                        react.createElement("button", { className: "bp5-button bp5-minimal bp5-icon-console", type: "button", style: ProfileSettings_css.toggleDataBtn, disabled: this.state.disabled, onClick: this.toggleData }, "Hata Ay\u0131klama Verisi"),
+                        react.createElement("button", { className: "bp5-button", type: "button", disabled: this.state.disabled, onClick: this.closeDialog }, "Vazge\u00E7"),
+                        react.createElement("button", { className: "bp5-button bp5-intent-success bp5-icon-tick", type: "button", disabled: this.state.disabled || !this.state.changed, onClick: this.onSave }, "Kaydet")))));
     }
 }
 
@@ -62037,21 +61979,21 @@ function getChartLabels(resource, data) {
                 let label = '';
                 switch (key) {
                     case 'bs':
-                        label = 'Transmitted';
+                        label = 'Gönderilen';
                         break;
                     case 'br':
-                        label = 'Received';
+                        label = 'Alınan';
                         break;
                     default:
-                        label = 'Unknown';
+                        label = 'Bilinmeyen';
                 }
                 bandwidthDatasets.push({
                     label: label,
                 });
             }
             return {
-                title: 'Bandwidth',
-                resource_label: 'Traffic',
+                title: 'Bant Genişliği',
+                resource_label: 'Trafik',
                 resource_type: 'bytes',
                 resource_suffix: '',
                 resource_fixed: 2,
@@ -62160,7 +62102,7 @@ class MetricChart extends react.Component {
                             type: 'time',
                             title: {
                                 display: true,
-                                text: 'Time',
+                                text: 'Zaman',
                                 color: chartColor1(),
                                 padding: 0,
                                 font: {
@@ -62605,10 +62547,10 @@ class MetricCharts extends react.Component {
         return react.createElement("div", { ref: this.chartBoxRef },
             react.createElement("div", { className: "layout horizontal wrap center-justified" },
                 react.createElement("div", { className: "bp5-button-group", style: MetricCharts_css.buttons },
-                    this.periodButton('1 Hours', 60),
-                    this.periodButton('12 Hours', 720),
-                    this.periodButton('24 Hours', 1440),
-                    this.periodButton('3 Days', 4320))),
+                    this.periodButton('1 Saat', 60),
+                    this.periodButton('12 Saat', 720),
+                    this.periodButton('24 Saat', 1440),
+                    this.periodButton('3 Gün', 4320))),
             react.createElement("div", { className: "layout horizontal wrap" },
                 react.createElement("div", { style: MetricCharts_css.chartGroup },
                     react.createElement(MetricChart, { profile: this.props.profile, resource: 'bandwidth', sync: this.state.sync, period: this.state.period, interval: this.state.interval, left: true, onLoading: () => {
@@ -62781,20 +62723,20 @@ class Profile extends react.Component {
     }
     render() {
         let profile = this.props.profile;
-        let statusLabel = "Online For";
+        let statusLabel = "Çevrimiçi Süre";
         let statusVal = profile.formattedUptime();
         if (statusVal === "") {
-            statusLabel = "Status";
+            statusLabel = "Durum";
             statusVal = profile.formattedStatus();
         }
         let open = this.state.open || !!profile.registration_key;
         let fieldsLeft = [
             {
-                label: 'User',
+                label: 'Kullanıcı',
                 value: profile.user || '-',
             },
             {
-                label: 'Server',
+                label: 'Sunucu',
                 value: profile.server || '-',
             },
         ];
@@ -62804,7 +62746,7 @@ class Profile extends react.Component {
                 value: statusVal,
             },
             {
-                label: 'Organization',
+                label: 'Kuruluş',
                 value: profile.organization || '-',
             },
         ];
@@ -62813,12 +62755,12 @@ class Profile extends react.Component {
         if ((profile.server_addr && profile.server_addr.length >= 16) ||
             (profile.client_addr && profile.client_addr.length >= 16)) {
             fieldsLong.push({
-                label: 'Server Address',
+                label: 'Sunucu Adresi',
                 value: profile.server_addr || '-',
                 copy: !!profile.server_addr,
             });
             fieldsLong.push({
-                label: 'Client Address',
+                label: 'İstemci Adresi',
                 value: profile.client_addr || '-',
                 copy: !!profile.client_addr,
             });
@@ -62826,12 +62768,12 @@ class Profile extends react.Component {
         }
         else if (profile.server_addr || profile.client_addr) {
             fieldsLeft.push({
-                label: 'Server Address',
+                label: 'Sunucu Adresi',
                 value: profile.server_addr || '-',
                 copy: !!profile.server_addr,
             });
             fieldsRight.push({
-                label: 'Client Address',
+                label: 'İstemci Adresi',
                 value: profile.client_addr || '-',
                 copy: !!profile.client_addr,
             });
@@ -62850,31 +62792,31 @@ class Profile extends react.Component {
                         });
                     }
                 } },
-                react.createElement("h3", { className: "tab-toggle", style: Profile_css.headerLabel }, profile.formattedNameShort() || 'Profile'),
+                react.createElement("h3", { className: "tab-toggle", style: Profile_css.headerLabel }, profile.formattedNameShort() || 'Profil'),
                 react.createElement("div", { className: "flex tab-toggle" }),
                 react.createElement(ProfileConnect, { profile: this.props.profile, minimal: true, hidden: !this.props.minimal || open }),
                 react.createElement("div", { style: Profile_css.deleteButtonBox, hidden: this.props.minimal && !open },
-                    react.createElement(ConfirmButton, { className: "bp5-minimal bp5-intent-danger bp5-icon-trash", style: Profile_css.deleteButton, safe: true, progressClassName: "bp5-intent-danger", dialogClassName: "bp5-intent-danger bp5-icon-delete", dialogLabel: "Delete Profile", confirmMsg: "Permanently delete this profile", items: [profile.formattedName()], disabled: this.state.disabled, onConfirm: this.onDelete })));
+                    react.createElement(ConfirmButton, { className: "bp5-minimal bp5-intent-danger bp5-icon-trash", style: Profile_css.deleteButton, safe: true, progressClassName: "bp5-intent-danger", dialogClassName: "bp5-intent-danger bp5-icon-delete", dialogLabel: "Profili Sil", confirmMsg: "Bu profil kal\u0131c\u0131 olarak silinsin mi?", items: [profile.formattedName()], disabled: this.state.disabled, onConfirm: this.onDelete })));
         }
         else {
             header = react.createElement("div", { className: "bp5-card-header layout horizontal tab-toggle", style: Profile_css.header },
-                react.createElement("h3", { className: "tab-toggle", style: Profile_css.headerLabel }, profile.formattedNameShort() || 'Profile'),
+                react.createElement("h3", { className: "tab-toggle", style: Profile_css.headerLabel }, profile.formattedNameShort() || 'Profil'),
                 react.createElement("div", { className: "flex tab-toggle" }),
                 react.createElement("div", { style: Profile_css.deleteButtonBox, hidden: this.props.minimal && !open },
-                    react.createElement(ConfirmButton, { className: "bp5-minimal bp5-intent-danger bp5-icon-trash", style: Profile_css.deleteButton, safe: true, progressClassName: "bp5-intent-danger", dialogClassName: "bp5-intent-danger bp5-icon-delete", dialogLabel: "Delete Profile", confirmMsg: "Permanently delete this profile", items: [profile.formattedName()], disabled: this.state.disabled, onConfirm: this.onDelete })));
+                    react.createElement(ConfirmButton, { className: "bp5-minimal bp5-intent-danger bp5-icon-trash", style: Profile_css.deleteButton, safe: true, progressClassName: "bp5-intent-danger", dialogClassName: "bp5-intent-danger bp5-icon-delete", dialogLabel: "Profili Sil", confirmMsg: "Bu profil kal\u0131c\u0131 olarak silinsin mi?", items: [profile.formattedName()], disabled: this.state.disabled, onConfirm: this.onDelete })));
         }
         return react.createElement("div", { className: "bp5-card layout vertical", style: Profile_css.card },
             header,
             react.createElement("div", { style: Profile_css.box, hidden: this.props.minimal && !open },
                 react.createElement("div", { style: Profile_css.toast, hidden: !profile.auth_reconnect, className: "bp5-toast bp5-intent-primary bp5-overlay-content" },
                     react.createElement("span", { className: "bp5-toast-message" },
-                        react.createElement("span", { style: Profile_css.toastHeader }, "Connection Lost"),
+                        react.createElement("span", { style: Profile_css.toastHeader }, "Ba\u011Flant\u0131 Kesildi"),
                         react.createElement("br", null),
-                        "Authentication required to reconnect")),
+                        "Yeniden ba\u011Flanmak i\u00E7in kimlik do\u011Frulama gerekli")),
                 react.createElement("div", { className: "layout vertical", style: Profile_css.regBox, hidden: !profile.registration_key },
                     react.createElement("div", { className: "bp5-card layout vertical", style: Profile_css.reg },
-                        react.createElement("h3", { className: "bp5-text-intent-danger", style: Profile_css.regTitle }, "Device Registration Required"),
-                        "Contact Server Administrator with Code:",
+                        react.createElement("h3", { className: "bp5-text-intent-danger", style: Profile_css.regTitle }, "Cihaz Kayd\u0131 Gerekli"),
+                        "Sunucu y\u00F6neticisine \u015Fu kodla ba\u015Fvurun:",
                         react.createElement("h3", { className: "bp5-text-intent-primary", style: Profile_css.regName }, hostname),
                         react.createElement("h1", { className: "bp5-text-intent-primary", style: Profile_css.regKey }, profile.registration_key))),
                 react.createElement("div", { className: "layout horizontal", style: Profile_css.body },
@@ -62995,7 +62937,7 @@ class Zero extends react.Component {
                 ...this.state,
                 disabled: true,
                 renewing: true,
-                message: 'Requesting certificate',
+                message: 'Sertifika isteniyor',
             });
             ZeroActions_renew(this.props.zero, (message) => {
                 this.setState({
@@ -63014,7 +62956,7 @@ class Zero extends react.Component {
         this.onCancelRenew = () => {
             this.setState({
                 ...this.state,
-                message: 'Cancelling renewal',
+                message: 'Yenileme iptal ediliyor',
             });
             cancelRenew(this.props.zero);
         };
@@ -63034,7 +62976,7 @@ class Zero extends react.Component {
             this.setState({
                 ...this.state,
                 disabled: true,
-                message: 'Resetting GPG agent',
+                message: 'GPG aracısı sıfırlanıyor',
             });
             ZeroActions_resetGpg().then(() => {
                 this.setState({
@@ -63074,36 +63016,36 @@ class Zero extends react.Component {
         let open = this.state.open;
         let statusClass = "";
         let status = zero.formattedStatus();
-        if (status === "Valid") {
+        if (status === "Geçerli") {
             statusClass = "bp5-text-intent-success";
         }
-        else if (status === "Expired") {
+        else if (status === "Süresi Dolmuş") {
             statusClass = "bp5-text-intent-danger";
         }
         let fieldsLeft = [
             {
-                label: 'Server',
+                label: 'Sunucu',
                 value: zero.formattedHost() || '-',
             },
             {
-                label: 'SSH Key',
+                label: 'SSH Anahtarı',
                 value: zero.formattedKey(),
             },
         ];
         let fieldsRight = [
             {
-                label: 'Certificate',
+                label: 'Sertifika',
                 value: status,
                 valueClass: statusClass,
             },
             {
-                label: 'Expires',
+                label: 'Bitiş',
                 value: zero.formattedExpires() || '-',
             },
         ];
         let zeroTag = react.createElement("div", { className: "bp5-tag bp5-intent-primary tab-toggle", style: Zero_css.headerTag }, "Pritunl Zero");
         let deleteButton = react.createElement("div", { style: Zero_css.deleteButtonBox, hidden: this.props.minimal && !open },
-            react.createElement(ConfirmButton, { className: "bp5-minimal bp5-intent-danger bp5-icon-trash", style: Zero_css.deleteButton, safe: true, progressClassName: "bp5-intent-danger", dialogClassName: "bp5-intent-danger bp5-icon-delete", dialogLabel: "Delete Pritunl Zero Profile", confirmMsg: "Permanently delete this Pritunl Zero profile", items: [zero.formattedName()], disabled: this.state.disabled, onConfirm: this.onDelete }));
+            react.createElement(ConfirmButton, { className: "bp5-minimal bp5-intent-danger bp5-icon-trash", style: Zero_css.deleteButton, safe: true, progressClassName: "bp5-intent-danger", dialogClassName: "bp5-intent-danger bp5-icon-delete", dialogLabel: "Pritunl Zero Profilini Sil", confirmMsg: "Bu Pritunl Zero profili kal\u0131c\u0131 olarak silinsin mi?", items: [zero.formattedName()], disabled: this.state.disabled, onConfirm: this.onDelete }));
         let header;
         if (this.props.minimal) {
             header = react.createElement("button", { className: (open ? "bp5-card-header " : "") +
@@ -63118,15 +63060,15 @@ class Zero extends react.Component {
                         });
                     }
                 } },
-                react.createElement("h3", { className: "tab-toggle", style: Zero_css.headerLabel }, zero.formattedNameShort() || 'Profile'),
+                react.createElement("h3", { className: "tab-toggle", style: Zero_css.headerLabel }, zero.formattedNameShort() || 'Profil'),
                 react.createElement("div", { className: "flex tab-toggle" }),
                 zeroTag,
-                react.createElement("button", { className: "bp5-button bp5-intent-primary bp5-minimal", style: Zero_css.buttonMinimal, type: "button", hidden: !this.props.minimal || open, disabled: this.state.disabled, onClick: this.onRenew }, "Renew"),
+                react.createElement("button", { className: "bp5-button bp5-intent-primary bp5-minimal", style: Zero_css.buttonMinimal, type: "button", hidden: !this.props.minimal || open, disabled: this.state.disabled, onClick: this.onRenew }, "Yenile"),
                 deleteButton);
         }
         else {
             header = react.createElement("div", { className: "bp5-card-header layout horizontal tab-toggle", style: Zero_css.header },
-                react.createElement("h3", { className: "tab-toggle", style: Zero_css.headerLabel }, zero.formattedNameShort() || 'Profile'),
+                react.createElement("h3", { className: "tab-toggle", style: Zero_css.headerLabel }, zero.formattedNameShort() || 'Profil'),
                 react.createElement("div", { className: "flex tab-toggle" }),
                 zeroTag,
                 deleteButton);
@@ -63140,10 +63082,10 @@ class Zero extends react.Component {
                 react.createElement("div", { style: Zero_css.message, hidden: !this.state.message }, this.state.message),
                 react.createElement("div", { className: "layout horizontal" },
                     react.createElement("div", { style: Zero_css.buttons },
-                        react.createElement("button", { className: "bp5-button bp5-intent-primary bp5-icon-refresh", style: Zero_css.button, type: "button", hidden: this.state.renewing, disabled: this.state.disabled, onClick: this.onRenew }, "Renew Certificate"),
-                        react.createElement("button", { className: "bp5-button bp5-intent-danger bp5-icon-cross", style: Zero_css.button, type: "button", hidden: !this.state.renewing, onClick: this.onCancelRenew }, "Cancel"),
-                        react.createElement("button", { className: "bp5-button bp5-minimal bp5-icon-id-number", style: Zero_css.button, type: "button", hidden: !zero.ssh_card_serial, disabled: this.state.disabled, onClick: this.onRegister }, "Register Card"),
-                        react.createElement("button", { className: "bp5-button bp5-minimal bp5-icon-reset", style: Zero_css.button, type: "button", hidden: !zero.ssh_card_serial, disabled: this.state.disabled, onClick: this.onResetGpg }, "Reset GPG")))));
+                        react.createElement("button", { className: "bp5-button bp5-intent-primary bp5-icon-refresh", style: Zero_css.button, type: "button", hidden: this.state.renewing, disabled: this.state.disabled, onClick: this.onRenew }, "Sertifikay\u0131 Yenile"),
+                        react.createElement("button", { className: "bp5-button bp5-intent-danger bp5-icon-cross", style: Zero_css.button, type: "button", hidden: !this.state.renewing, onClick: this.onCancelRenew }, "Vazge\u00E7"),
+                        react.createElement("button", { className: "bp5-button bp5-minimal bp5-icon-id-number", style: Zero_css.button, type: "button", hidden: !zero.ssh_card_serial, disabled: this.state.disabled, onClick: this.onRegister }, "Kart\u0131 Kaydet"),
+                        react.createElement("button", { className: "bp5-button bp5-minimal bp5-icon-reset", style: Zero_css.button, type: "button", hidden: !zero.ssh_card_serial, disabled: this.state.disabled, onClick: this.onResetGpg }, "GPG'yi S\u0131f\u0131rla")))));
     }
 }
 
@@ -63270,7 +63212,7 @@ async function readServiceLog() {
         logData = resp.data;
     }
     catch (err) {
-        err = new RequestError(err, "Logs: Service log request error");
+        err = new RequestError(err, "Günlükler: Hizmet günlüğü isteği hatası");
         errorAlert2(err, 10);
     }
     return logData;
@@ -63281,7 +63223,7 @@ async function clearServiceLog() {
             .end();
     }
     catch (err) {
-        err = new RequestError(err, "Logs: Service log request error");
+        err = new RequestError(err, "Günlükler: Hizmet günlüğü isteği hatası");
         errorAlert2(err, 10);
     }
 }
@@ -63533,27 +63475,27 @@ class Logs extends react.Component {
     render() {
         let label = "";
         if (this.state.view === "service") {
-            label = "Service";
+            label = "Hizmet";
         }
         else if (this.state.view === "client") {
-            label = "Client";
+            label = "İstemci";
         }
         else if (this.state.curProfile) {
             label = this.state.curProfile.formattedName();
         }
         let viewsDom = [
-            react.createElement("option", { value: "service" }, "Service logs"),
-            react.createElement("option", { value: "client" }, "Client logs"),
+            react.createElement("option", { value: "service" }, "Hizmet g\u00FCnl\u00FCkleri"),
+            react.createElement("option", { value: "client" }, "\u0130stemci g\u00FCnl\u00FCkleri"),
         ];
         this.state.profiles.forEach((prfl) => {
-            viewsDom.push(react.createElement("option", { value: prfl.id }, prfl.formattedName() + " logs"));
+            viewsDom.push(react.createElement("option", { value: prfl.id }, prfl.formattedName() + " günlükleri"));
         });
         return react.createElement("div", { className: "bp5-card layout vertical flex", style: Logs_css.card },
             react.createElement("div", { style: Logs_css.buttonsTop },
-                react.createElement(ConfirmButton, { className: "bp5-minimal bp5-intent-danger bp5-icon-trash", style: Logs_css.deleteButton, safe: true, progressClassName: "bp5-intent-danger", dialogClassName: "bp5-intent-danger bp5-icon-delete", dialogLabel: "Clear Logs", confirmMsg: "Confirm clearing " + label + " logs", disabled: this.state.disabled, onConfirm: this.onDelete }),
+                react.createElement(ConfirmButton, { className: "bp5-minimal bp5-intent-danger bp5-icon-trash", style: Logs_css.deleteButton, safe: true, progressClassName: "bp5-intent-danger", dialogClassName: "bp5-intent-danger bp5-icon-delete", dialogLabel: "G\u00FCnl\u00FCkleri Temizle", confirmMsg: label + " günlüklerinin temizlenmesini onaylayın", disabled: this.state.disabled, onConfirm: this.onDelete }),
                 react.createElement("button", { className: "bp5-button bp5-minimal bp5-icon-cross", onClick: this.props.onClose })),
             react.createElement("div", { className: "layout horizontal" },
-                react.createElement("h3", { style: Logs_css.header }, "Log Viewer")),
+                react.createElement("h3", { style: Logs_css.header }, "G\u00FCnl\u00FCk G\u00F6r\u00FCnt\u00FCleyici")),
             react.createElement("div", { className: "layout horizontal" },
                 react.createElement("div", { className: "bp5-select" },
                     react.createElement("select", { disabled: this.state.disabled, value: this.state.view, onChange: (evt) => {
@@ -64654,33 +64596,33 @@ class ConfigView extends react.Component {
             react.createElement("div", { style: Config_css.buttonsTop },
                 react.createElement("button", { className: "bp5-button bp5-minimal bp5-icon-cross", onClick: this.props.onClose })),
             react.createElement("div", { className: "layout horizontal" },
-                react.createElement("h3", { style: Config_css.header }, "Advanced Settings")),
+                react.createElement("h3", { style: Config_css.header }, "Geli\u015Fmi\u015F Ayarlar")),
             react.createElement("div", { className: "layout horizontal" },
-                react.createElement(PageSwitch, { disabled: this.state.disabled, label: "Enable DNS refresh", help: "Automatically refresh DNS to fix issues with macOS DNS cache.", checked: !!this.state.config.enable_dns_refresh, onToggle: () => {
+                react.createElement(PageSwitch, { disabled: this.state.disabled, label: "DNS yenilemeyi etkinle\u015Ftir", help: "macOS DNS \u00F6nbelle\u011Fiyle ilgili sorunlar\u0131 gidermek i\u00E7in DNS'i otomatik olarak yenile.", checked: !!this.state.config.enable_dns_refresh, onToggle: () => {
                         this.set("enable_dns_refresh", !this.state.config.enable_dns_refresh);
                     } })),
             react.createElement("div", { className: "layout horizontal" },
-                react.createElement(PageSwitch, { disabled: this.state.disabled, label: "Disable DNS watch", help: "Disable automatic correction of DNS changes if configuration is lost from system network change.", checked: !!this.state.config.disable_dns_watch, onToggle: () => {
+                react.createElement(PageSwitch, { disabled: this.state.disabled, label: "DNS izlemeyi devre d\u0131\u015F\u0131 b\u0131rak", help: "Sistem a\u011F\u0131 de\u011Fi\u015Fikli\u011Finde yap\u0131land\u0131rma kaybolursa DNS de\u011Fi\u015Fikliklerinin otomatik d\u00FCzeltilmesini devre d\u0131\u015F\u0131 b\u0131rak.", checked: !!this.state.config.disable_dns_watch, onToggle: () => {
                         this.set("disable_dns_watch", !this.state.config.disable_dns_watch);
                     } })),
             react.createElement("div", { className: "layout horizontal" },
-                react.createElement(PageSwitch, { disabled: this.state.disabled, label: "Disable WireGuard DNS watch", help: "Disable WireGuard DNS watch on macOS.", checked: !!this.state.config.disable_wg_dns, onToggle: () => {
+                react.createElement(PageSwitch, { disabled: this.state.disabled, label: "WireGuard DNS izlemeyi devre d\u0131\u015F\u0131 b\u0131rak", help: "macOS'ta WireGuard DNS izlemeyi devre d\u0131\u015F\u0131 b\u0131rak.", checked: !!this.state.config.disable_wg_dns, onToggle: () => {
                         this.set("disable_wg_dns", !this.state.config.disable_wg_dns);
                     } })),
             react.createElement("div", { className: "layout horizontal" },
-                react.createElement(PageSwitch, { disabled: this.state.disabled, label: "Disable device wake watch", help: "Disable wake watch used for faster reconnections when device is resumed from sleep.", checked: !!this.state.config.disable_wake_watch, onToggle: () => {
+                react.createElement(PageSwitch, { disabled: this.state.disabled, label: "Cihaz uyanma izlemeyi devre d\u0131\u015F\u0131 b\u0131rak", help: "Cihaz uykudan d\u00F6nd\u00FC\u011F\u00FCnde daha h\u0131zl\u0131 yeniden ba\u011Flanmak i\u00E7in kullan\u0131lan uyanma izlemeyi devre d\u0131\u015F\u0131 b\u0131rak.", checked: !!this.state.config.disable_wake_watch, onToggle: () => {
                         this.set("disable_wake_watch", !this.state.config.disable_wake_watch);
                     } })),
             react.createElement("div", { className: "layout horizontal" },
-                react.createElement(PageSwitch, { disabled: this.state.disabled, label: "Disable network clean", help: "Disable Windows VPN interface cleanup on startup.", checked: !!this.state.config.disable_net_clean, onToggle: () => {
+                react.createElement(PageSwitch, { disabled: this.state.disabled, label: "A\u011F temizli\u011Fini devre d\u0131\u015F\u0131 b\u0131rak", help: "Ba\u015Flang\u0131\u00E7ta Windows VPN aray\u00FCz\u00FC temizli\u011Fini devre d\u0131\u015F\u0131 b\u0131rak.", checked: !!this.state.config.disable_net_clean, onToggle: () => {
                         this.set("disable_net_clean", !this.state.config.disable_net_clean);
                     } })),
             react.createElement("div", { className: "layout horizontal" },
-                react.createElement(PageSwitch, { disabled: this.state.disabled, label: "Disable browser open", help: "Disable automatic opening of browser for single sign-on authentication.", checked: !!this.state.config.disable_browser, onToggle: () => {
+                react.createElement(PageSwitch, { disabled: this.state.disabled, label: "Taray\u0131c\u0131 a\u00E7may\u0131 devre d\u0131\u015F\u0131 b\u0131rak", help: "Tek oturum a\u00E7ma kimlik do\u011Frulamas\u0131 i\u00E7in taray\u0131c\u0131n\u0131n otomatik a\u00E7\u0131lmas\u0131n\u0131 devre d\u0131\u015F\u0131 b\u0131rak.", checked: !!this.state.config.disable_browser, onToggle: () => {
                         this.set("disable_browser", !this.state.config.disable_browser);
                     } })),
             react.createElement("div", { className: "layout horizontal" },
-                react.createElement(PageSwitch, { disabled: this.state.disabled, label: "Transparent window", help: "Enable transparent window, should not be used for most configurations. Restart client for configuration to take effect.", checked: !!transparentWindow, onToggle: () => {
+                react.createElement(PageSwitch, { disabled: this.state.disabled, label: "Saydam pencere", help: "Saydam pencereyi etkinle\u015Ftir; \u00E7o\u011Fu yap\u0131land\u0131rma i\u00E7in kullan\u0131lmamal\u0131d\u0131r. De\u011Fi\u015Fikli\u011Fin uygulanmas\u0131 i\u00E7in istemciyi yeniden ba\u015Flat\u0131n.", checked: !!transparentWindow, onToggle: () => {
                         this.setState({
                             ...this.state,
                             changed: true,
@@ -64688,7 +64630,7 @@ class ConfigView extends react.Component {
                         });
                     } })),
             react.createElement("div", { className: "layout horizontal" },
-                react.createElement(PageSwitch, { disabled: this.state.disabled, label: "Enable safe storage", help: "Enable encryption of profile keys with safe storage. May cause client to become unresponsive or connections to fail.", checked: !!safeStorage, onToggle: () => {
+                react.createElement(PageSwitch, { disabled: this.state.disabled, label: "G\u00FCvenli depolamay\u0131 etkinle\u015Ftir", help: "Profil anahtarlar\u0131n\u0131n g\u00FCvenli depolama ile \u015Fifrelenmesini etkinle\u015Ftir. \u0130stemcinin yan\u0131t vermemesine veya ba\u011Flant\u0131lar\u0131n ba\u015Far\u0131s\u0131z olmas\u0131na neden olabilir.", checked: !!safeStorage, onToggle: () => {
                         this.setState({
                             ...this.state,
                             changed: true,
@@ -64696,14 +64638,53 @@ class ConfigView extends react.Component {
                         });
                     } })),
             react.createElement("div", { className: "layout horizontal" },
-                react.createElement(PageNumInput, { label: "Interface Metric", help: "Configure the VPN interfaces metric on Windows. Set to 0 to leave interfaces unmodified.", min: 0, max: 9999, stepSize: 1, disabled: this.state.disabled, selectAllOnFocus: true, value: this.state.config.interface_metric, onChange: (val) => {
+                react.createElement(PageNumInput, { label: "Aray\u00FCz Metri\u011Fi", help: "Windows'ta VPN aray\u00FCzlerinin metri\u011Fini yap\u0131land\u0131r. Aray\u00FCzleri de\u011Fi\u015Ftirmeden b\u0131rakmak i\u00E7in 0 yap\u0131n.", min: 0, max: 9999, stepSize: 1, disabled: this.state.disabled, selectAllOnFocus: true, value: this.state.config.interface_metric, onChange: (val) => {
                         this.set('interface_metric', val);
                     } })),
             react.createElement("div", { className: "layout horizontal flex" }),
             react.createElement("div", { className: "bp5-dialog-footer", style: Config_css.footer },
                 react.createElement("div", { className: "bp5-dialog-footer-actions" },
-                    react.createElement("button", { className: "bp5-button bp5-intent-danger bp5-icon-cross", type: "button", disabled: this.state.disabled || !this.state.changed, onClick: this.onCancel }, "Cancel"),
-                    react.createElement("button", { className: "bp5-button bp5-intent-success bp5-icon-tick", type: "button", disabled: this.state.disabled || !this.state.changed, onClick: this.onSave }, "Save"))));
+                    react.createElement("button", { className: "bp5-button bp5-intent-danger bp5-icon-cross", type: "button", disabled: this.state.disabled || !this.state.changed, onClick: this.onCancel }, "Vazge\u00E7"),
+                    react.createElement("button", { className: "bp5-button bp5-intent-success bp5-icon-tick", type: "button", disabled: this.state.disabled || !this.state.changed, onClick: this.onSave }, "Kaydet"))));
+    }
+}
+
+;// ./app/components/About.js
+
+
+
+const GITHUB_URL = 'https://github.com/ziyacakmak/pritunl-client-auto-auth';
+const About_css = {
+    paragraph: {
+        margin: '0 0 10px 0',
+        lineHeight: '1.5',
+    },
+    footer: {
+        marginTop: '16px',
+        display: 'flex',
+        justifyContent: 'center',
+    },
+};
+class About extends react.Component {
+    render() {
+        return react.createElement(Dialog, { title: "Hakk\u0131nda", className: "about-dialog", isOpen: this.props.isOpen, usePortal: true, portalContainer: document.body, onClose: this.props.onClose },
+            react.createElement("div", { className: "bp5-dialog-body" },
+                react.createElement("div", { className: "about-name" }, "Ziya \u00C7akmak"),
+                react.createElement("div", { className: "about-byline" }, "taraf\u0131ndan geli\u015Ftirildi"),
+                react.createElement("h3", { className: "about-title" }, "Otomatik PIN ve OTP"),
+                react.createElement("p", { style: About_css.paragraph }, "Pritunl istemcisi i\u00E7in haz\u0131rlanm\u0131\u015F bir kolayl\u0131k eklentisi. Ba\u011Flant\u0131 s\u0131ras\u0131nda istenen PIN, parola ve TOTP do\u011Frulama kodlar\u0131n\u0131 sizin yerinize otomatik olarak girer."),
+                react.createElement("p", { style: About_css.paragraph }, "Kimlik bilgileri profil dosyalar\u0131na yaz\u0131lmaz; yaln\u0131zca bu cihazda, i\u015Fletim sisteminin g\u00FCvenli kimlik bilgisi deposunda saklan\u0131r. Otomatik giri\u015F ba\u015Far\u0131s\u0131z olursa normal kimlik bilgisi penceresine geri d\u00F6n\u00FCl\u00FCr."),
+                react.createElement("div", { className: "about-license" },
+                    react.createElement("div", { className: "about-license-title" }, "Lisans ve at\u0131f"),
+                    react.createElement("div", null, "Bu proje Pritunl Client \u00FCzerine kurulmu\u015F bir \u00E7atald\u0131r. Pritunl istemcisinin ve ilgili t\u00FCm haklar\u0131n lisans\u0131 Pritunl, Inc.'e aittir."),
+                    react.createElement("div", { style: { marginTop: '8px' } }, "Bu yaz\u0131l\u0131m yaln\u0131zca ki\u015Fisel kullan\u0131m i\u00E7in haz\u0131rlanm\u0131\u015F bir kolayl\u0131k eklentisidir; Pritunl, Inc. ile ba\u011Flant\u0131l\u0131 de\u011Fildir ve resmi olarak desteklenmemektedir. Yeniden da\u011F\u0131t\u0131m veya ticari kullan\u0131m i\u00E7in upstream lisans\u0131 inceleyin ve gerekli izinleri al\u0131n.")),
+                react.createElement("div", { style: About_css.footer },
+                    react.createElement("a", { className: "about-link", role: "button", onClick: () => {
+                            external_electron_namespaceObject.ipcRenderer.send('control', 'open-link', GITHUB_URL);
+                        } }, "github.com/ziyacakmak/pritunl-client-auto-auth"))),
+            react.createElement("div", { className: "bp5-dialog-footer" },
+                react.createElement("div", { className: "bp5-dialog-footer-actions" },
+                    react.createElement("button", { className: "bp5-button bp5-intent-primary", type: "button", onClick: this.props.onClose }, "Kapat"))));
     }
 }
 
@@ -64740,6 +64721,7 @@ var MenuDivider = function (_a) {
 MenuDivider.displayName = "".concat(DISPLAYNAME_PREFIX, ".MenuDivider");
 
 ;// ./app/components/Main.js
+
 
 
 
@@ -64915,12 +64897,12 @@ class Main extends react.Component {
                 disable_tray_icon: app_Config.disable_tray_icon,
             });
             if (app_Config.disable_tray_icon) {
-                success("Tray icon disabled, restart client " +
-                    "for configuration to take effect");
+                success("Tepsi simgesi devre dışı bırakıldı. " +
+                    "Değişikliğin uygulanması için istemciyi yeniden başlatın.");
             }
             else {
-                success("Tray icon enabled, restart client " +
-                    "for configuration to take effect");
+                success("Tepsi simgesi etkinleştirildi. " +
+                    "Değişikliğin uygulanması için istemciyi yeniden başlatın.");
             }
         };
         this.onWindowFrame = async () => {
@@ -64929,12 +64911,12 @@ class Main extends react.Component {
                 frameless: app_Config.frameless,
             });
             if (app_Config.frameless) {
-                success("Window frame disabled, restart client " +
-                    "for configuration to take effect");
+                success("Pencere çerçevesi devre dışı bırakıldı. " +
+                    "Değişikliğin uygulanması için istemciyi yeniden başlatın.");
             }
             else {
-                success("Window frame enabled, restart client " +
-                    "for configuration to take effect");
+                success("Pencere çerçevesi etkinleştirildi. " +
+                    "Değişikliğin uygulanması için istemciyi yeniden başlatın.");
             }
         };
         this.onAlert = (toasts) => {
@@ -64950,6 +64932,7 @@ class Main extends react.Component {
             path: "/",
             disabled: false,
             menu: false,
+            about: false,
             showErrors: false,
         };
     }
@@ -64973,18 +64956,18 @@ class Main extends react.Component {
             if (state.security) {
                 let updateElm = react.createElement("div", null,
                     react.createElement("div", null,
-                        react.createElement("b", null, "Important security update available, download the latest release below")),
+                        react.createElement("b", null, "\u00D6nemli bir g\u00FCvenlik g\u00FCncellemesi mevcut. En son s\u00FCr\u00FCm\u00FC a\u015Fa\u011F\u0131dan indirin.")),
                     react.createElement("button", { className: "bp5-button bp5-intent-primary bp5-icon-download", type: "button", style: Main_css.updateButton, onClick: () => {
                             external_electron_namespaceObject.ipcRenderer.send("control", "download-update");
-                        } }, "Download Update"));
+                        } }, "G\u00FCncellemeyi \u0130ndir"));
                 error(updateElm, 0);
             }
             else {
                 let updateElm = react.createElement("div", null,
-                    react.createElement("div", null, "Update available, download the latest release below"),
+                    react.createElement("div", null, "Bir g\u00FCncelleme mevcut. En son s\u00FCr\u00FCm\u00FC a\u015Fa\u011F\u0131dan indirin."),
                     react.createElement("button", { className: "bp5-button bp5-intent-primary bp5-icon-download", type: "button", style: Main_css.updateButton, onClick: () => {
                             external_electron_namespaceObject.ipcRenderer.send("control", "download-update");
-                        } }, "Download Update"));
+                        } }, "G\u00FCncellemeyi \u0130ndir"));
                 info(updateElm, 0);
             }
         }
@@ -64992,36 +64975,36 @@ class Main extends react.Component {
         let themeLabel = "";
         let themeIcon;
         if (theme === "dark") {
-            themeLabel = "Light Theme";
+            themeLabel = "Açık Tema";
             themeIcon = "flash";
         }
         else {
-            themeLabel = "Dark Theme";
+            themeLabel = "Koyu Tema";
             themeIcon = "moon";
         }
         let themeVerLabel = "";
         let themeVerIcon;
         if (themeVer === 3) {
-            themeVerLabel = "Square Theme";
+            themeVerLabel = "Köşeli Tema";
             themeVerIcon = "style";
         }
         else {
-            themeVerLabel = "Round Theme";
+            themeVerLabel = "Yuvarlak Tema";
             themeVerIcon = "style";
         }
         let trayLabel = "";
         if (app_Config.disable_tray_icon) {
-            trayLabel = "Enable Tray Icon";
+            trayLabel = "Tepsi Simgesini Etkinleştir";
         }
         else {
-            trayLabel = "Disable Tray Icon";
+            trayLabel = "Tepsi Simgesini Devre Dışı Bırak";
         }
         let frameLabel = "";
         if (this.frameless()) {
-            frameLabel = "Enable Window Frame";
+            frameLabel = "Pencere Çerçevesini Etkinleştir";
         }
         else {
-            frameLabel = "Disable Window Frame";
+            frameLabel = "Pencere Çerçevesini Devre Dışı Bırak";
         }
         let profilesHidden = false;
         let page;
@@ -65059,7 +65042,7 @@ class Main extends react.Component {
             Main_css.controlButtonDarwin : Main_css.controlButton;
         let menu = react.createElement(Menu, null,
             react.createElement("li", { className: "bp5-menu-header", style: Main_css.menuHeader },
-                react.createElement("h6", { className: "bp5-heading", style: Main_css.menuLabel }, "Pritunl Client" + version)),
+                react.createElement("h6", { className: "bp5-heading", style: Main_css.menuLabel }, "pritunl++" + version)),
             react.createElement(MenuDivider, null),
             react.createElement(MenuItem, { text: themeLabel, icon: themeIcon, onKeyDown: (evt) => {
                     if (evt.key === "Enter") {
@@ -65079,7 +65062,7 @@ class Main extends react.Component {
                     toggleVer();
                     save();
                 } }),
-            react.createElement(MenuItem, { text: "Refresh", icon: "refresh", hidden: true, disabled: this.state.disabled, onKeyDown: (evt) => {
+            react.createElement(MenuItem, { text: "Yenile", icon: "refresh", hidden: true, disabled: this.state.disabled, onKeyDown: (evt) => {
                     if (evt.key === "Enter") {
                         this.onRefresh();
                     }
@@ -65094,7 +65077,7 @@ class Main extends react.Component {
                         this.onWindowFrame();
                     }
                 }, onClick: this.onWindowFrame }),
-            react.createElement(MenuItem, { text: "View Logs", icon: "history", onKeyDown: (evt) => {
+            react.createElement(MenuItem, { text: "G\u00FCnl\u00FCkleri G\u00F6r\u00FCnt\u00FCle", icon: "history", onKeyDown: (evt) => {
                     if (evt.key === "Enter") {
                         this.setState({
                             ...this.state,
@@ -65107,14 +65090,15 @@ class Main extends react.Component {
                         path: "/logs",
                     });
                 } }),
-            react.createElement(MenuItem, { text: "Reload App", icon: "refresh", onKeyDown: (evt) => {
+            react.createElement(MenuItem, { text: "Uygulamay\u0131 Yeniden Y\u00FCkle", icon: "refresh", onKeyDown: (evt) => {
                     if (evt.key === "Enter") {
                         external_electron_namespaceObject.ipcRenderer.send("control", "reload");
                     }
                 }, onClick: () => {
                     external_electron_namespaceObject.ipcRenderer.send("control", "reload");
                 } }),
-            react.createElement(MenuItem, { text: "Advanced Settings", icon: "cog", onKeyDown: (evt) => {
+            react.createElement(MenuDivider, null),
+            react.createElement(MenuItem, { text: "Geli\u015Fmi\u015F Ayarlar", icon: "cog", onKeyDown: (evt) => {
                     if (evt.key === "Enter") {
                         this.setState({
                             ...this.state,
@@ -65127,28 +65111,42 @@ class Main extends react.Component {
                         path: "/config",
                     });
                 } }),
-            react.createElement(MenuItem, { text: "Reset DNS", intent: "warning", icon: "search", onKeyDown: (evt) => {
+            react.createElement(MenuItem, { text: "Hakk\u0131nda", icon: "info-sign", onKeyDown: (evt) => {
+                    if (evt.key === "Enter") {
+                        this.setState({
+                            ...this.state,
+                            about: true,
+                        });
+                    }
+                }, onClick: () => {
+                    this.setState({
+                        ...this.state,
+                        about: true,
+                    });
+                } }),
+            react.createElement(MenuDivider, null),
+            react.createElement(MenuItem, { text: "DNS'i S\u0131f\u0131rla", intent: "warning", icon: "search", onKeyDown: (evt) => {
                     if (evt.key === "Enter") {
                         resetDns(false);
                     }
                 }, onClick: () => {
                     resetDns(false);
                 } }),
-            react.createElement(MenuItem, { text: "Reset Networking", intent: "warning", icon: "globe-network", onKeyDown: (evt) => {
+            react.createElement(MenuItem, { text: "A\u011F Ayarlar\u0131n\u0131 S\u0131f\u0131rla", intent: "warning", icon: "globe-network", onKeyDown: (evt) => {
                     if (evt.key === "Enter") {
                         resetAll(false);
                     }
                 }, onClick: () => {
                     resetAll(false);
                 } }),
-            react.createElement(MenuItem, { text: "Reset Secure Enclave Key", intent: "danger", icon: "globe-network", hidden: platform !== "darwin", onKeyDown: (evt) => {
+            react.createElement(MenuItem, { text: "G\u00FCvenli Alan Anahtar\u0131n\u0131 S\u0131f\u0131rla", intent: "danger", icon: "globe-network", hidden: platform !== "darwin", onKeyDown: (evt) => {
                     if (evt.key === "Enter") {
                         resetEnclave(false);
                     }
                 }, onClick: () => {
                     resetEnclave(false);
                 } }),
-            react.createElement(MenuItem, { text: "Developer Tools", intent: "warning", icon: "code", onClick: () => {
+            react.createElement(MenuItem, { text: "Geli\u015Ftirici Ara\u00E7lar\u0131", intent: "warning", icon: "code", onClick: () => {
                     external_electron_namespaceObject.ipcRenderer.send("control", "dev-tools");
                 } }));
         return react.createElement("div", { style: Main_css.container, className: "layout vertical" + ((process.platform === "linux" && frameless) ?
@@ -65157,7 +65155,7 @@ class Main extends react.Component {
             react.createElement("nav", { className: "bp5-navbar layout horizontal", style: Main_css.nav },
                 react.createElement("div", { className: "bp5-navbar-group bp5-align-left flex webkit-drag", style: Main_css.navTitle },
                     react.createElement("div", { className: "bp5-navbar-heading", style: process.platform === "darwin" ?
-                            Main_css.headingDarwin : Main_css.heading }, "pritunl")),
+                            Main_css.headingDarwin : Main_css.heading }, "pritunl++")),
                 react.createElement("div", { className: "bp5-navbar-group bp5-align-right", style: Main_css.navGroup },
                     react.createElement("button", { className: "bp5-button bp5-minimal bp5-intent-danger bp5-icon-error", style: Main_css.link, hidden: !this.state.showErrors, onClick: () => {
                             let elmnt = document.getElementById("toaster2");
@@ -65173,14 +65171,14 @@ class Main extends react.Component {
                                 ...this.state,
                                 path: "/profiles",
                             });
-                        } }, "Profiles"),
+                        } }, "Profiller"),
                     react.createElement(ProfileImport, { style: Main_css.link }),
                     react.createElement("button", { className: "bp5-button bp5-minimal bp5-icon-history", hidden: true, style: Main_css.link, onClick: () => {
                             this.setState({
                                 ...this.state,
                                 path: "/logs",
                             });
-                        } }, "Logs"),
+                        } }, "G\u00FCnl\u00FCkler"),
                     react.createElement("div", null,
                         react.createElement(Popover, { interactionKind: "click", popoverClassName: "main-menu", placement: Position.BOTTOM, content: menu, defaultIsOpen: false, renderTarget: ({ isOpen, ...targetProps }) => (react.createElement(Button, { ...targetProps, minimal: true, icon: "menu", style: controlButtonStyle })), usePortal: true, minimal: true })),
                     react.createElement("button", { className: "bp5-button bp5-minimal bp5-icon-minus", type: "button", style: controlButtonStyle, hidden: !showControls, onClick: () => {
@@ -65190,7 +65188,13 @@ class Main extends react.Component {
                             window.close();
                         } }))),
             react.createElement("div", { className: "layout vertical flex", style: (process.platform === "linux" && frameless) ?
-                    Main_css.contentLinux : Main_css.content }, page));
+                    Main_css.contentLinux : Main_css.content }, page),
+            react.createElement(About, { isOpen: this.state.about, onClose: () => {
+                    this.setState({
+                        ...this.state,
+                        about: false,
+                    });
+                } }));
     }
 }
 
@@ -65209,18 +65213,18 @@ function Event_init() {
     registered = true;
     external_electron_namespaceObject.ipcRenderer.on("event.reconnected", () => {
         connectionLost = false;
-        success("Events: Service connection restored");
+        success("Olaylar: Hizmet bağlantısı yeniden kuruldu");
         clearAlert2();
     });
     external_electron_namespaceObject.ipcRenderer.on("event.closed", (evt, errStr) => {
         if (!connectionLost) {
             connectionLost = true;
-            error("Events: Service connection lost");
+            error("Olaylar: Hizmet bağlantısı kesildi");
         }
     });
     external_electron_namespaceObject.ipcRenderer.on("event.error", (evt, errStr) => {
         let err = new Error(errStr);
-        err = new RequestError(err, "Failed to connect to background service, retrying");
+        err = new RequestError(err, "Arka plan hizmetine bağlanılamadı, yeniden deneniyor");
         errorAlert2(err, 3);
     });
     external_electron_namespaceObject.ipcRenderer.on("event", (evt, dataStr) => {
@@ -65282,13 +65286,13 @@ let unrejCount = 0;
 window.onerror = (event, source, line, col, err) => {
     unerrCount += 1;
     if (unerrCount == 100) {
-        errorAlert("Main: Ending unhandled error infinite loop");
+        errorAlert("Ana: İşlenmeyen hata döngüsü sonlandırılıyor");
         return;
     }
     else if (unerrCount > 100) {
         return;
     }
-    err = new UnknownError(err, "Main: Unhandled exception", {
+    err = new UnknownError(err, "Ana: İşlenmeyen özel durum", {
         event: event,
         source: source,
         line: line,
@@ -65365,7 +65369,7 @@ try {
     sourceMapReq.send();
 }
 catch (err) {
-    err = new ReadError(err, "Main: Failed to load source map", {
+    err = new ReadError(err, "Ana: Kaynak haritası yüklenemedi", {
         path: sourceMapPath,
     });
     Logger_error(err);
@@ -65376,7 +65380,7 @@ try {
     });
 }
 catch (err) {
-    err = new ReadError(err, "Main: Failed to initialize source map", {
+    err = new ReadError(err, "Ana: Kaynak haritası başlatılamadı", {
         path: sourceMapPath,
     });
     Logger_error(err);

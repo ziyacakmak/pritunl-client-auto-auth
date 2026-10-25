@@ -35,7 +35,7 @@ function loadSystemProfiles(): Promise<ProfileTypes.Profiles> {
 			.then((resp: Request.Response) => {
 				if (resp.status !== 200) {
 					let err = new Errors.ReadError(
-						null, "Profiles: Failed to load service profiles",
+						null, "Profiller: Hizmet profilleri yüklenemedi",
 						{body: resp.data})
 					Logger.error(err)
 					resolve([])
@@ -44,7 +44,7 @@ function loadSystemProfiles(): Promise<ProfileTypes.Profiles> {
 				resolve(resp.json() as ProfileTypes.Profiles)
 			}, (err) => {
 				err = new Errors.RequestError(err,
-					"Profiles: Service load error")
+					"Profiller: Hizmet yükleme hatası")
 				Logger.errorAlert2(err)
 				resolve([])
 				return
@@ -72,7 +72,7 @@ function loadProfile(prflId: string,
 						mode = (stats.mode & 0o777).toString(8);
 					} catch (err) {
 						err = new Errors.ReadError(
-							err, "Profiles: Failed to stat profile",
+							err, "Profiller: Profil bilgisi alınamadı",
 							{profile_path: prflPath})
 						Logger.errorAlert(err)
 						return
@@ -81,7 +81,7 @@ function loadProfile(prflId: string,
 						fs.chmod(prflPath, 0o600, function(err) {
 							if (err) {
 								err = new Errors.ReadError(
-									err, "Profiles: Failed to stat profile",
+									err, "Profiller: Profil bilgisi alınamadı",
 									{profile_path: prflPath})
 								Logger.errorAlert(err)
 							}
@@ -101,7 +101,7 @@ function loadProfile(prflId: string,
 						mode = (stats.mode & 0o777).toString(8);
 					} catch (err) {
 						err = new Errors.ReadError(
-							err, "Profiles: Failed to stat profile ovpn",
+							err, "Profiller: OVPN profil bilgisi alınamadı",
 							{profile_ovpn_path: ovpnPath})
 						Logger.errorAlert(err)
 						return
@@ -111,7 +111,7 @@ function loadProfile(prflId: string,
 						fs.chmod(ovpnPath, 0o600, function(err) {
 							if (err) {
 								err = new Errors.ReadError(
-									err, "Profiles: Failed to stat profile ovpn",
+									err, "Profiller: OVPN profil bilgisi alınamadı",
 									{profile_ovpn_path: ovpnPath})
 								Logger.errorAlert(err)
 							}
@@ -131,7 +131,7 @@ function loadProfile(prflId: string,
 						mode = (stats.mode & 0o777).toString(8);
 					} catch (err) {
 						err = new Errors.ReadError(
-							err, "Profiles: Failed to stat profile log",
+							err, "Profiller: Profil günlük bilgisi alınamadı",
 							{profile_log_path: logPath})
 						Logger.errorAlert(err)
 						return
@@ -141,7 +141,7 @@ function loadProfile(prflId: string,
 						fs.chmod(logPath, 0o600, function(err) {
 							if (err) {
 								err = new Errors.ReadError(
-									err, "Profiles: Failed to stat profile log",
+									err, "Profiller: Profil günlük bilgisi alınamadı",
 									{profile_log_path: logPath})
 								Logger.errorAlert(err)
 							}
@@ -156,7 +156,7 @@ function loadProfile(prflId: string,
 			(err: NodeJS.ErrnoException, data: string): void => {
 				if (err) {
 					err = new Errors.ReadError(
-						err, "Profiles: Failed to read profile",
+						err, "Profiller: Profil okunamadı",
 						{profile_log_path: logPath})
 					reject(err)
 					return
@@ -168,7 +168,7 @@ function loadProfile(prflId: string,
 					prfl.id = prflId
 				} catch (err) {
 					err = new Errors.ParseError(err,
-						"Profiles: Failed to parse profile configuration",
+						"Profiller: Profil yapılandırması ayrıştırılamadı",
 						{profile_path: prflPath})
 					reject(err)
 					return
@@ -179,7 +179,7 @@ function loadProfile(prflId: string,
 					(err: NodeJS.ErrnoException, data: string): void => {
 						if (err) {
 							err = new Errors.ReadError(
-								err, "Profiles: Failed to read profile",
+								err, "Profiller: Profil okunamadı",
 								{profile_log_path: logPath})
 							reject(err)
 							return
@@ -204,7 +204,7 @@ function loadProfiles(): Promise<ProfileTypes.Profiles> {
 			(err: NodeJS.ErrnoException, stats: fs.Stats): void => {
 				if (err) {
 					if (err.code !== "ENOENT") {
-						err = new Errors.ReadError(err, "Profiles: Read error",
+						err = new Errors.ReadError(err, "Profiller: Okuma hatası",
 							{profiles_path: profilesPath});
 						Logger.errorAlert(err);
 					}
@@ -217,7 +217,7 @@ function loadProfiles(): Promise<ProfileTypes.Profiles> {
 					profilesPath,
 					async (err: NodeJS.ErrnoException, filenames: string[]) => {
 						if (err) {
-							err = new Errors.ReadError(err, "Profiles: Read error",
+							err = new Errors.ReadError(err, "Profiller: Okuma hatası",
 								{profiles_path: profilesPath});
 							Logger.errorAlert(err);
 
@@ -265,7 +265,7 @@ function loadProfilesState(): Promise<ProfileTypes.ProfilesMap> {
 				resolve(resp.json() as ProfileTypes.ProfilesMap)
 			}, (err) => {
 				err = new Errors.RequestError(err,
-					"Profiles: Status error")
+					"Profiller: Durum hatası")
 				Logger.errorAlert2(err)
 				resolve({})
 				return
@@ -346,7 +346,7 @@ export function chart(prflId: string, resource: string, period: number,
 			.then((resp: Request.Response) => {
 				if (resp.status !== 200) {
 					let err = new Errors.ReadError(
-						null, "Profiles: Failed to load profile chart",
+						null, "Profiller: Profil grafiği yüklenemedi",
 						{body: resp.data})
 					Logger.errorAlert2(err)
 					reject(err)
@@ -355,7 +355,7 @@ export function chart(prflId: string, resource: string, period: number,
 				resolve(resp.json() as ChartTypes.ProfileData)
 			}, (err) => {
 				err = new Errors.RequestError(err,
-					"Profiles: Chart load error")
+					"Profiller: Grafik yükleme hatası")
 				Logger.errorAlert2(err)
 				reject(err)
 				return
@@ -381,123 +381,122 @@ EventDispatcher.register((action: ProfileTypes.ProfileDispatch) => {
 			if (action.data) {
 				let prfl = ProfilesStore.profile(action.data.id)
 				if (prfl) {
-					Alert.error("Failed to authenticate to " +
+					Alert.error("Kimlik doğrulanamadı: " +
 						prfl.formattedName())
 					return
 				}
 			}
-			Alert.error("Failed to authenticate")
+			Alert.error("Kimlik doğrulama başarısız oldu")
 			break
 		case "flatpak_tpm_missing":
 			if (action.data) {
 				let prfl = ProfilesStore.profile(action.data.id)
 				if (prfl) {
-					Alert.error("Flatpak missing TPM access for device " +
-						"authentication on " + prfl.formattedName() +
-						". Flatpak must have device access for " +
-						"device authentication.")
+					Alert.error("Flatpak'te cihaz doğrulaması için TPM erişimi " +
+						"yok: " + prfl.formattedName() +
+						". Cihaz doğrulaması için Flatpak'ın cihaz erişimine " +
+						"sahip olması gerekir.")
 					return
 				}
 			}
-			Alert.error("Flatpak missing TPM access for device " +
-				"authentication. Flatpak must have device access for " +
-				"device authentication.")
+			Alert.error("Flatpak'te cihaz doğrulaması için TPM erişimi yok. " +
+				"Cihaz doğrulaması için Flatpak'ın cihaz erişimine sahip " +
+				"olması gerekir.")
 			break
 		case "flatpak_tpm_unauthorized":
 			if (action.data) {
 				let prfl = ProfilesStore.profile(action.data.id)
 				if (prfl) {
-					Alert.error("Permission denied accessing TPM for device " +
-						"authentication on " + prfl.formattedName() +
-						". Flatpak has access to the TPM device but " +
-						"does not have permission to open it. Update the " +
-						"udev rules to provide access.")
+					Alert.error("Cihaz doğrulaması için TPM'e erişim izni " +
+						"reddedildi: " + prfl.formattedName() +
+						". Flatpak TPM cihazına erişebiliyor ancak açma izni " +
+						"yok. Erişim sağlamak için udev kurallarını " +
+						"güncelleyin.")
 					return
 				}
 			}
-			Alert.error("Permission denied accessing TPM for device " +
-				"authentication. Flatpak has access to the TPM device but " +
-				"does not have permission to open it. Update the udev rules to " +
-				"provide access.")
+			Alert.error("Cihaz doğrulaması için TPM'e erişim izni reddedildi. " +
+				"Flatpak TPM cihazına erişebiliyor ancak açma izni yok. " +
+				"Erişim sağlamak için udev kurallarını güncelleyin.")
 			break
 		case "inactive":
 			if (action.data) {
 				let prfl = ProfilesStore.profile(action.data.id)
 				if (prfl) {
-					Alert.error("Disconnected due to inactivity on " +
+					Alert.error("Hareketsizlik nedeniyle bağlantı kesildi: " +
 						prfl.formattedName())
 					return
 				}
 			}
-			Alert.error("Disconnected due to inactivity")
+			Alert.error("Hareketsizlik nedeniyle bağlantı kesildi")
 			break
 		case "timeout_error":
 			if (action.data) {
 				let prfl = ProfilesStore.profile(action.data.id)
 				if (prfl) {
-					Alert.error("Connection timed out on " +
+					Alert.error("Bağlantı zaman aşımına uğradı: " +
 						prfl.formattedName())
 					return
 				}
 			}
-			Alert.error("Connection timed out")
+			Alert.error("Bağlantı zaman aşımına uğradı")
 			break
 		case "offline_error":
 			if (action.data) {
 				let prfl = ProfilesStore.profile(action.data.id)
 				if (prfl) {
-					Alert.error("Server is offline on " +
+					Alert.error("Sunucu çevrimdışı: " +
 						prfl.formattedName())
 					return
 				}
 			}
-			Alert.error("Connection timed out")
+			Alert.error("Bağlantı zaman aşımına uğradı")
 			break
 		case "connection_error":
 			if (action.data) {
 				let prfl = ProfilesStore.profile(action.data.id)
 				if (prfl) {
-					Alert.error("Failed to connect to " +
+					Alert.error("Bağlanılamadı: " +
 						prfl.formattedName())
 					return
 				}
 			}
-			Alert.error("Failed to connect")
+			Alert.error("Bağlantı kurulamadı")
 			break
 		case "handshake_timeout":
 			if (action.data) {
 				let prfl = ProfilesStore.profile(action.data.id)
 				if (prfl) {
-					Alert.error("Handshake timeout on " +
+					Alert.error("El sıkışma zaman aşımı: " +
 						prfl.formattedName())
 					return
 				}
 			}
-			Alert.error("Handshake timeout")
+			Alert.error("El sıkışma zaman aşımı")
 			break
 		case "configuration_error":
 			if (action.data) {
 				let prfl = ProfilesStore.profile(action.data.id)
 				if (prfl) {
-					Alert.error("Configuration error on " +
+					Alert.error("Yapılandırma hatası: " +
 						prfl.formattedName())
 					return
 				}
 			}
-			Alert.error("Handshake timeout")
+			Alert.error("El sıkışma zaman aşımı")
 			break
 		case "sso_auth":
-			let ssoAuthMsg = "Connection requires single sign-on authentication. " +
-				"Complete authentication in web browser. Copy the link below if " +
-				"the web browser did not open."
+			let ssoAuthMsg = "Bağlantı tek oturum açma kimlik doğrulaması " +
+				"gerektiriyor. Kimlik doğrulamayı web tarayıcısında tamamlayın. " +
+				"Tarayıcı açılmadıysa aşağıdaki bağlantıyı kopyalayın."
 
 			if (action.data) {
 				let prfl = ProfilesStore.profile(action.data.id)
 				if (prfl) {
-					ssoAuthMsg = "Connection to \"" +
-						prfl.formattedName() + "\" requires single sign-on " +
-						"authentication. Complete authentication in web browser. " +
-						"Copy the link below if the web browser did not open."
+					ssoAuthMsg = "\"" + prfl.formattedName() + "\" bağlantısı " +
+						"tek oturum açma kimlik doğrulaması gerektiriyor. Kimlik " +
+						"doğrulamayı web tarayıcısında tamamlayın. Tarayıcı " +
+						"açılmadıysa aşağıdaki bağlantıyı kopyalayın."
 				}
 			}
 
@@ -511,9 +510,9 @@ EventDispatcher.register((action: ProfileTypes.ProfileDispatch) => {
 						Electron.ipcRenderer.send("control", "copy", action.data.url)
 						evt.currentTarget.className = "bp5-button bp5-intent-success " +
 							"bp5-icon-link"
-						evt.currentTarget.innerText = "Link Copied"
+						evt.currentTarget.innerText = "Bağlantı Kopyalandı"
 					}}
-				>Copy Single Sign-On Link</button>
+				>Tek Oturum Açma Bağlantısını Kopyala</button>
 			</div>
 
 			Alert.info(ssoAuthElm, 5)
@@ -527,13 +526,13 @@ EventDispatcher.register((action: ProfileTypes.ProfileDispatch) => {
 						prfl.writeConf()
 					}
 
-					Alert.error("Device registration required for " +
+					Alert.error("Cihaz kaydı gerekli: " +
 						prfl.formattedName())
 
 					return
 				}
 			}
-			Alert.error("Failed to authenticate")
+			Alert.error("Kimlik doğrulama başarısız oldu")
 			break
 		case "registration_pass":
 			if (action.data) {

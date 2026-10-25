@@ -46,7 +46,7 @@ export class Response {
 		try {
 			return JSON.parse(this.data || null)
 		} catch(err) {
-			err = new Errors.ReadError(err, "Request: JSON parse failed",
+			err = new Errors.ReadError(err, "İstek: JSON ayrıştırma başarısız",
 				{data: this.data})
 			throw err
 		}
@@ -231,14 +231,14 @@ export class Request {
 				}
 
 				req.on("timeout", () => {
-					let err = this.parseError(null, "Request: Timeout error")
+					let err = this.parseError(null, "İstek: Zaman aşımı hatası")
 					req.destroy(err)
 					Logger.error(err)
 					reject(err)
 				})
 
 				req.on("error", (err) => {
-					err = this.parseError(err, "Request:  Client error")
+					err = this.parseError(err, "İstek: İstemci hatası")
 					Logger.error(err)
 					reject(err)
 				})
@@ -249,7 +249,7 @@ export class Request {
 
 				req.end()
 			} catch (err) {
-				err = this.parseError(err, "Request: Exception")
+				err = this.parseError(err, "İstek: Özel durum")
 				Logger.error(err)
 				reject(err)
 			}

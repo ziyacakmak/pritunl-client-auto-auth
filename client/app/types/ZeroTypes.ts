@@ -71,7 +71,7 @@ export function New(self: Zero): Zero {
 
 		let keyName: string
 		if (this.ssh_card_serial) {
-			keyName = "Smart Card"
+			keyName = "Akıllı Kart"
 		} else {
 			keyName = path.basename(this.public_key_path || "")
 		}
@@ -99,19 +99,19 @@ export function New(self: Zero): Zero {
 
 	self.formattedKey = function(): string {
 		if (this.ssh_card_serial) {
-			return "Smart Card (" + this.ssh_card_serial + ")"
+			return "Akıllı Kart (" + this.ssh_card_serial + ")"
 		}
 		return this.public_key_path || "-"
 	}
 
 	self.formattedStatus = function(): string {
 		if (!this.cert_paths || !this.cert_paths.length) {
-			return "No Certificate"
+			return "Sertifika Yok"
 		}
 		if (this.certValid()) {
-			return "Valid"
+			return "Geçerli"
 		}
-		return "Expired"
+		return "Süresi Dolmuş"
 	}
 
 	self.formattedExpires = function(): string {
@@ -186,7 +186,7 @@ export function New(self: Zero): Zero {
 			}
 		} catch (err) {
 			err = new Errors.WriteError(
-				err, "Zero: SSH write error",
+				err, "Zero: SSH yazma hatası",
 				{zero_path: zeroPath})
 			Logger.errorAlert(err, 10)
 		}

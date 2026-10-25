@@ -140,7 +140,7 @@ export default class Zero extends React.Component<Props, State> {
 			...this.state,
 			disabled: true,
 			renewing: true,
-			message: 'Requesting certificate',
+			message: 'Sertifika isteniyor',
 		})
 
 		ZeroActions.renew(this.props.zero, (message: string): void => {
@@ -161,7 +161,7 @@ export default class Zero extends React.Component<Props, State> {
 	onCancelRenew = (): void => {
 		this.setState({
 			...this.state,
-			message: 'Cancelling renewal',
+			message: 'Yenileme iptal ediliyor',
 		})
 
 		ZeroActions.cancelRenew(this.props.zero)
@@ -185,7 +185,7 @@ export default class Zero extends React.Component<Props, State> {
 		this.setState({
 			...this.state,
 			disabled: true,
-			message: 'Resetting GPG agent',
+			message: 'GPG aracısı sıfırlanıyor',
 		})
 
 		ZeroActions.resetGpg().then((): void => {
@@ -217,31 +217,31 @@ export default class Zero extends React.Component<Props, State> {
 
 		let statusClass = ""
 		let status = zero.formattedStatus()
-		if (status === "Valid") {
+		if (status === "Geçerli") {
 			statusClass = "bp5-text-intent-success"
-		} else if (status === "Expired") {
+		} else if (status === "Süresi Dolmuş") {
 			statusClass = "bp5-text-intent-danger"
 		}
 
 		let fieldsLeft: PageInfos.Field[] = [
 			{
-				label: 'Server',
+				label: 'Sunucu',
 				value: zero.formattedHost() || '-',
 			},
 			{
-				label: 'SSH Key',
+				label: 'SSH Anahtarı',
 				value: zero.formattedKey(),
 			},
 		]
 
 		let fieldsRight: PageInfos.Field[] = [
 			{
-				label: 'Certificate',
+				label: 'Sertifika',
 				value: status,
 				valueClass: statusClass,
 			},
 			{
-				label: 'Expires',
+				label: 'Bitiş',
 				value: zero.formattedExpires() || '-',
 			},
 		]
@@ -261,8 +261,8 @@ export default class Zero extends React.Component<Props, State> {
 				safe={true}
 				progressClassName="bp5-intent-danger"
 				dialogClassName="bp5-intent-danger bp5-icon-delete"
-				dialogLabel="Delete Pritunl Zero Profile"
-				confirmMsg="Permanently delete this Pritunl Zero profile"
+				dialogLabel="Pritunl Zero Profilini Sil"
+				confirmMsg="Bu Pritunl Zero profili kalıcı olarak silinsin mi?"
 				items={[zero.formattedName()]}
 				disabled={this.state.disabled}
 				onConfirm={this.onDelete}
@@ -292,7 +292,7 @@ export default class Zero extends React.Component<Props, State> {
 				<h3
 					className="tab-toggle"
 					style={css.headerLabel}
-				>{zero.formattedNameShort() || 'Profile'}</h3>
+				>{zero.formattedNameShort() || 'Profil'}</h3>
 				<div className="flex tab-toggle"/>
 				{zeroTag}
 				<button
@@ -303,7 +303,7 @@ export default class Zero extends React.Component<Props, State> {
 					disabled={this.state.disabled}
 					onClick={this.onRenew}
 				>
-					Renew
+					Yenile
 				</button>
 				{deleteButton}
 			</button>
@@ -315,7 +315,7 @@ export default class Zero extends React.Component<Props, State> {
 				<h3
 					className="tab-toggle"
 					style={css.headerLabel}
-				>{zero.formattedNameShort() || 'Profile'}</h3>
+				>{zero.formattedNameShort() || 'Profil'}</h3>
 				<div className="flex tab-toggle"/>
 				{zeroTag}
 				{deleteButton}
@@ -348,7 +348,7 @@ export default class Zero extends React.Component<Props, State> {
 							disabled={this.state.disabled}
 							onClick={this.onRenew}
 						>
-							Renew Certificate
+							Sertifikayı Yenile
 						</button>
 						<button
 							className="bp5-button bp5-intent-danger bp5-icon-cross"
@@ -357,7 +357,7 @@ export default class Zero extends React.Component<Props, State> {
 							hidden={!this.state.renewing}
 							onClick={this.onCancelRenew}
 						>
-							Cancel
+							Vazgeç
 						</button>
 						<button
 							className="bp5-button bp5-minimal bp5-icon-id-number"
@@ -367,7 +367,7 @@ export default class Zero extends React.Component<Props, State> {
 							disabled={this.state.disabled}
 							onClick={this.onRegister}
 						>
-							Register Card
+							Kartı Kaydet
 						</button>
 						<button
 							className="bp5-button bp5-minimal bp5-icon-reset"
@@ -377,7 +377,7 @@ export default class Zero extends React.Component<Props, State> {
 							disabled={this.state.disabled}
 							onClick={this.onResetGpg}
 						>
-							Reset GPG
+							GPG'yi Sıfırla
 						</button>
 					</div>
 				</div>

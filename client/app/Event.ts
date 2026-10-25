@@ -16,21 +16,21 @@ export function init() {
 
 	Electron.ipcRenderer.on("event.reconnected", (): void => {
 		connectionLost = false
-		Alert.success("Events: Service connection restored")
+		Alert.success("Olaylar: Hizmet bağlantısı yeniden kuruldu")
 		Alert.clearAlert2()
 	})
 
 	Electron.ipcRenderer.on("event.closed", (evt, errStr: string) => {
 		if (!connectionLost) {
 			connectionLost = true
-			Alert.error("Events: Service connection lost")
+			Alert.error("Olaylar: Hizmet bağlantısı kesildi")
 		}
 	})
 
 	Electron.ipcRenderer.on("event.error", (evt, errStr: string) => {
 		let err = new Error(errStr)
 		err = new Errors.RequestError(
-			err, "Failed to connect to background service, retrying")
+			err, "Arka plan hizmetine bağlanılamadı, yeniden deneniyor")
 		Logger.errorAlert2(err, 3)
 	})
 

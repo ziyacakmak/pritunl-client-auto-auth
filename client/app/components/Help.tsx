@@ -81,7 +81,7 @@ export default class Help extends React.Component<Props, State> {
 										popover: !this.state.popover,
 									});
 								}}
-							>Close</button>
+							>Kapat</button>
 						</div>
 					</div>
 				</Blueprint.Dialog>;

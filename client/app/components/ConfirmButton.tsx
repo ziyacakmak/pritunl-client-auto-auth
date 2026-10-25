@@ -196,17 +196,17 @@ export default class ConfirmButton extends React.Component<Props, State> {
 				className="bp5-label"
 				style={css.label}
 			>
-				Enter "delete" to confirm:
+				Onaylamak için "sil" yazın:
 				<input
 					className="bp5-input"
 					style={css.input}
 					disabled={this.props.disabled}
 					autoCapitalize="off"
 					spellCheck={false}
-					placeholder='Enter "delete" to confirm'
+					placeholder='Onaylamak için "sil" yazın'
 					value={this.state.input}
 					onKeyDown={(evt): void => {
-						if (evt.key === "Enter" && this.state.input === 'delete') {
+						if (evt.key === "Enter" && this.state.input === 'sil') {
 							this.closeDialogConfirm();
 						}
 					}}
@@ -222,7 +222,7 @@ export default class ConfirmButton extends React.Component<Props, State> {
 
 		if (dialog) {
 			let confirmMsg = this.props.confirmMsg ? this.props.confirmMsg :
-				'Confirm ' + (this.props.label || '');
+				'Onayla: ' + (this.props.label || '');
 			let itemsList: JSX.Element;
 			if (this.props.items) {
 				let items: JSX.Element[] = [];
@@ -233,7 +233,7 @@ export default class ConfirmButton extends React.Component<Props, State> {
 			}
 
 			let dialogElem = <Blueprint.Dialog
-				title="Confirm"
+				title="Onayla"
 				style={css.dialog}
 				isOpen={this.state.dialog}
 				usePortal={true}
@@ -251,12 +251,12 @@ export default class ConfirmButton extends React.Component<Props, State> {
 							className="bp5-button"
 							type="button"
 							onClick={this.closeDialog}
-						>Cancel</button>
+						>Vazgeç</button>
 						<button
 							className={'bp5-button ' + dialogClassName}
 							type="button"
 							disabled={this.props.confirmInput && !this.state.force &&
-								this.state.input !== 'delete'}
+								this.state.input !== 'sil'}
 							onClick={this.closeDialogConfirm}
 						>{this.props.dialogLabel || this.props.label}</button>
 					</div>

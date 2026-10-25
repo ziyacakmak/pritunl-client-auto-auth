@@ -192,21 +192,21 @@ export default class Profile extends React.Component<Props, State> {
 	render(): JSX.Element {
 		let profile: ProfileTypes.Profile = this.props.profile;
 
-		let statusLabel = "Online For"
+		let statusLabel = "Çevrimiçi Süre"
 		let statusVal = profile.formattedUptime()
 		if (statusVal === "") {
-			statusLabel = "Status"
+			statusLabel = "Durum"
 			statusVal = profile.formattedStatus()
 		}
 		let open = this.state.open || !!profile.registration_key
 
 		let fieldsLeft: PageInfos.Field[] = [
 			{
-				label: 'User',
+				label: 'Kullanıcı',
 				value: profile.user || '-',
 			},
 			{
-				label: 'Server',
+				label: 'Sunucu',
 				value: profile.server || '-',
 			},
 		]
@@ -217,7 +217,7 @@ export default class Profile extends React.Component<Props, State> {
 				value: statusVal,
 			},
 			{
-				label: 'Organization',
+				label: 'Kuruluş',
 				value: profile.organization || '-',
 			},
 		]
@@ -229,12 +229,12 @@ export default class Profile extends React.Component<Props, State> {
 			(profile.client_addr && profile.client_addr.length >= 16)) {
 
 			fieldsLong.push({
-				label: 'Server Address',
+				label: 'Sunucu Adresi',
 				value: profile.server_addr || '-',
 				copy: !!profile.server_addr,
 			})
 			fieldsLong.push({
-				label: 'Client Address',
+				label: 'İstemci Adresi',
 				value: profile.client_addr || '-',
 				copy: !!profile.client_addr,
 			})
@@ -242,12 +242,12 @@ export default class Profile extends React.Component<Props, State> {
 			longIp = true
 		} else if (profile.server_addr || profile.client_addr) {
 			fieldsLeft.push({
-				label: 'Server Address',
+				label: 'Sunucu Adresi',
 				value: profile.server_addr || '-',
 				copy: !!profile.server_addr,
 			})
 			fieldsRight.push({
-				label: 'Client Address',
+				label: 'İstemci Adresi',
 				value: profile.client_addr || '-',
 				copy: !!profile.client_addr,
 			})
@@ -276,7 +276,7 @@ export default class Profile extends React.Component<Props, State> {
 				<h3
 					className="tab-toggle"
 					style={css.headerLabel}
-				>{profile.formattedNameShort() || 'Profile'}</h3>
+				>{profile.formattedNameShort() || 'Profil'}</h3>
 				<div className="flex tab-toggle"/>
 				<ProfileConnect
 					profile={this.props.profile}
@@ -293,8 +293,8 @@ export default class Profile extends React.Component<Props, State> {
 						safe={true}
 						progressClassName="bp5-intent-danger"
 						dialogClassName="bp5-intent-danger bp5-icon-delete"
-						dialogLabel="Delete Profile"
-						confirmMsg="Permanently delete this profile"
+						dialogLabel="Profili Sil"
+						confirmMsg="Bu profil kalıcı olarak silinsin mi?"
 						items={[profile.formattedName()]}
 						disabled={this.state.disabled}
 						onConfirm={this.onDelete}
@@ -309,7 +309,7 @@ export default class Profile extends React.Component<Props, State> {
 				<h3
 					className="tab-toggle"
 					style={css.headerLabel}
-				>{profile.formattedNameShort() || 'Profile'}</h3>
+				>{profile.formattedNameShort() || 'Profil'}</h3>
 				<div className="flex tab-toggle"/>
 				<div
 					style={css.deleteButtonBox}
@@ -321,8 +321,8 @@ export default class Profile extends React.Component<Props, State> {
 						safe={true}
 						progressClassName="bp5-intent-danger"
 						dialogClassName="bp5-intent-danger bp5-icon-delete"
-						dialogLabel="Delete Profile"
-						confirmMsg="Permanently delete this profile"
+						dialogLabel="Profili Sil"
+						confirmMsg="Bu profil kalıcı olarak silinsin mi?"
 						items={[profile.formattedName()]}
 						disabled={this.state.disabled}
 						onConfirm={this.onDelete}
@@ -340,8 +340,8 @@ export default class Profile extends React.Component<Props, State> {
 					className="bp5-toast bp5-intent-primary bp5-overlay-content"
 				>
 					<span className="bp5-toast-message">
-						<span style={css.toastHeader}>Connection Lost</span><br/>
-						Authentication required to reconnect
+						<span style={css.toastHeader}>Bağlantı Kesildi</span><br/>
+						Yeniden bağlanmak için kimlik doğrulama gerekli
 					</span>
 				</div>
 				<div
@@ -353,8 +353,8 @@ export default class Profile extends React.Component<Props, State> {
 						<h3
 							className="bp5-text-intent-danger"
 							style={css.regTitle}
-						>Device Registration Required</h3>
-						Contact Server Administrator with Code:
+						>Cihaz Kaydı Gerekli</h3>
+						Sunucu yöneticisine şu kodla başvurun:
 						<h3
 							className="bp5-text-intent-primary"
 							style={css.regName}

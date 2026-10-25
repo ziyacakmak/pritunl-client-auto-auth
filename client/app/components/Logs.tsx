@@ -193,22 +193,22 @@ export default class Logs extends React.Component<Props, State> {
 	render(): JSX.Element {
 		let label = ""
 		if (this.state.view === "service") {
-			label = "Service"
+			label = "Hizmet"
 		} else if (this.state.view === "client") {
-			label = "Client"
+			label = "İstemci"
 		} else if (this.state.curProfile) {
 			label = this.state.curProfile.formattedName()
 		}
 
 		let viewsDom: JSX.Element[] = [
-			<option value="service">Service logs</option>,
-			<option value="client">Client logs</option>,
+			<option value="service">Hizmet günlükleri</option>,
+			<option value="client">İstemci günlükleri</option>,
 		]
 
 		this.state.profiles.forEach((prfl: ProfileTypes.ProfileRo): void => {
 			viewsDom.push(<option
 				value={prfl.id}
-			>{prfl.formattedName() + " logs"}</option>)
+			>{prfl.formattedName() + " günlükleri"}</option>)
 		})
 
 		return <div className="bp5-card layout vertical flex" style={css.card}>
@@ -219,8 +219,8 @@ export default class Logs extends React.Component<Props, State> {
 					safe={true}
 					progressClassName="bp5-intent-danger"
 					dialogClassName="bp5-intent-danger bp5-icon-delete"
-					dialogLabel="Clear Logs"
-					confirmMsg={"Confirm clearing " + label + " logs"}
+					dialogLabel="Günlükleri Temizle"
+					confirmMsg={label + " günlüklerinin temizlenmesini onaylayın"}
 					disabled={this.state.disabled}
 					onConfirm={this.onDelete}
 				/>
@@ -230,7 +230,7 @@ export default class Logs extends React.Component<Props, State> {
 				/>
 			</div>
 			<div className="layout horizontal">
-				<h3 style={css.header}>Log Viewer</h3>
+				<h3 style={css.header}>Günlük Görüntüleyici</h3>
 			</div>
 			<div className="layout horizontal">
 				<div className="bp5-select">

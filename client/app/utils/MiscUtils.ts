@@ -103,77 +103,69 @@ export function formatDate(dateData: any): string {
 	let str = '';
 
 	let hours = date.getHours();
-	let period = 'AM';
-
-	if (hours > 12) {
-		period = 'PM';
-		hours -= 12;
-	} else if (hours === 0) {
-		hours = 12;
-	}
 
 	let day;
 	switch (date.getDay()) {
 		case 0:
-			day = 'Sun';
+			day = 'Paz';
 			break;
 		case 1:
-			day = 'Mon';
+			day = 'Pzt';
 			break;
 		case 2:
-			day = 'Tue';
+			day = 'Sal';
 			break;
 		case 3:
-			day = 'Wed';
+			day = 'Çar';
 			break;
 		case 4:
-			day = 'Thu';
+			day = 'Per';
 			break;
 		case 5:
-			day = 'Fri';
+			day = 'Cum';
 			break;
 		case 6:
-			day = 'Sat';
+			day = 'Cmt';
 			break;
 	}
 
 	let month;
 	switch (date.getMonth()) {
 		case 0:
-			month = 'Jan';
+			month = 'Oca';
 			break;
 		case 1:
-			month = 'Feb';
+			month = 'Şub';
 			break;
 		case 2:
 			month = 'Mar';
 			break;
 		case 3:
-			month = 'Apr';
+			month = 'Nis';
 			break;
 		case 4:
 			month = 'May';
 			break;
 		case 5:
-			month = 'Jun';
+			month = 'Haz';
 			break;
 		case 6:
-			month = 'Jul';
+			month = 'Tem';
 			break;
 		case 7:
-			month = 'Aug';
+			month = 'Ağu';
 			break;
 		case 8:
-			month = 'Sep';
+			month = 'Eyl';
 			break;
 		case 9:
-			month = 'Oct';
+			month = 'Eki';
 			break;
 		case 10:
-			month = 'Nov';
+			month = 'Kas';
 			break;
 		case 11:
-			month = 'Dec';
+			month = 'Ara';
 			break;
 	}
 
@@ -181,10 +173,9 @@ export function formatDate(dateData: any): string {
 	str += date.getDate() + ' ';
 	str += month + ' ';
 	str += date.getFullYear() + ', ';
-	str += hours + ':';
+	str += zeroPad(hours, 2) + ':';
 	str += zeroPad(date.getMinutes(), 2) + ':';
-	str += zeroPad(date.getSeconds(), 2) + ' ';
-	str += period;
+	str += zeroPad(date.getSeconds(), 2);
 
 	return str;
 }
@@ -205,61 +196,52 @@ export function formatDateLess(dateData: any): string {
 	let str = '';
 
 	let hours = date.getHours();
-	let period = 'AM';
-
-	if (hours > 12) {
-		period = 'PM';
-		hours -= 12;
-	} else if (hours === 0) {
-		hours = 12;
-	}
 
 	let month;
 	switch (date.getMonth()) {
 		case 0:
-			month = 'Jan';
+			month = 'Oca';
 			break;
 		case 1:
-			month = 'Feb';
+			month = 'Şub';
 			break;
 		case 2:
 			month = 'Mar';
 			break;
 		case 3:
-			month = 'Apr';
+			month = 'Nis';
 			break;
 		case 4:
 			month = 'May';
 			break;
 		case 5:
-			month = 'Jun';
+			month = 'Haz';
 			break;
 		case 6:
-			month = 'Jul';
+			month = 'Tem';
 			break;
 		case 7:
-			month = 'Aug';
+			month = 'Ağu';
 			break;
 		case 8:
-			month = 'Sep';
+			month = 'Eyl';
 			break;
 		case 9:
-			month = 'Oct';
+			month = 'Eki';
 			break;
 		case 10:
-			month = 'Nov';
+			month = 'Kas';
 			break;
 		case 11:
-			month = 'Dec';
+			month = 'Ara';
 			break;
 	}
 
 	str += month + ' ';
 	str += date.getDate() + ' ';
 	str += date.getFullYear() + ', ';
-	str += hours + ':';
+	str += zeroPad(hours, 2) + ':';
 	str += zeroPad(date.getMinutes(), 2);
-	str += period;
 
 	return str;
 }
@@ -282,40 +264,40 @@ export function formatDateShort(dateData: any): string {
 	let month;
 	switch (date.getMonth()) {
 		case 0:
-			month = 'Jan';
+			month = 'Oca';
 			break;
 		case 1:
-			month = 'Feb';
+			month = 'Şub';
 			break;
 		case 2:
 			month = 'Mar';
 			break;
 		case 3:
-			month = 'Apr';
+			month = 'Nis';
 			break;
 		case 4:
 			month = 'May';
 			break;
 		case 5:
-			month = 'Jun';
+			month = 'Haz';
 			break;
 		case 6:
-			month = 'Jul';
+			month = 'Tem';
 			break;
 		case 7:
-			month = 'Aug';
+			month = 'Ağu';
 			break;
 		case 8:
-			month = 'Sep';
+			month = 'Eyl';
 			break;
 		case 9:
-			month = 'Oct';
+			month = 'Eki';
 			break;
 		case 10:
-			month = 'Nov';
+			month = 'Kas';
 			break;
 		case 11:
-			month = 'Dec';
+			month = 'Ara';
 			break;
 	}
 
@@ -346,40 +328,40 @@ export function formatDateShortTime(dateData: any): string {
 	let month;
 	switch (date.getMonth()) {
 		case 0:
-			month = 'Jan';
+			month = 'Oca';
 			break;
 		case 1:
-			month = 'Feb';
+			month = 'Şub';
 			break;
 		case 2:
 			month = 'Mar';
 			break;
 		case 3:
-			month = 'Apr';
+			month = 'Nis';
 			break;
 		case 4:
 			month = 'May';
 			break;
 		case 5:
-			month = 'Jun';
+			month = 'Haz';
 			break;
 		case 6:
-			month = 'Jul';
+			month = 'Tem';
 			break;
 		case 7:
-			month = 'Aug';
+			month = 'Ağu';
 			break;
 		case 8:
-			month = 'Sep';
+			month = 'Eyl';
 			break;
 		case 9:
-			month = 'Oct';
+			month = 'Eki';
 			break;
 		case 10:
-			month = 'Nov';
+			month = 'Kas';
 			break;
 		case 11:
-			month = 'Dec';
+			month = 'Ara';
 			break;
 	}
 
@@ -390,19 +372,10 @@ export function formatDateShortTime(dateData: any): string {
 	} else if (date.getMonth() === curDate.getMonth() &&
 			date.getDate() === curDate.getDate()) {
 		let hours = date.getHours();
-		let period = 'AM';
 
-		if (hours > 12) {
-			period = 'PM';
-			hours -= 12;
-		} else if (hours === 0) {
-			hours = 12;
-		}
-
-		str = hours + ':';
+		str = zeroPad(hours, 2) + ':';
 		str += zeroPad(date.getMinutes(), 2) + ':';
-		str += zeroPad(date.getSeconds(), 2) + ' ';
-		str += period;
+		str += zeroPad(date.getSeconds(), 2);
 	}
 
 	return str;
@@ -420,7 +393,7 @@ export function exec(path: string,
 	return new Promise<ExecOutput>((resolve): void => {
 		childProcess.execFile(path, args, (err, stdout, stderr) => {
 			if (err) {
-				err = new Errors.ExecError(err, "Utils: Exec error",
+				err = new Errors.ExecError(err, "Yardımcılar: Komut yürütme hatası",
 					{path: path, args: args, stdout: stdout, stderr: stderr});
 			}
 
@@ -465,7 +438,7 @@ export function fileDelete(path: string): Promise<void> {
 			}
 			fs.unlink(path, (err) => {
 				if (err) {
-					err = new Errors.WriteError(err, "Utils: Failed to delete file",
+					err = new Errors.WriteError(err, "Yardımcılar: Dosya silinemedi",
 						{path: path});
 					reject(err)
 					return
@@ -482,7 +455,7 @@ export function fileRead(path: string): Promise<string> {
 			path, "utf-8",
 			(err: NodeJS.ErrnoException, data: string): void => {
 				if (err) {
-					err = new Errors.ReadError(err, "Utils: Failed to read file",
+					err = new Errors.ReadError(err, "Yardımcılar: Dosya okunamadı",
 						{path: path});
 					reject(err)
 					return
@@ -500,7 +473,7 @@ export function fileWrite(path: string, data: string): Promise<void> {
 			path, data,
 			(err: NodeJS.ErrnoException): void => {
 				if (err) {
-					err = new Errors.WriteError(err, "Utils: Failed to write file",
+					err = new Errors.WriteError(err, "Yardımcılar: Dosya yazılamadı",
 						{path: path});
 					reject(err)
 					return
@@ -550,7 +523,7 @@ export function fileChmod(pth: string, mode: number): Promise<void> {
 	return new Promise<void>((resolve, reject): void => {
 		fs.chmod(pth, mode, (err: NodeJS.ErrnoException): void => {
 			if (err) {
-				err = new Errors.WriteError(err, "Utils: Failed to chmod file",
+				err = new Errors.WriteError(err, "Yardımcılar: Dosya izinleri değiştirilemedi",
 					{path: pth});
 				reject(err)
 				return
@@ -565,7 +538,7 @@ export function dirMake(pth: string): Promise<void> {
 		fs.mkdir(pth, {recursive: true},
 			(err: NodeJS.ErrnoException): void => {
 				if (err) {
-					err = new Errors.WriteError(err, "Utils: Failed to make directory",
+					err = new Errors.WriteError(err, "Yardımcılar: Dizin oluşturulamadı",
 						{path: pth});
 					reject(err)
 					return
@@ -582,7 +555,7 @@ export function fileReaddir(pth: string): Promise<string[]> {
 			pth,
 			(err: NodeJS.ErrnoException, filenames: string[]): void => {
 				if (err) {
-					err = new Errors.ReadError(err, "Utils: Failed to read directory",
+					err = new Errors.ReadError(err, "Yardımcılar: Dizin okunamadı",
 						{path: pth});
 					reject(err)
 					return
@@ -625,23 +598,23 @@ export function encryptAvailable(): Promise<boolean> {
 			evt.then((resp: [Error, boolean]) => {
 				if (!resp) {
 					let err = new Errors.ParseError(
-						null, "Utils: Failed to check encryption support e1");
+						null, "Yardımcılar: Şifreleme desteği denetlenemedi e1");
 					reject(err)
 				} else if (resp[0]) {
 					let err = new Errors.ParseError(
-						resp[0], "Utils: Failed to check encryption support e2");
+						resp[0], "Yardımcılar: Şifreleme desteği denetlenemedi e2");
 					reject(err)
 				} else {
 					resolve(resp[1])
 				}
 			}).catch((err) => {
 				err = new Errors.ParseError(
-					err, "Utils: Failed to check encryption support e3");
+					err, "Yardımcılar: Şifreleme desteği denetlenemedi e3");
 				reject(err)
 			})
 		} catch (err) {
 			err = new Errors.ParseError(
-				err, "Utils: Failed to check encryption support e4");
+				err, "Yardımcılar: Şifreleme desteği denetlenemedi e4");
 			reject(err)
 		}
 	})
@@ -655,23 +628,23 @@ export function encryptString(decData: string): Promise<string> {
 			evt.then((resp: [Error, string]) => {
 				if (!resp) {
 					let err = new Errors.ParseError(
-						null, "Utils: Failed to encrypt string e1");
+						null, "Yardımcılar: Metin şifrelenemedi e1");
 					reject(err)
 				} else if (resp[0]) {
 					let err = new Errors.ParseError(
-						resp[0], "Utils: Failed to encrypt string e2");
+						resp[0], "Yardımcılar: Metin şifrelenemedi e2");
 					reject(err)
 				} else {
 					resolve(resp[1])
 				}
 			}).catch((err) => {
 				err = new Errors.ParseError(
-					err, "Utils: Failed to encrypt string e3");
+					err, "Yardımcılar: Metin şifrelenemedi e3");
 				reject(err)
 			})
 		} catch (err) {
 			err = new Errors.ParseError(
-				err, "Utils: Failed to encrypt string e4");
+				err, "Yardımcılar: Metin şifrelenemedi e4");
 			reject(err)
 		}
 	})
@@ -685,23 +658,23 @@ export function decryptString(encData: string): Promise<string> {
 			evt.then((resp: [Error, string]) => {
 				if (!resp) {
 					let err = new Errors.ParseError(
-						null, "Utils: Failed to decrypt string e1");
+						null, "Yardımcılar: Metnin şifresi çözülemedi e1");
 					reject(err)
 				} else if (resp[0]) {
 					let err = new Errors.ParseError(
-						resp[0], "Utils: Failed to decrypt string e2");
+						resp[0], "Yardımcılar: Metnin şifresi çözülemedi e2");
 					reject(err)
 				} else {
 					resolve(resp[1])
 				}
 			}).catch((err) => {
 				err = new Errors.ParseError(
-					err, "Utils: Failed to decrypt string e3");
+					err, "Yardımcılar: Metnin şifresi çözülemedi e3");
 				reject(err)
 			})
 		} catch (err) {
 			err = new Errors.ParseError(
-				err, "Utils: Failed to decrypt string e4");
+				err, "Yardımcılar: Metnin şifresi çözülemedi e4");
 			reject(err)
 		}
 	})
@@ -733,7 +706,7 @@ export function tarRead(pth: string): Promise<TarData[]> {
 	}).then(() => {
 		return files
 	}).catch((err) => {
-		throw new Errors.ReadError(err, "Utils: Failed to read tar file",
+		throw new Errors.ReadError(err, "Yardımcılar: Tar dosyası okunamadı",
 			{path: pth})
 	})
 }

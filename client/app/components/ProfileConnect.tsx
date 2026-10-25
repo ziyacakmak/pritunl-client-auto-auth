@@ -57,8 +57,6 @@ const css = {
 		marginRight: "5px",
 	} as React.CSSProperties,
 	dialog: {
-		width: "340px",
-		position: "absolute",
 	} as React.CSSProperties,
 	label: {
 		width: "100%",
@@ -432,10 +430,10 @@ export default class ProfileConnect extends React.Component<Props, State> {
 		let buttonLabel = ""
 		if (connected) {
 			buttonClass = "bp5-intent-danger bp5-icon-delete"
-			buttonLabel = "Disconnect"
+			buttonLabel = "Bağlantıyı Kes"
 		} else {
 			buttonClass = "bp5-intent-success bp5-icon-link"
-			buttonLabel = "Connect"
+			buttonLabel = "Bağlan"
 		}
 
 		let cssButton = css.button
@@ -480,10 +478,11 @@ export default class ProfileConnect extends React.Component<Props, State> {
 					this.onConnect("wg")
 				}}
 			>
-				{hideOvpn ? "Connect" : (this.props.minimal ? "WG" : "WireGuard")}
+				{hideOvpn ? "Bağlan" : (this.props.minimal ? "WG" : "WireGuard")}
 			</button>
 			<Blueprint.Dialog
-				title="Profile Connect"
+				title="Profile Bağlan"
+				className="profile-connect-dialog"
 				style={css.dialog}
 				isOpen={this.state.dialog}
 				usePortal={true}
@@ -492,7 +491,7 @@ export default class ProfileConnect extends React.Component<Props, State> {
 			>
 				<div className="bp5-dialog-body">
 					<h3 style={css.header}>
-						Connecting to {this.props.profile.formattedName()}
+						{this.props.profile.formattedName()} profiline bağlanılıyor
 					</h3>
 					<div
 						style={css.preConnect}
@@ -503,10 +502,10 @@ export default class ProfileConnect extends React.Component<Props, State> {
 					<PageInput
 						disabled={this.state.disabled}
 						hidden={!this.state.hasUsername}
-						label="Username"
-						help="Enter profile username."
+						label="Kullanıcı Adı"
+						help="Profil kullanıcı adını girin."
 						type="text"
-						placeholder="Enter username"
+						placeholder="Kullanıcı adı girin"
 						value={this.state.username}
 						onChange={(val: string): void => {
 							this.setState({
@@ -520,10 +519,10 @@ export default class ProfileConnect extends React.Component<Props, State> {
 						disabled={this.state.disabled}
 						hidden={!this.state.hasPassword}
 						autoFocus={this.state.autoFocus === "password"}
-						label="Password"
-						help="Enter profile password."
+						label="Parola"
+						help="Profil parolasını girin."
 						type="password"
-						placeholder="Enter password"
+						placeholder="Parola girin"
 						value={this.state.password}
 						onKeyUp={(key: string): void => {
 							if (key === "Enter") {
@@ -542,10 +541,10 @@ export default class ProfileConnect extends React.Component<Props, State> {
 						disabled={this.state.disabled}
 						hidden={!this.state.hasPin}
 						autoFocus={this.state.autoFocus === "pin"}
-						label="Pin"
-						help="Enter profile pin."
+						label="PIN"
+						help="Profil PIN'ini girin."
 						type="password"
-						placeholder="Enter pin"
+						placeholder="PIN girin"
 						value={this.state.pin}
 						onKeyUp={(key: string): void => {
 							if (key === "Enter") {
@@ -564,10 +563,10 @@ export default class ProfileConnect extends React.Component<Props, State> {
 						disabled={this.state.disabled}
 						hidden={!this.state.hasDuo}
 						autoFocus={this.state.autoFocus === "duo"}
-						label="Duo Passcode"
-						help="Enter profile Duo passcode from Duo authenticator."
+						label="Duo Şifresi"
+						help="Duo doğrulayıcıdan profil Duo şifresini girin."
 						type="text"
-						placeholder="Enter passcode"
+						placeholder="Şifre girin"
 						value={this.state.duo}
 						onKeyUp={(key: string): void => {
 							if (key === "Enter") {
@@ -586,10 +585,10 @@ export default class ProfileConnect extends React.Component<Props, State> {
 						disabled={this.state.disabled}
 						hidden={!this.state.hasOnelogin}
 						autoFocus={this.state.autoFocus === "onelogin"}
-						label="OneLogin Passcode"
-						help="Enter profile OneLogin passcode from OneLogin authenticator app."
+						label="OneLogin Şifresi"
+						help="OneLogin doğrulayıcı uygulamasından profil OneLogin şifresini girin."
 						type="text"
-						placeholder="Enter passcode"
+						placeholder="Şifre girin"
 						value={this.state.onelogin}
 						onKeyUp={(key: string): void => {
 							if (key === "Enter") {
@@ -608,10 +607,10 @@ export default class ProfileConnect extends React.Component<Props, State> {
 						disabled={this.state.disabled}
 						hidden={!this.state.hasOkta}
 						autoFocus={this.state.autoFocus === "okta"}
-						label="Okta Passcode"
-						help="Enter profile Okta passcode from Okta authenticator app."
+						label="Okta Şifresi"
+						help="Okta doğrulayıcı uygulamasından profil Okta şifresini girin."
 						type="text"
-						placeholder="Enter passcode"
+						placeholder="Şifre girin"
 						value={this.state.okta}
 						onKeyUp={(key: string): void => {
 							if (key === "Enter") {
@@ -630,10 +629,10 @@ export default class ProfileConnect extends React.Component<Props, State> {
 						disabled={this.state.disabled}
 						hidden={!this.state.hasOtp}
 						autoFocus={this.state.autoFocus === "otp"}
-						label="Authenticator Passcode"
-						help="Enter profile passcode from authenticator app."
+						label="Doğrulayıcı Şifresi"
+						help="Doğrulayıcı uygulamasından profil şifresini girin."
 						type="text"
-						placeholder="Enter passcode"
+						placeholder="Şifre girin"
 						value={this.state.otp}
 						onKeyUp={(key: string): void => {
 							if (key === "Enter") {
@@ -653,9 +652,9 @@ export default class ProfileConnect extends React.Component<Props, State> {
 						hidden={!this.state.hasYubikey}
 						autoFocus={this.state.autoFocus === "yubikey"}
 						label="YubiKey"
-						help="Select field and push button on YubiKey device to fill passcode."
+						help="Şifreyi doldurmak için alanı seçin ve YubiKey cihazındaki düğmeye basın."
 						type="text"
-						placeholder="Activate YubiKey"
+						placeholder="YubiKey'i etkinleştirin"
 						value={this.state.yubikey}
 						onKeyUp={(key: string): void => {
 							if (key === "Enter") {
@@ -677,14 +676,14 @@ export default class ProfileConnect extends React.Component<Props, State> {
 							className="bp5-button bp5-intent-danger bp5-icon-cross"
 							type="button"
 							onClick={this.closeDialog}
-						>Cancel</button>
+						>Vazgeç</button>
 						<button
 							className="bp5-button bp5-intent-success bp5-icon-link"
 							type="button"
 							disabled={this.state.disabled || (!this.state.changed &&
 								!this.state.preConnMsgOnly)}
 							onClick={this.closeDialogConfirm}
-						>Connect</button>
+						>Bağlan</button>
 					</div>
 				</div>
 			</Blueprint.Dialog>

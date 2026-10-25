@@ -187,27 +187,27 @@ export function New(self: Profile): Profile {
 	self.formattedStatus = function(): string {
 		if (!this.status) {
 			if (this.system && this.state) {
-				return "Connecting"
+				return "Bağlanıyor"
 			}
-			return "Disconnected"
+			return "Bağlantı Kesildi"
 		}
 
 		switch (this.status) {
 			case "connected":
-				return "Connected"
+				return "Bağlı"
 			case "connecting":
-				return "Connecting"
+				return "Bağlanıyor"
 			case "disconnected":
-				return "Disconnected"
+				return "Bağlantı Kesildi"
 			case "authenticating":
-				return "Authenticating"
+				return "Kimlik Doğrulanıyor"
 			case "reconnecting":
-				return "Reconnecting"
+				return "Yeniden Bağlanıyor"
 			case "disconnecting":
 				if (this.system && this.state) {
-					return "Reconnecting"
+					return "Yeniden Bağlanıyor"
 				}
-				return "Disconnecting"
+				return "Bağlantı Kesiliyor"
 			default:
 				return this.status
 		}
@@ -230,39 +230,23 @@ export function New(self: Profile): Profile {
 			hasDays = true
 			units = Math.floor(uptime / 86400)
 			uptime -= units * 86400
-			unitStr = units + " day"
-			if (units > 1) {
-				unitStr += "s"
-			}
-			uptimeItems.push(unitStr)
+			uptimeItems.push(units + " gün")
 		}
 
 		if (uptime > 3600) {
 			units = Math.floor(uptime / 3600)
 			uptime -= units * 3600
-			unitStr = units + " hour"
-			if (units > 1) {
-				unitStr += "s"
-			}
-			uptimeItems.push(unitStr)
+			uptimeItems.push(units + " saat")
 		}
 
 		if (uptime > 60) {
 			units = Math.floor(uptime / 60)
 			uptime -= units * 60
-			unitStr = units + " min"
-			if (units > 1) {
-				unitStr += "s"
-			}
-			uptimeItems.push(unitStr)
+			uptimeItems.push(units + " dk")
 		}
 
 		if (uptime && !hasDays) {
-			unitStr = uptime + " sec"
-			if (uptime > 1) {
-				unitStr += "s"
-			}
-			uptimeItems.push(unitStr)
+			uptimeItems.push(uptime + " sn")
 		}
 
 		return uptimeItems.join(" ")
@@ -424,7 +408,7 @@ export function New(self: Profile): Profile {
 
 				if (resp.error) {
 					let err = new Errors.ReadError(resp.error,
-						"Profiles: Failed to get key from keychain")
+						"Profiller: Anahtar zincirinden anahtar alınamadı")
 					Logger.errorAlert(err)
 					return data
 				}
@@ -613,7 +597,7 @@ export function New(self: Profile): Profile {
 				.end()
 		} catch (err) {
 			err = new Errors.RequestError(err,
-				"Profiles: Failed to save system profile")
+				"Profiller: Sistem profili kaydedilemedi")
 			Logger.errorAlert(err)
 			ProfileActions.sync()
 			return
@@ -631,7 +615,7 @@ export function New(self: Profile): Profile {
 
 		if (this.force_connect) {
 			let err = new Errors.WriteError(
-				null, "Profiles: Profile autostart enforced by server",
+				null, "Profiller: Profil otomatik başlatması sunucu tarafından zorunlu kılınmış",
 				{profile_id: this.id})
 			Logger.errorAlert(err, 10)
 			return
@@ -648,7 +632,7 @@ export function New(self: Profile): Profile {
 				.end()
 		} catch (err) {
 			err = new Errors.RequestError(err,
-				"Profiles: Failed to delete system profile")
+				"Profiller: Sistem profili silinemedi")
 			Logger.errorAlert(err)
 			ProfileActions.sync()
 			return
@@ -676,7 +660,7 @@ export function New(self: Profile): Profile {
 						ProfileActions.sync()
 					}, (err) => {
 						err = new Errors.RequestError(err,
-							"Profiles: Failed to save system profile")
+							"Profiller: Sistem profili kaydedilemedi")
 						Logger.errorAlert(err)
 						resolve()
 						return
@@ -692,7 +676,7 @@ export function New(self: Profile): Profile {
 				(err: NodeJS.ErrnoException): void => {
 					if (err) {
 						err = new Errors.ReadError(
-							err, "Profiles: Profile write error",
+							err, "Profiller: Profil yazma hatası",
 							{profile_path: profilePath})
 						Logger.errorAlert(err, 10)
 
@@ -752,7 +736,7 @@ export function New(self: Profile): Profile {
 						ProfileActions.sync()
 					}, (err) => {
 						err = new Errors.RequestError(err,
-							"Profiles: Failed to save system profile")
+							"Profiller: Sistem profili kaydedilemedi")
 						Logger.errorAlert(err)
 						resolve()
 						return
@@ -770,7 +754,7 @@ export function New(self: Profile): Profile {
 						(err: NodeJS.ErrnoException): void => {
 							if (err) {
 								err = new Errors.WriteError(
-									err, "Profiles: Profile write error",
+									err, "Profiller: Profil yazma hatası",
 									{profile_path: profilePath})
 								Logger.errorAlert(err, 10)
 
@@ -789,7 +773,7 @@ export function New(self: Profile): Profile {
 						(err: NodeJS.ErrnoException): void => {
 							if (err) {
 								err = new Errors.WriteError(
-									err, "Profiles: Profile write error",
+									err, "Profiller: Profil yazma hatası",
 									{profile_path: profilePath})
 								Logger.errorAlert(err, 10)
 
@@ -815,7 +799,7 @@ export function New(self: Profile): Profile {
 			logData = resp.data
 		} catch (err) {
 			err = new Errors.RequestError(
-				err, "Profiles: Profile log request error")
+				err, "Profiller: Profil günlük isteği hatası")
 			Logger.errorAlert(err, 10)
 		}
 
@@ -829,7 +813,7 @@ export function New(self: Profile): Profile {
 				.end()
 		} catch (err) {
 			err = new Errors.RequestError(
-				err, "Profiles: Profile log request error")
+				err, "Profiller: Profil günlük isteği hatası")
 			Logger.errorAlert(err, 10)
 		}
 	}
@@ -1032,21 +1016,21 @@ export function New(self: Profile): Profile {
 						switch (resp.status) {
 							case 480:
 								Logger.info(
-									"Profiles: Skipping profile sync, requires subscription")
+									"Profiller: Profil eşitlemesi atlanıyor, abonelik gerekli")
 								break
 							case 404:
 								err = new Errors.RequestError(null,
-									"Profiles: Failed to sync profile, user not found")
+									"Profiller: Profil eşitlenemedi, kullanıcı bulunamadı")
 								reject(err)
 								return
 							case 401:
 								err = new Errors.RequestError(null,
-									"Profiles: Failed to sync profile, authentication failed")
+									"Profiller: Profil eşitlenemedi, kimlik doğrulama başarısız")
 								reject(err)
 								return
 							default:
 								err = new Errors.RequestError(null,
-									"Profiles: Failed to sync profile, status: " + resp.status)
+									"Profiller: Profil eşitlenemedi, durum: " + resp.status)
 								reject(err)
 								return
 						}
@@ -1073,7 +1057,7 @@ export function New(self: Profile): Profile {
 
 					if (confSignature !== syncData.signature) {
 						let err = new Errors.ParseError(null,
-							"Profiles: Failed to sync profile, signature invalid")
+							"Profiller: Profil eşitlenemedi, imza geçersiz")
 						reject(err)
 						return
 					}
@@ -1081,7 +1065,7 @@ export function New(self: Profile): Profile {
 					resolve(syncData.conf)
 				}, (err) => {
 					err = new Errors.RequestError(err,
-						"Profiles: Failed to sync profile configuration")
+						"Profiller: Profil yapılandırması eşitlenemedi")
 					reject(err)
 					return
 				})
@@ -1138,7 +1122,7 @@ export function New(self: Profile): Profile {
 				await this._importSync(syncData)
 			} catch(err) {
 				err = new Errors.ParseError(err,
-					"Profiles: Failed to parse profile sync",
+					"Profiller: Profil eşitlemesi ayrıştırılamadı",
 					{profile_id: this.id})
 				Logger.error(err)
 				this.sync_time = -1

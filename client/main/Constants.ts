@@ -22,7 +22,7 @@ export const flatpakRunDir = path.join(
 	process.env.XDG_RUNTIME_DIR || "", "app", flatpakId)
 export let flatpakError = ""
 if (flatpak && !process.env.XDG_RUNTIME_DIR) {
-	flatpakError = "XDG_RUNTIME_DIR not defined in flatpak mode"
+	flatpakError = "flatpak kipinde XDG_RUNTIME_DIR tanımlı değil"
 }
 
 export const unixPath = flatpak ?

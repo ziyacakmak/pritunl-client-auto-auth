@@ -32,7 +32,7 @@ function loadZero(zeroId: string,
 			(err: NodeJS.ErrnoException, data: string): void => {
 				if (err) {
 					err = new Errors.ReadError(
-						err, "Zeros: Failed to read zero",
+						err, "Zero: Zero yapılandırması okunamadı",
 						{zero_path: zeroPath})
 					reject(err)
 					return
@@ -44,7 +44,7 @@ function loadZero(zeroId: string,
 					zero.id = zeroId
 				} catch (err) {
 					err = new Errors.ParseError(err,
-						"Zeros: Failed to parse zero configuration",
+						"Zero: Zero yapılandırması ayrıştırılamadı",
 						{zero_path: zeroPath})
 					reject(err)
 					return
@@ -65,7 +65,7 @@ function loadZeros(): Promise<ZeroTypes.Zeros> {
 			(err: NodeJS.ErrnoException, stats: fs.Stats): void => {
 				if (err) {
 					if (err.code !== "ENOENT") {
-						err = new Errors.ReadError(err, "Zeros: Read error",
+						err = new Errors.ReadError(err, "Zero: Okuma hatası",
 							{zeros_path: zerosPath});
 						Logger.errorAlert(err);
 					}
@@ -78,7 +78,7 @@ function loadZeros(): Promise<ZeroTypes.Zeros> {
 					zerosPath,
 					async (err: NodeJS.ErrnoException, filenames: string[]) => {
 						if (err) {
-							err = new Errors.ReadError(err, "Zeros: Read error",
+							err = new Errors.ReadError(err, "Zero: Okuma hatası",
 								{zeros_path: zerosPath});
 							Logger.errorAlert(err);
 
@@ -194,9 +194,9 @@ function openLinkAlert(url: string, message: string): string {
 				Electron.ipcRenderer.send("control", "copy", url)
 				evt.currentTarget.className = "bp5-button bp5-intent-success " +
 					"bp5-icon-link"
-				evt.currentTarget.innerText = "Link Copied"
+				evt.currentTarget.innerText = "Bağlantı Kopyalandı"
 			}}
-		>Copy Link</button>
+		>Bağlantıyı Kopyala</button>
 	</div>
 
 	return Alert.info(linkElm, 30)
@@ -224,9 +224,9 @@ export async function renew(zero: ZeroTypes.ZeroRo,
 	try {
 		let renewed = await ZeroUtils.renew(zero, onStatus,
 			(url: string): void => {
-				alertId = openLinkAlert(url, "Complete SSH certificate " +
-					"verification in web browser. Copy the link below if " +
-					"the web browser did not open.")
+				alertId = openLinkAlert(url, "SSH sertifikası doğrulamasını " +
+					"web tarayıcısında tamamlayın. Tarayıcı açılmadıysa " +
+					"aşağıdaki bağlantıyı kopyalayın.")
 			}, controller)
 		Alert.dismiss(alertId)
 
@@ -234,14 +234,14 @@ export async function renew(zero: ZeroTypes.ZeroRo,
 			let zeros = await loadZerosModels()
 			await ZeroUtils.syncSshState(zeros)
 
-			Alert.success("Successfully renewed SSH certificate", 3)
+			Alert.success("SSH sertifikası başarıyla yenilendi", 3)
 		} else if (controller.cancelled) {
-			Alert.info("SSH certificate renewal cancelled", 3)
+			Alert.info("SSH sertifikası yenileme iptal edildi", 3)
 		}
 	} catch (err) {
 		Alert.dismiss(alertId)
 		if (controller.cancelled) {
-			Alert.info("SSH certificate renewal cancelled", 3)
+			Alert.info("SSH sertifikası yenileme iptal edildi", 3)
 		} else {
 			Logger.errorAlert(err, 10)
 		}
@@ -284,7 +284,7 @@ export interface ZeroImportData {
 export async function importZero(data: ZeroImportData): Promise<boolean> {
 	let serverUri = (data.server || "").trim()
 	if (!serverUri) {
-		Alert.error("Enter Pritunl Zero server hostname")
+		Alert.error("Pritunl Zero sunucu ana bilgisayar adını girin")
 		return false
 	}
 
@@ -297,7 +297,7 @@ export async function importZero(data: ZeroImportData): Promise<boolean> {
 		let serverUrl = new URL(serverUri)
 		server = "https://" + serverUrl.host
 	} catch {
-		Alert.error("Invalid Pritunl Zero server hostname")
+		Alert.error("Geçersiz Pritunl Zero sunucu ana bilgisayar adı")
 		return false
 	}
 
@@ -306,14 +306,14 @@ export async function importZero(data: ZeroImportData): Promise<boolean> {
 		publicKeyPath = MiscUtils.collapsePath(data.publicKeyPath || "")
 
 		if (!publicKeyPath.endsWith(".pub")) {
-			Alert.error("SSH key path must end with .pub")
+			Alert.error("SSH anahtar yolu .pub ile bitmelidir")
 			return false
 		}
 
 		if (!await MiscUtils.fileExists(
 			MiscUtils.expandPath(publicKeyPath))) {
 
-			Alert.error("Selected SSH key does not exist")
+			Alert.error("Seçilen SSH anahtarı mevcut değil")
 			return false
 		}
 	}
@@ -348,7 +348,7 @@ export async function importZero(data: ZeroImportData): Promise<boolean> {
 
 	await zero.writeConf()
 
-	Alert.success("Successfully imported Pritunl Zero profile")
+	Alert.success("Pritunl Zero profili başarıyla içe aktarıldı")
 
 	await sync()
 
@@ -358,9 +358,9 @@ export async function importZero(data: ZeroImportData): Promise<boolean> {
 export async function registerCard(zero: ZeroTypes.ZeroRo): Promise<void> {
 	try {
 		let url = await ZeroUtils.registerUrl(zero)
-		openLinkAlert(url, "Complete Smart Card registration in " +
-			"web browser. Copy the link below if the web browser " +
-			"did not open.")
+		openLinkAlert(url, "Akıllı kart kaydını web tarayıcısında " +
+			"tamamlayın. Tarayıcı açılmadıysa aşağıdaki bağlantıyı " +
+			"kopyalayın.")
 	} catch (err) {
 		Logger.errorAlert(err, 10)
 	}
@@ -368,7 +368,7 @@ export async function registerCard(zero: ZeroTypes.ZeroRo): Promise<void> {
 
 export async function resetGpg(): Promise<void> {
 	await ZeroUtils.resetGpg()
-	Alert.success("GPG agent reset")
+	Alert.success("GPG aracısı sıfırlandı")
 }
 
 export interface KeyOptions {
