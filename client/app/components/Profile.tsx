@@ -328,6 +328,7 @@ export default class Profile extends React.Component<Props, State> {
 				profile={this.props.profile}
 				minimal={true}
 				hidden={open}
+				autoAuth={true}
 			/>
 			<div style={css.headerButtons}>
 				{open ? deleteButton : null}

@@ -8053,7 +8053,7 @@ class Profile extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
             react__WEBPACK_IMPORTED_MODULE_0__.createElement("h3", { className: "tab-toggle", style: css.headerLabel }, profile.formattedNameShort() || 'Profil'),
             !open ? statusBadge : null,
             react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", { className: "flex tab-toggle" }),
-            react__WEBPACK_IMPORTED_MODULE_0__.createElement(_ProfileConnect__WEBPACK_IMPORTED_MODULE_6__["default"], { profile: this.props.profile, minimal: true, hidden: open }),
+            react__WEBPACK_IMPORTED_MODULE_0__.createElement(_ProfileConnect__WEBPACK_IMPORTED_MODULE_6__["default"], { profile: this.props.profile, minimal: true, hidden: open, autoAuth: true }),
             react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", { style: css.headerButtons },
                 open ? deleteButton : null,
                 react__WEBPACK_IMPORTED_MODULE_0__.createElement(_blueprintjs_core__WEBPACK_IMPORTED_MODULE_3__.Button, { className: "bp5-minimal", style: css.collapseButton, icon: open ? "chevron-up" : "chevron-down", title: open ? "Profili daralt" : "Profili genişlet", "aria-label": open ? "Profili daralt" : "Profili genişlet", type: "button", disabled: !!profile.registration_key, onClick: this.onToggleCollapsed })));

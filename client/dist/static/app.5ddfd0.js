@@ -63477,7 +63477,7 @@ class Profile extends react.Component {
             react.createElement("h3", { className: "tab-toggle", style: Profile_css.headerLabel }, profile.formattedNameShort() || 'Profil'),
             !open ? statusBadge : null,
             react.createElement("div", { className: "flex tab-toggle" }),
-            react.createElement(ProfileConnect, { profile: this.props.profile, minimal: true, hidden: open }),
+            react.createElement(ProfileConnect, { profile: this.props.profile, minimal: true, hidden: open, autoAuth: true }),
             react.createElement("div", { style: Profile_css.headerButtons },
                 open ? deleteButton : null,
                 react.createElement(Button, { className: "bp5-minimal", style: Profile_css.collapseButton, icon: open ? "chevron-up" : "chevron-down", title: open ? "Profili daralt" : "Profili genişlet", "aria-label": open ? "Profili daralt" : "Profili genişlet", type: "button", disabled: !!profile.registration_key, onClick: this.onToggleCollapsed })));
