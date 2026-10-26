@@ -12,9 +12,13 @@ function push(level: string, err: any): void {
 	let time = new Date()
 	let msg = err.message || err
 
-	msg = "[" + time.getFullYear() + "-" + (time.getMonth() + 1) + "-" +
-		time.getDate() + " " + time.getHours() + ":" + time.getMinutes() + ":" +
-		time.getSeconds() + "][" + level  + "] " + msg + "\n" + (err.stack || "")
+	msg = "[" + time.getFullYear() + "-" +
+		String(time.getMonth() + 1).padStart(2, "0") + "-" +
+		String(time.getDate()).padStart(2, "0") + " " +
+		String(time.getHours()).padStart(2, "0") + ":" +
+		String(time.getMinutes()).padStart(2, "0") + ":" +
+		String(time.getSeconds()).padStart(2, "0") + "][" + level + "] " +
+		msg + "\n" + (err.stack || "")
 
 	msg = msg.trim()
 

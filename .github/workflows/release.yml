@@ -23,6 +23,8 @@ jobs:
 
       - name: Build client
         working-directory: client
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
         run: |
           npm ci
           sh build.sh
@@ -32,7 +34,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/pritunl"
           curl -L --fail --retry 3 \
             -o "$RUNNER_TEMP/pritunl/Pritunl.pkg.zip" \
-            "https://github.com/pritunl/pritunl-client/releases/download/1.4.4777.90/Pritunl.pkg.zip"
+            "https://github.com/pritunl/pritunl-client/releases/download/1.4.4791.77/Pritunl.pkg.zip"
           unzip -q "$RUNNER_TEMP/pritunl/Pritunl.pkg.zip" \
             -d "$RUNNER_TEMP/pritunl"
           pkgutil --expand-full \
@@ -104,6 +106,8 @@ jobs:
 
       - name: Build installer
         shell: pwsh
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
         run: ./tools/build_win_auto_auth.ps1
 
       - uses: actions/upload-artifact@v4
@@ -131,14 +135,14 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          name: "Pritunl Client 1.4.4777.90 — Auto Auth"
+          name: "Pritunl Client 1.4.4791.77 — Auto Auth"
           body: |
-            Source-built Pritunl Client 1.4.4777.90 with Keychain/DPAPI-backed
+            Source-built Pritunl Client 1.4.4791.77 with Keychain/DPAPI-backed
             auto authentication and local TOTP.
 
             - **macOS (Apple Silicon):** `Pritunl-AutoAuth-macOS-arm64.zip`
               is ad-hoc signed and not notarized.
-            - **Windows (x64 / arm64):** `Pritunl-AutoAuth-1.4.4777.90-setup.exe`
+            - **Windows (x64 / arm64):** `Pritunl-AutoAuth-1.4.4791.77-setup.exe`
               is an unsigned Inno Setup installer.
 
             The builds are unsigned, so Gatekeeper and SmartScreen will warn.

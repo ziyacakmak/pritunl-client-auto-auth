@@ -34,6 +34,8 @@ module.exports = {
   plugins: [
     new webpack.DefinePlugin({
       'process.env': JSON.stringify({}),
+      __APP_VERSION__: JSON.stringify(require('./package.json').version),
+      __RELEASE_TAG__: JSON.stringify(process.env.RELEASE_TAG || ''),
     }),
   ],
 };

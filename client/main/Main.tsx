@@ -141,7 +141,8 @@ electron.ipcMain.on(
 				main.window.close()
 			}
 		} else if (msg === "download-update") {
-			Utils.openLink("https://client.pritunl.com/#install")
+			Utils.openLink(
+				"https://github.com/ziyacakmak/pritunl-client-auto-auth/releases/latest")
 		} else if (msg === "open-link") {
 			Utils.openLink(data)
 		} else if (msg === "copy") {

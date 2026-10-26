@@ -5499,9 +5499,13 @@ function push(level, err) {
     }
     let time = new Date();
     let msg = err.message || err;
-    msg = "[" + time.getFullYear() + "-" + (time.getMonth() + 1) + "-" +
-        time.getDate() + " " + time.getHours() + ":" + time.getMinutes() + ":" +
-        time.getSeconds() + "][" + level + "] " + msg + "\n" + (err.stack || "");
+    msg = "[" + time.getFullYear() + "-" +
+        String(time.getMonth() + 1).padStart(2, "0") + "-" +
+        String(time.getDate()).padStart(2, "0") + " " +
+        String(time.getHours()).padStart(2, "0") + ":" +
+        String(time.getMinutes()).padStart(2, "0") + ":" +
+        String(time.getSeconds()).padStart(2, "0") + "][" + level + "] " +
+        msg + "\n" + (err.stack || "");
     msg = msg.trim();
     let pth = logPath;
     external_fs_default().stat(pth, (err, stat) => {
@@ -7932,7 +7936,7 @@ external_electron_default().ipcMain.on("control", (evt, msg, data) => {
         }
     }
     else if (msg === "download-update") {
-        openLink("https://client.pritunl.com/#install");
+        openLink("https://github.com/ziyacakmak/pritunl-client-auto-auth/releases/latest");
     }
     else if (msg === "open-link") {
         openLink(data);
@@ -7994,7 +7998,8 @@ class Main {
             icon: external_path_default().join(__dirname, "..", "logo.png"),
             titleBarStyle: titleBarStyle,
             frame: !frameless,
-            transparent: (external_process_default()).platform === "linux" && frameless,
+            transparent: ((external_process_default()).platform === "linux" && frameless &&
+                (main_Config.transparent_window || (external_process_default()).env.XDG_SESSION_TYPE === "x11")),
             trafficLightPosition: {
                 x: 14,
                 y: 12,

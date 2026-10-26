@@ -129,6 +129,7 @@ export default class MetricChart extends React.Component<Props, State> {
 						},
 						time: {
 							unit: 'minute',
+							tooltipFormat: 'D MMM YYYY, HH:mm',
 							displayFormats: {
 								minute: 'HH:mm',
 							},

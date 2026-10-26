@@ -21,6 +21,7 @@ const entitlements = path.resolve('entitlements.plist');
 
 const home = os.homedir();
 const sourceCandidates = [
+	path.join(home, 'Pritunl-1.4.4791.77.app'),
 	path.join(home, 'Pritunl-1.4.4777.90.app'),
 	path.join(home, 'Pritunl-1.4.4752.50.app'),
 	'/Applications/Pritunl.app',

@@ -23,6 +23,7 @@ interface Props {
 
 interface State {
 	open: boolean;
+	collapsed: boolean;
 	message: string;
 	disabled: boolean;
 	changed: boolean;
@@ -67,9 +68,6 @@ const css = {
 	} as React.CSSProperties,
 	deleteButton: {
 	} as React.CSSProperties,
-	deleteButtonBox: {
-		marginTop: "-1px",
-	} as React.CSSProperties,
 	buttons: {
 	} as React.CSSProperties,
 	editor: {
@@ -89,20 +87,6 @@ const css = {
 		cursor: 'default',
 		outline: 'inherit',
 	} as React.CSSProperties,
-	headerOpen: {
-		userSelect: 'none',
-		position: 'absolute',
-		top: '0',
-		left: '0',
-		right: '0',
-		padding: '4px',
-		height: '36px',
-		color: 'inherit',
-		border: 'none',
-		font: 'inherit',
-		cursor: 'pointer',
-		outline: 'none',
-	} as React.CSSProperties,
 	headerClosed: {
 		userSelect: 'none',
 		position: 'absolute',
@@ -120,9 +104,24 @@ const css = {
 	} as React.CSSProperties,
 	headerLabel: {
 		fontSize: "1.09em",
-		margin: "4px 34px 0 6px",
+		margin: "4px 6px 0 6px",
 		overflow: "hidden",
 		whiteSpace: "nowrap",
+		textOverflow: "ellipsis",
+		minWidth: 0,
+		flexShrink: 1,
+	} as React.CSSProperties,
+	statusTag: {
+		margin: "3px 8px 1px 0",
+		flexShrink: 0,
+	} as React.CSSProperties,
+	headerButtons: {
+		display: "flex",
+		alignItems: "center",
+		flexShrink: 0,
+	} as React.CSSProperties,
+	collapseButton: {
+		marginTop: "-1px",
 	} as React.CSSProperties,
 	body: {
 	} as React.CSSProperties,
@@ -151,6 +150,7 @@ export default class Profile extends React.Component<Props, State> {
 		super(props, context);
 		this.state = {
 			open: false,
+			collapsed: false,
 			message: '',
 			disabled: false,
 			changed: false,
@@ -170,6 +170,43 @@ export default class Profile extends React.Component<Props, State> {
 		this.setState({
 			...this.state,
 		});
+	}
+
+	onHeaderClick = (evt: React.MouseEvent<HTMLDivElement>): void => {
+		let open = !!this.props.profile.registration_key ||
+			(!this.state.collapsed &&
+				(!this.props.minimal || this.state.open))
+
+		if (open) {
+			return
+		}
+
+		let target = evt.target as HTMLElement
+		if (target.className && target.className.indexOf &&
+				target.className.indexOf('tab-toggle') !== -1) {
+
+			this.setState({
+				...this.state,
+				open: true,
+				collapsed: false,
+			})
+		}
+	}
+
+	onToggleCollapsed = (evt: React.MouseEvent<HTMLElement>): void => {
+		evt.stopPropagation()
+
+		if (this.props.profile.registration_key) {
+			return
+		}
+
+		let collapsed = !this.state.collapsed
+
+		this.setState({
+			...this.state,
+			open: !collapsed,
+			collapsed: collapsed,
+		})
 	}
 
 	onDelete = (): void => {
@@ -198,7 +235,9 @@ export default class Profile extends React.Component<Props, State> {
 			statusLabel = "Durum"
 			statusVal = profile.formattedStatus()
 		}
-		let open = this.state.open || !!profile.registration_key
+		let open = !!profile.registration_key ||
+			(!this.state.collapsed &&
+				(!this.props.minimal || this.state.open))
 
 		let fieldsLeft: PageInfos.Field[] = [
 			{
@@ -253,87 +292,61 @@ export default class Profile extends React.Component<Props, State> {
 			})
 		}
 
-		let header: JSX.Element;
-		if (this.props.minimal) {
-			header = <button
-				className={(open ? "bp5-card-header " : "") +
-					"layout horizontal tab-toggle"}
-				style={open ? css.headerOpen : css.headerClosed}
-				onClick={(evt): void => {
-					let target = evt.target as HTMLElement;
+		let statusBadge = <div
+			className={"bp5-tag bp5-minimal" + (profile.status === "connected" ?
+				" bp5-intent-success" : "")}
+			style={css.statusTag}
+			title={profile.formattedStatus()}
+		>{profile.status === "connected" ? "Bağlı" : "Bağlı değil"}</div>
 
-					if (this.props.minimal &&
-						target.className && target.className.indexOf &&
-						target.className.indexOf('tab-toggle') !== -1) {
+		let deleteButton = <ConfirmButton
+			className="bp5-minimal bp5-intent-danger bp5-icon-trash"
+			style={css.deleteButton}
+			safe={true}
+			progressClassName="bp5-intent-danger"
+			dialogClassName="bp5-intent-danger bp5-icon-delete"
+			dialogLabel="Profili Sil"
+			confirmMsg="Bu profil kalıcı olarak silinsin mi?"
+			items={[profile.formattedName()]}
+			disabled={this.state.disabled}
+			onConfirm={this.onDelete}
+		/>
 
-						this.setState({
-							...this.state,
-							open: !open,
-						})
-					}
-				}}
-			>
-				<h3
-					className="tab-toggle"
-					style={css.headerLabel}
-				>{profile.formattedNameShort() || 'Profil'}</h3>
-				<div className="flex tab-toggle"/>
-				<ProfileConnect
-					profile={this.props.profile}
-					minimal={true}
-					hidden={!this.props.minimal || open}
+		let header = <div
+			className={"layout horizontal tab-toggle" +
+				(open ? " bp5-card-header" : "")}
+			style={open ? css.header : css.headerClosed}
+			onClick={this.onHeaderClick}
+		>
+			<h3
+				className="tab-toggle"
+				style={css.headerLabel}
+			>{profile.formattedNameShort() || 'Profil'}</h3>
+			{!open ? statusBadge : null}
+			<div className="flex tab-toggle"/>
+			<ProfileConnect
+				profile={this.props.profile}
+				minimal={true}
+				hidden={open}
+			/>
+			<div style={css.headerButtons}>
+				{open ? deleteButton : null}
+				<Blueprint.Button
+					className="bp5-minimal"
+					style={css.collapseButton}
+					icon={open ? "chevron-up" : "chevron-down"}
+					title={open ? "Profili daralt" : "Profili genişlet"}
+					aria-label={open ? "Profili daralt" : "Profili genişlet"}
+					type="button"
+					disabled={!!profile.registration_key}
+					onClick={this.onToggleCollapsed}
 				/>
-				<div
-					style={css.deleteButtonBox}
-					hidden={this.props.minimal && !open}
-				>
-					<ConfirmButton
-						className="bp5-minimal bp5-intent-danger bp5-icon-trash"
-						style={css.deleteButton}
-						safe={true}
-						progressClassName="bp5-intent-danger"
-						dialogClassName="bp5-intent-danger bp5-icon-delete"
-						dialogLabel="Profili Sil"
-						confirmMsg="Bu profil kalıcı olarak silinsin mi?"
-						items={[profile.formattedName()]}
-						disabled={this.state.disabled}
-						onConfirm={this.onDelete}
-					/>
-				</div>
-			</button>
-		} else {
-			header = <div
-				className="bp5-card-header layout horizontal tab-toggle"
-				style={css.header}
-			>
-				<h3
-					className="tab-toggle"
-					style={css.headerLabel}
-				>{profile.formattedNameShort() || 'Profil'}</h3>
-				<div className="flex tab-toggle"/>
-				<div
-					style={css.deleteButtonBox}
-					hidden={this.props.minimal && !open}
-				>
-					<ConfirmButton
-						className="bp5-minimal bp5-intent-danger bp5-icon-trash"
-						style={css.deleteButton}
-						safe={true}
-						progressClassName="bp5-intent-danger"
-						dialogClassName="bp5-intent-danger bp5-icon-delete"
-						dialogLabel="Profili Sil"
-						confirmMsg="Bu profil kalıcı olarak silinsin mi?"
-						items={[profile.formattedName()]}
-						disabled={this.state.disabled}
-						onConfirm={this.onDelete}
-					/>
-				</div>
 			</div>
-		}
+		</div>
 
 		return <div className="bp5-card layout vertical" style={css.card}>
 			{header}
-			<div style={css.box} hidden={this.props.minimal && !open}>
+			<div style={css.box} hidden={!open}>
 				<div
 					style={css.toast}
 					hidden={!profile.auth_reconnect}
@@ -385,7 +398,7 @@ export default class Profile extends React.Component<Props, State> {
 				</div>
 				<MetricCharts
 					profile={profile.id}
-					disabled={this.props.minimal && !open}
+					disabled={!open}
 				/>
 				<div className="layout horizontal">
 					<div style={css.buttons}>

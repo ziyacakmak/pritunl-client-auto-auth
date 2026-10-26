@@ -105,7 +105,7 @@ if (-not $isccPath) {
 
 Invoke-Checked $isccPath @((Join-Path $Root "resources_win\setup-auto-auth.iss"))
 
-$installer = Join-Path $Build "Pritunl-AutoAuth-1.4.4777.90-setup.exe"
+$installer = Join-Path $Build "Pritunl-AutoAuth-1.4.4791.77-setup.exe"
 if (-not (Test-Path $installer)) {
 	throw "Installer was not created at $installer"
 }

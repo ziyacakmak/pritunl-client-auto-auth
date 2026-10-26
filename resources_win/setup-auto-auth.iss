@@ -1,5 +1,5 @@
 #define MyAppName "Pritunl"
-#define MyAppVersion "1.4.4777.90"
+#define MyAppVersion "1.4.4791.77"
 #define MyAppPublisher "Pritunl Auto Auth (unofficial fork)"
 #define MyAppURL "https://github.com/ziyacakmak/pritunl-client-auto-auth"
 #define MyAppExeName "pritunl.exe"

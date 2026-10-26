@@ -15,8 +15,12 @@ import ConfigView from './Config';
 import About from './About';
 import * as Blueprint from "@blueprintjs/core";
 import * as Alert from "../Alert";
+import * as UpdateUtils from "../utils/UpdateUtils";
 
-let upgradeShown = false
+const updateCheckInterval = 6 * 60 * 60 * 1000
+
+let updateTimer: number
+let updateShown = ""
 
 interface State {
 	path: string
@@ -97,6 +101,10 @@ const css = {
 	updateButton: {
 		marginTop: "7px",
 	} as React.CSSProperties,
+	updateDismissButton: {
+		marginTop: "7px",
+		marginLeft: "5px",
+	} as React.CSSProperties,
 	controlButtonFirst: {
 		marginLeft: '4px',
 	} as React.CSSProperties,
@@ -128,11 +136,20 @@ export default class Main extends React.Component<{}, State> {
 	componentDidMount(): void {
 		Constants.addChangeListener(this.onChange)
 		Alert.addChangeListener(this.onAlert)
+
+		this.checkUpdate()
+		updateTimer = window.setInterval(
+			this.checkUpdate, updateCheckInterval)
 	}
 
 	componentWillUnmount(): void {
 		Constants.removeChangeListener(this.onChange)
 		Alert.removeChangeListener(this.onAlert)
+
+		if (updateTimer) {
+			window.clearInterval(updateTimer)
+			updateTimer = null
+		}
 	}
 
 	onChange = (): void => {
@@ -248,41 +265,45 @@ export default class Main extends React.Component<{}, State> {
 		})
 	}
 
-	render(): JSX.Element {
-		if (Constants.state.upgrade && !upgradeShown) {
-			upgradeShown = true
-
-			if (Constants.state.security) {
-					let updateElm: JSX.Element = <div>
-					<div><b>Önemli bir güvenlik güncellemesi mevcut. En son sürümü aşağıdan indirin.</b></div>
-					<button
-						className="bp5-button bp5-intent-primary bp5-icon-download"
-						type="button"
-						style={css.updateButton}
-						onClick={(): void => {
-							Electron.ipcRenderer.send("control", "download-update")
-						}}
-					>Güncellemeyi İndir</button>
-				</div>
-
-				Alert.error(updateElm, 0)
-			} else {
-				let updateElm: JSX.Element = <div>
-					<div>Bir güncelleme mevcut. En son sürümü aşağıdan indirin.</div>
-					<button
-						className="bp5-button bp5-intent-primary bp5-icon-download"
-						type="button"
-						style={css.updateButton}
-						onClick={(): void => {
-							Electron.ipcRenderer.send("control", "download-update")
-						}}
-					>Güncellemeyi İndir</button>
-				</div>
-
-				Alert.info(updateElm, 0)
+	checkUpdate = (): void => {
+		UpdateUtils.check().then((update: UpdateUtils.Update): void => {
+			if (!update || update.latest.label === updateShown) {
+				return
 			}
-		}
 
+			updateShown = update.latest.label
+			this.showUpdate(update)
+		}).catch((): void => {})
+	}
+
+	showUpdate = (update: UpdateUtils.Update): void => {
+		let updateKey = ""
+		let updateElm: JSX.Element = <div>
+			<div><b>Yeni bir sürüm mevcut: {update.latest.label}</b></div>
+			<div>Kullanılan sürüm: {update.current.label}</div>
+			<button
+				className="bp5-button bp5-intent-primary bp5-icon-download"
+				type="button"
+				style={css.updateButton}
+				onClick={(): void => {
+					Alert.dismiss(updateKey)
+					Electron.ipcRenderer.send("control", "download-update")
+				}}
+			>Güncellemeyi İndir</button>
+			<button
+				className="bp5-button bp5-minimal"
+				type="button"
+				style={css.updateDismissButton}
+				onClick={(): void => {
+					Alert.dismiss(updateKey)
+				}}
+			>Daha Sonra</button>
+		</div>
+
+		updateKey = Alert.info(updateElm, 0)
+	}
+
+	render(): JSX.Element {
 		let showControls = Constants.frameless && process.platform !== "darwin"
 
 		let themeLabel = ""
