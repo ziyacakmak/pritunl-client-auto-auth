@@ -99,6 +99,11 @@ release tag is embedded at build time and compared by upstream version and
 `v1.4.4791.77-auto-auth.2`. Official Pritunl update notices are ignored; the
 download button opens the fork's releases page.
 
+Upstream releases are checked daily by the
+[`Check upstream release`](.github/workflows/check-upstream.yml) workflow. When
+a newer Pritunl Client is available it opens an issue labeled
+`upstream-release`; merging and publishing are still manual.
+
 ## Requirements
 
 - macOS (tested on Apple Silicon) or Windows 10/11.

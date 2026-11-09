@@ -1,0 +1,155 @@
+name: Check upstream release
+
+# This workflow only detects new upstream releases and opens an issue.
+# It never merges, tags, builds, or publishes anything.
+
+on:
+  schedule:
+    # Daily at 06:00 UTC (09:00 Türkiye saati)
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: check-upstream-release
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: Check pritunl/pritunl-client
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compare upstream release with fork base version
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs')
+
+            function parseVersion(label) {
+              const match = String(label || '').trim().replace(/^v/i, '')
+                .match(/^(\d+(?:\.\d+)*)/)
+              return match ? match[1] : null
+            }
+
+            function compareVersions(left, right) {
+              const leftParts = left.split('.')
+              const rightParts = right.split('.')
+              const length = Math.max(leftParts.length, rightParts.length)
+
+              for (let i = 0; i < length; i++) {
+                const leftPart = parseInt(leftParts[i] || '0', 10)
+                const rightPart = parseInt(rightParts[i] || '0', 10)
+
+                if (leftPart !== rightPart) {
+                  return leftPart > rightPart ? 1 : -1
+                }
+              }
+
+              return 0
+            }
+
+            async function main() {
+              const pkg = JSON.parse(fs.readFileSync('client/package.json', 'utf8'))
+              const currentVersion = parseVersion(pkg.version)
+              if (!currentVersion) {
+                core.setFailed(`Cannot parse client/package.json version: ${pkg.version}`)
+                return
+              }
+
+              const response = await github.rest.repos.getLatestRelease({
+                owner: 'pritunl',
+                repo: 'pritunl-client',
+              })
+              const upstreamRelease = response.data
+              const upstreamTag = upstreamRelease.tag_name
+              const upstreamVersion = parseVersion(upstreamTag)
+
+              if (!upstreamVersion) {
+                core.setFailed(`Cannot parse upstream release tag: ${upstreamTag}`)
+                return
+              }
+
+              core.info(`Fork base: ${currentVersion}`)
+              core.info(`Upstream latest: ${upstreamTag} (${upstreamRelease.html_url})`)
+
+              if (compareVersions(upstreamVersion, currentVersion) <= 0) {
+                core.info('Upstream is not newer than the fork base; nothing to do.')
+                return
+              }
+
+              const label = 'upstream-release'
+              try {
+                await github.rest.issues.getLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: label,
+                })
+              } catch (error) {
+                if (error.status !== 404) {
+                  throw error
+                }
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: label,
+                  color: '1d76db',
+                  description: 'New upstream Pritunl Client release available',
+                })
+              }
+
+              const marker = `<!-- upstream-release:${upstreamTag} -->`
+              const existingIssues = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'all',
+                labels: label,
+                per_page: 100,
+              })
+              const existing = existingIssues.data.find((issue) =>
+                (issue.body || '').includes(marker))
+
+              if (existing) {
+                core.info(`Issue #${existing.number} already exists for ${upstreamTag}.`)
+                return
+              }
+
+              const body = [
+                marker,
+                '',
+                'Yeni bir upstream Pritunl Client sürümü yayınlandı.',
+                '',
+                `- **Upstream sürüm:** \`${upstreamTag}\``,
+                `- **Fork temel sürümü:** \`${currentVersion}\``,
+                `- **Upstream release:** ${upstreamRelease.html_url}`,
+                `- **Yayın tarihi:** ${upstreamRelease.published_at}`,
+                '',
+                '## Yapılacaklar',
+                '',
+                '- [ ] Upstream etiketini fetch et ve fork\'a merge et',
+                '- [ ] Çakışmaları çöz ve yeni metinleri Türkçeleştir',
+                '- [ ] Sürüm referanslarını güncelle',
+                '- [ ] `tsc` ve build çalıştır',
+                `- [ ] \`v${upstreamVersion}-auto-auth.1\` etiketiyle yeni sürümü yayınla`,
+                '',
+                '> Bu issue otomatik oluşturuldu. Fork güncellenip release',
+                '> yayınlandıktan sonra kapatılabilir.',
+              ].join('\n')
+
+              const issue = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `Upstream Pritunl Client ${upstreamTag} yayınlandı`,
+                body: body,
+                labels: [label],
+              })
+
+              core.info(`Created issue #${issue.data.number}: ${issue.data.html_url}`)
+            }
+
+            await main()
