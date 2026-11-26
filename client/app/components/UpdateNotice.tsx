@@ -13,6 +13,7 @@ export interface State {
 	received: number
 	total: number
 	message: string
+	ready: boolean
 }
 
 interface Props {
@@ -81,6 +82,7 @@ export default class UpdateNotice extends React.Component<Props, State> {
 			received: 0,
 			total: 0,
 			message: "",
+			ready: false,
 		}
 	}
 
@@ -235,16 +237,29 @@ export default class UpdateNotice extends React.Component<Props, State> {
 		}
 
 		if (state.phase === "error") {
-			return <div>
-				<div style={css.message}>
-					{state.message || "Güncelleme tamamlanamadı."}
-				</div>
-				<button
+			let retry: JSX.Element
+
+			if (state.ready) {
+				retry = <button
+					className="bp5-button bp5-intent-primary bp5-icon-cloud-upload"
+					type="button"
+					style={css.button}
+					onClick={this.install}
+				>Kur</button>
+			} else {
+				retry = <button
 					className="bp5-button bp5-intent-primary bp5-icon-refresh"
 					type="button"
 					style={css.button}
 					onClick={this.download}
 				>Tekrar Dene</button>
+			}
+
+			return <div>
+				<div style={css.message}>
+					{state.message || "Güncelleme tamamlanamadı."}
+				</div>
+				{retry}
 				{this.renderManual()}
 			</div>
 		}

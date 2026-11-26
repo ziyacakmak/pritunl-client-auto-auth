@@ -65517,7 +65517,7 @@ function autoInstallSupported() {
     return process.platform === "darwin" && process.arch === "arm64";
 }
 function getCurrentVersion() {
-    return parseVersion("v1.4.4823.50-auto-auth.1") || parseVersion("1.4.4823.50");
+    return parseVersion("") || parseVersion("1.4.4823.50");
 }
 function check() {
     let current = getCurrentVersion();
@@ -65651,6 +65651,7 @@ class UpdateNotice extends react.Component {
             received: 0,
             total: 0,
             message: "",
+            ready: false,
         };
     }
     componentDidMount() {
@@ -65714,9 +65715,16 @@ class UpdateNotice extends react.Component {
                 react.createElement("div", { style: UpdateNotice_css.size }, "Uygulama kapan\u0131p yeniden a\u00E7\u0131lacak."));
         }
         if (state.phase === "error") {
+            let retry;
+            if (state.ready) {
+                retry = react.createElement("button", { className: "bp5-button bp5-intent-primary bp5-icon-cloud-upload", type: "button", style: UpdateNotice_css.button, onClick: this.install }, "Kur");
+            }
+            else {
+                retry = react.createElement("button", { className: "bp5-button bp5-intent-primary bp5-icon-refresh", type: "button", style: UpdateNotice_css.button, onClick: this.download }, "Tekrar Dene");
+            }
             return react.createElement("div", null,
                 react.createElement("div", { style: UpdateNotice_css.message }, state.message || "Güncelleme tamamlanamadı."),
-                react.createElement("button", { className: "bp5-button bp5-intent-primary bp5-icon-refresh", type: "button", style: UpdateNotice_css.button, onClick: this.download }, "Tekrar Dene"),
+                retry,
                 this.renderManual());
         }
         return react.createElement("div", null,

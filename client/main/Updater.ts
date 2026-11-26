@@ -30,6 +30,7 @@ export interface State {
 	received: number
 	total: number
 	message: string
+	ready: boolean
 }
 
 interface Pending {
@@ -59,6 +60,7 @@ function emptyState(): State {
 		received: 0,
 		total: 0,
 		message: "",
+		ready: false,
 	}
 }
 
@@ -85,6 +87,7 @@ function fail(message: string, err?: Error): [string | null, State] {
 		phase: "error",
 		percent: 0,
 		message: message,
+		ready: false,
 	})
 	return [message, state]
 }
@@ -381,6 +384,7 @@ export function status(target: Target | null): [string | null, State] {
 			received: pending.size,
 			total: pending.size,
 			message: "",
+			ready: true,
 		}
 
 		return [null, state]
@@ -435,6 +439,7 @@ export async function start(target: Target):
 			received: 0,
 			total: target.asset.size || 0,
 			message: "",
+			ready: false,
 		})
 
 		let downloaded: {size: number, sha256: string} | null = null
@@ -469,6 +474,7 @@ export async function start(target: Target):
 				percent: 0,
 				received: 0,
 				message: "",
+				ready: false,
 			})
 			return [null, state]
 		}
@@ -518,6 +524,7 @@ export async function start(target: Target):
 			received: downloaded.size,
 			total: downloaded.size,
 			message: "",
+			ready: true,
 		})
 
 		return [null, state]
@@ -597,7 +604,8 @@ async function installDarwin(target: Target, file: string):
 
 	let scriptPath = path.join(dir, "install.sh")
 
-	fs.writeFileSync(scriptPath, darwinScript(bundle, source), "utf8")
+	fs.writeFileSync(scriptPath, darwinScript(bundle, source,
+		pendingFile(target)), "utf8")
 	fs.chmodSync(scriptPath, 0o755)
 
 	let elevated = !isWritable(path.dirname(bundle))
@@ -643,22 +651,37 @@ async function installDarwin(target: Target, file: string):
 		stdio: "ignore",
 	}).unref()
 
-	clearPending(target)
-
+	// Bekleyen güncelleme script tarafından yalnızca kurulum başarılı
+	// olduğunda silinir; başarısız kurulumdan sonra "Kur" kalır.
 	setState({
 		phase: "installing",
-		message: "Kuruldu, uygulama yeniden açılıyor",
+		message: "Kuruluyor, uygulama yeniden başlatılacak",
 	})
 
 	return [null, state]
 }
 
-function darwinScript(bundle: string, source: string): string {
+function darwinScript(bundle: string, source: string,
+		pending: string): string {
 	return [
 		"#!/bin/sh",
 		"BUNDLE='" + bundle + "'",
 		"SRC='" + source + "'",
+		"PENDING='" + pending + "'",
 		"BAK=\"$BUNDLE.bak\"",
+		"",
+		"open_app() {",
+		"\tif [ \"$(id -u)\" -eq 0 ]; then",
+		"\t\tuser=$(/usr/bin/stat -f %Su /dev/console)",
+		"\t\tif [ -n \"$user\" ] && [ \"$user\" != \"root\" ]; then",
+		"\t\t\t/usr/bin/launchctl asuser \"$(id -u \"$user\")\" " +
+				"/usr/bin/sudo -u \"$user\" /usr/bin/open \"$BUNDLE\" " +
+				">/dev/null 2>&1",
+		"\t\t\treturn",
+		"\t\tfi",
+		"\tfi",
+		"\t/usr/bin/open \"$BUNDLE\" >/dev/null 2>&1",
+		"}",
 		"",
 		"pkill -f \"$BUNDLE/Contents/MacOS/\" >/dev/null 2>&1",
 		"i=0",
@@ -672,12 +695,16 @@ function darwinScript(bundle: string, source: string): string {
 		"",
 		"rm -rf \"$BAK\"",
 		"if [ -e \"$BUNDLE\" ]; then",
-		"\tmv \"$BUNDLE\" \"$BAK\" || exit 3",
+		"\tif ! mv \"$BUNDLE\" \"$BAK\"; then",
+		"\t\topen_app",
+		"\t\texit 3",
+		"\tfi",
 		"fi",
 		"",
 		"if ! ditto \"$SRC\" \"$BUNDLE\"; then",
 		"\trm -rf \"$BUNDLE\"",
 		"\tif [ -e \"$BAK\" ]; then mv \"$BAK\" \"$BUNDLE\"; fi",
+		"\topen_app",
 		"\texit 4",
 		"fi",
 		"",
@@ -686,11 +713,13 @@ function darwinScript(bundle: string, source: string): string {
 		"if ! codesign --verify --deep --strict \"$BUNDLE\" >/dev/null 2>&1; then",
 		"\trm -rf \"$BUNDLE\"",
 		"\tif [ -e \"$BAK\" ]; then mv \"$BAK\" \"$BUNDLE\"; fi",
+		"\topen_app",
 		"\texit 5",
 		"fi",
 		"",
+		"rm -f \"$PENDING\"",
 		"rm -rf \"$BAK\"",
-		"open -a \"$BUNDLE\" >/dev/null 2>&1",
+		"open_app",
 		"exit 0",
 		"",
 	].join("\n")
@@ -746,7 +775,11 @@ async function installWindows(target: Target, file: string):
 	}
 
 	if (code === -1) {
-		clearPending(target)
+		// Kurulum sonucu bilinmiyor, bekleyen indirme silinmez
+		setState({
+			message: "Kurulum sonucu alınamadı, uygulama yeniden " +
+				"başlatılınca tekrar deneyin",
+		})
 		return [null, state]
 	}
 
@@ -783,18 +816,29 @@ export async function install(target: Target):
 
 	running = true
 
+	let result: [string | null, State] = [null, state]
+
 	try {
 		if (process.platform === "darwin") {
-			return await installDarwin(target, file)
+			result = await installDarwin(target, file)
+		} else if (process.platform === "win32") {
+			result = await installWindows(target, file)
+		} else {
+			result = fail("Güncelleme: Bu platformda otomatik kurulum " +
+				"desteklenmiyor")
 		}
-
-		if (process.platform === "win32") {
-			return await installWindows(target, file)
-		}
-
-		return fail("Güncelleme: Bu platformda otomatik kurulum " +
-			"desteklenmiyor")
 	} finally {
 		running = false
 	}
+
+	if (result[0]) {
+		// Kurulum başarısız olduğunda indirilen dosya yerinde kalır, böylece
+		// "Kur" yeniden denenebilir
+		setState({
+			ready: fs.existsSync(file),
+		})
+		result = [result[0], state]
+	}
+
+	return result
 }

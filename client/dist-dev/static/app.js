@@ -9700,6 +9700,7 @@ class UpdateNotice extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
             received: 0,
             total: 0,
             message: "",
+            ready: false,
         };
     }
     componentDidMount() {
@@ -9763,9 +9764,16 @@ class UpdateNotice extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
                 react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", { style: css.size }, "Uygulama kapan\u0131p yeniden a\u00E7\u0131lacak."));
         }
         if (state.phase === "error") {
+            let retry;
+            if (state.ready) {
+                retry = react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", { className: "bp5-button bp5-intent-primary bp5-icon-cloud-upload", type: "button", style: css.button, onClick: this.install }, "Kur");
+            }
+            else {
+                retry = react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", { className: "bp5-button bp5-intent-primary bp5-icon-refresh", type: "button", style: css.button, onClick: this.download }, "Tekrar Dene");
+            }
             return react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null,
                 react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", { style: css.message }, state.message || "Güncelleme tamamlanamadı."),
-                react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", { className: "bp5-button bp5-intent-primary bp5-icon-refresh", type: "button", style: css.button, onClick: this.download }, "Tekrar Dene"),
+                retry,
                 this.renderManual());
         }
         return react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null,
@@ -13351,7 +13359,7 @@ function autoInstallSupported() {
     return process.platform === "darwin" && process.arch === "arm64";
 }
 function getCurrentVersion() {
-    return parseVersion("v1.4.4823.50-auto-auth.1") || parseVersion("1.4.4823.50");
+    return parseVersion("") || parseVersion("1.4.4823.50");
 }
 function check() {
     let current = getCurrentVersion();

@@ -7881,6 +7881,7 @@ function emptyState() {
         received: 0,
         total: 0,
         message: "",
+        ready: false,
     };
 }
 function getState() {
@@ -7903,6 +7904,7 @@ function Updater_fail(message, err) {
         phase: "error",
         percent: 0,
         message: message,
+        ready: false,
     });
     return [message, state];
 }
@@ -8147,6 +8149,7 @@ function Updater_status(target) {
             received: pending.size,
             total: pending.size,
             message: "",
+            ready: true,
         };
         return [null, state];
     }
@@ -8188,6 +8191,7 @@ async function start(target) {
             received: 0,
             total: target.asset.size || 0,
             message: "",
+            ready: false,
         });
         let downloaded = null;
         let lastErr = null;
@@ -8217,6 +8221,7 @@ async function start(target) {
                 percent: 0,
                 received: 0,
                 message: "",
+                ready: false,
             });
             return [null, state];
         }
@@ -8257,6 +8262,7 @@ async function start(target) {
             received: downloaded.size,
             total: downloaded.size,
             message: "",
+            ready: true,
         });
         return [null, state];
     }
@@ -8312,7 +8318,7 @@ async function installDarwin(target, file) {
             "geçemedi");
     }
     let scriptPath = external_path_default().join(dir, "install.sh");
-    external_fs_default().writeFileSync(scriptPath, darwinScript(bundle, source), "utf8");
+    external_fs_default().writeFileSync(scriptPath, darwinScript(bundle, source, pendingFile(target)), "utf8");
     external_fs_default().chmodSync(scriptPath, 0o755);
     let elevated = !isWritable(external_path_default().dirname(bundle));
     if (elevated) {
@@ -8346,19 +8352,32 @@ async function installDarwin(target, file) {
         detached: true,
         stdio: "ignore",
     }).unref();
-    clearPending(target);
     setState({
         phase: "installing",
-        message: "Kuruldu, uygulama yeniden açılıyor",
+        message: "Kuruluyor, uygulama yeniden başlatılacak",
     });
     return [null, state];
 }
-function darwinScript(bundle, source) {
+function darwinScript(bundle, source, pending) {
     return [
         "#!/bin/sh",
         "BUNDLE='" + bundle + "'",
         "SRC='" + source + "'",
+        "PENDING='" + pending + "'",
         "BAK=\"$BUNDLE.bak\"",
+        "",
+        "open_app() {",
+        "\tif [ \"$(id -u)\" -eq 0 ]; then",
+        "\t\tuser=$(/usr/bin/stat -f %Su /dev/console)",
+        "\t\tif [ -n \"$user\" ] && [ \"$user\" != \"root\" ]; then",
+        "\t\t\t/usr/bin/launchctl asuser \"$(id -u \"$user\")\" " +
+            "/usr/bin/sudo -u \"$user\" /usr/bin/open \"$BUNDLE\" " +
+            ">/dev/null 2>&1",
+        "\t\t\treturn",
+        "\t\tfi",
+        "\tfi",
+        "\t/usr/bin/open \"$BUNDLE\" >/dev/null 2>&1",
+        "}",
         "",
         "pkill -f \"$BUNDLE/Contents/MacOS/\" >/dev/null 2>&1",
         "i=0",
@@ -8372,12 +8391,16 @@ function darwinScript(bundle, source) {
         "",
         "rm -rf \"$BAK\"",
         "if [ -e \"$BUNDLE\" ]; then",
-        "\tmv \"$BUNDLE\" \"$BAK\" || exit 3",
+        "\tif ! mv \"$BUNDLE\" \"$BAK\"; then",
+        "\t\topen_app",
+        "\t\texit 3",
+        "\tfi",
         "fi",
         "",
         "if ! ditto \"$SRC\" \"$BUNDLE\"; then",
         "\trm -rf \"$BUNDLE\"",
         "\tif [ -e \"$BAK\" ]; then mv \"$BAK\" \"$BUNDLE\"; fi",
+        "\topen_app",
         "\texit 4",
         "fi",
         "",
@@ -8386,11 +8409,13 @@ function darwinScript(bundle, source) {
         "if ! codesign --verify --deep --strict \"$BUNDLE\" >/dev/null 2>&1; then",
         "\trm -rf \"$BUNDLE\"",
         "\tif [ -e \"$BAK\" ]; then mv \"$BAK\" \"$BUNDLE\"; fi",
+        "\topen_app",
         "\texit 5",
         "fi",
         "",
+        "rm -f \"$PENDING\"",
         "rm -rf \"$BAK\"",
-        "open -a \"$BUNDLE\" >/dev/null 2>&1",
+        "open_app",
         "exit 0",
         "",
     ].join("\n");
@@ -8434,7 +8459,10 @@ async function installWindows(target, file) {
         return Updater_fail("Güncelleme: Yönetici izni verilmedi");
     }
     if (code === -1) {
-        clearPending(target);
+        setState({
+            message: "Kurulum sonucu alınamadı, uygulama yeniden " +
+                "başlatılınca tekrar deneyin",
+        });
         return [null, state];
     }
     if (code !== 0) {
@@ -8459,19 +8487,29 @@ async function install(target) {
         return Updater_fail("Güncelleme: İndirilen dosya bulunamadı");
     }
     running = true;
+    let result = [null, state];
     try {
         if ((external_process_default()).platform === "darwin") {
-            return await installDarwin(target, file);
+            result = await installDarwin(target, file);
         }
-        if ((external_process_default()).platform === "win32") {
-            return await installWindows(target, file);
+        else if ((external_process_default()).platform === "win32") {
+            result = await installWindows(target, file);
         }
-        return Updater_fail("Güncelleme: Bu platformda otomatik kurulum " +
-            "desteklenmiyor");
+        else {
+            result = Updater_fail("Güncelleme: Bu platformda otomatik kurulum " +
+                "desteklenmiyor");
+        }
     }
     finally {
         running = false;
     }
+    if (result[0]) {
+        setState({
+            ready: external_fs_default().existsSync(file),
+        });
+        result = [result[0], state];
+    }
+    return result;
 }
 
 ;// ./main/Main.js
