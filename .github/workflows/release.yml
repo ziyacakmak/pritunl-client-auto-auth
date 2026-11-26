@@ -11,7 +11,8 @@ permissions:
 jobs:
   macos:
     name: macOS app
-    runs-on: macos-14
+    # Pinned to an arm64 image; macos-14 was retired on 2026-11-02.
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
 
