@@ -342,9 +342,13 @@ When a new upstream release is available:
    - `client/app/components/ProfileConnect.tsx`
    - `client/app/components/ProfileSettings.tsx`
    - `client/app/components/Profiles.tsx`
+
+   The two-step update flow lives in `client/app/utils/UpdateUtils.ts`,
+   `client/app/components/UpdateNotice.tsx` and `client/main/Updater.ts`.
 3. Rebuild with `sh build.sh` and `node package_local.js` on macOS, or
    `.\tools\build_win_auto_auth.ps1` on Windows.
-4. Test PIN-only, TOTP-only, and PIN + TOTP profiles.
+4. Test PIN-only, TOTP-only, and PIN + TOTP profiles, then run the update
+   flow (İndir → progress → Kur → relaunch).
 5. Keep the previous app and daemon available for rollback.
 
 Build from source rather than relying only on the prebuilt `dist` bundle:
@@ -357,7 +361,9 @@ upstream source and published bundles are not always in sync.
 | `client/app/utils/AutoAuth.ts` | Keychain / DPAPI storage and credential assembly |
 | `client/app/utils/Totp.ts` | RFC 6238 TOTP implementation |
 | `client/app/utils/ConnectUtils.ts` | Shared connect and auto-connect helpers |
-| `client/app/utils/UpdateUtils.ts` | Fork release update check and tag comparison |
+| `client/app/utils/UpdateUtils.ts` | Fork release update check, tag comparison, asset selection |
+| `client/app/components/UpdateNotice.tsx` | Two-step update notice: download progress and install prompt |
+| `client/main/Updater.ts` | Update download, SHA-256 verification, and platform installer |
 | `client/app/components/ProfileConnect.tsx` | Auto-auth connect flow and fallback dialog |
 | `client/app/components/ProfileSettings.tsx` | Auto Auth settings UI and validation |
 | `client/app/components/Profiles.tsx` | Connect-on-app-start handling |

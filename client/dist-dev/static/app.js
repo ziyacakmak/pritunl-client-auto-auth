@@ -6381,6 +6381,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _blueprintjs_core__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @blueprintjs/core */ "./node_modules/@blueprintjs/core/lib/esm/components/popover/popover.js");
 /* harmony import */ var _Alert__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ../Alert */ "./app/Alert.js");
 /* harmony import */ var _utils_UpdateUtils__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ../utils/UpdateUtils */ "./app/utils/UpdateUtils.js");
+/* harmony import */ var _UpdateNotice__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./UpdateNotice */ "./app/components/UpdateNotice.js");
+
 
 
 
@@ -6606,22 +6608,9 @@ class Main extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
         };
         this.showUpdate = (update) => {
             let updateKey = "";
-            let updateElm = react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null,
-                react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null,
-                    react__WEBPACK_IMPORTED_MODULE_0__.createElement("b", null,
-                        "Yeni bir s\u00FCr\u00FCm mevcut: ",
-                        update.latest.label)),
-                react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null,
-                    "Kullan\u0131lan s\u00FCr\u00FCm: ",
-                    update.current.label),
-                react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", { className: "bp5-button bp5-intent-primary bp5-icon-download", type: "button", style: css.updateButton, onClick: () => {
-                        _Alert__WEBPACK_IMPORTED_MODULE_20__.dismiss(updateKey);
-                        electron__WEBPACK_IMPORTED_MODULE_1__.ipcRenderer.send("control", "download-update");
-                    } }, "G\u00FCncellemeyi \u0130ndir"),
-                react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", { className: "bp5-button bp5-minimal", type: "button", style: css.updateDismissButton, onClick: () => {
-                        _Alert__WEBPACK_IMPORTED_MODULE_20__.dismiss(updateKey);
-                    } }, "Daha Sonra"));
-            updateKey = _Alert__WEBPACK_IMPORTED_MODULE_20__.info(updateElm, 0);
+            updateKey = _Alert__WEBPACK_IMPORTED_MODULE_20__.info(react__WEBPACK_IMPORTED_MODULE_0__.createElement(_UpdateNotice__WEBPACK_IMPORTED_MODULE_22__["default"], { update: update, onDismiss: () => {
+                    _Alert__WEBPACK_IMPORTED_MODULE_20__.dismiss(updateKey);
+                } }), 0);
         };
         this.state = {
             path: "/",
@@ -9600,6 +9589,200 @@ class Profiles extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
         return react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null,
             react__WEBPACK_IMPORTED_MODULE_0__.createElement("style", null, profilesStyle),
             react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", { className: "profiles-grid" }, profilesDom));
+    }
+}
+
+
+/***/ },
+
+/***/ "./app/components/UpdateNotice.js"
+/*!****************************************!*\
+  !*** ./app/components/UpdateNotice.js ***!
+  \****************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ UpdateNotice)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var electron__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! electron */ "electron");
+/* harmony import */ var electron__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(electron__WEBPACK_IMPORTED_MODULE_1__);
+
+
+const css = {
+    title: {
+        marginBottom: "2px",
+    },
+    meta: {
+        opacity: 0.8,
+        marginBottom: "4px",
+    },
+    bar: {
+        height: "6px",
+        borderRadius: "3px",
+        overflow: "hidden",
+        margin: "7px 0 3px 0",
+        backgroundColor: "rgba(255, 255, 255, 0.2)",
+    },
+    barFill: {
+        height: "100%",
+        backgroundColor: "#2d72d2",
+        transition: "width 200ms linear",
+    },
+    size: {
+        fontSize: "12px",
+        opacity: 0.8,
+    },
+    message: {
+        marginTop: "4px",
+    },
+    button: {
+        marginTop: "7px",
+    },
+    buttonSecond: {
+        marginTop: "7px",
+        marginLeft: "5px",
+    },
+};
+function formatSize(bytes) {
+    if (!bytes) {
+        return "0 MB";
+    }
+    let mb = bytes / (1024 * 1024);
+    if (mb >= 1) {
+        return Math.round(mb) + " MB";
+    }
+    return Math.round(bytes / 1024) + " KB";
+}
+class UpdateNotice extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
+    constructor(props, context) {
+        super(props, context);
+        this.onState = (evt, state) => {
+            if (!state || !state.phase) {
+                return;
+            }
+            this.setState(state);
+        };
+        this.refresh = () => {
+            electron__WEBPACK_IMPORTED_MODULE_1__.ipcRenderer.invoke("update", "status", this.target()).then((result) => {
+                if (result && result[1] && result[1].phase) {
+                    this.setState(result[1]);
+                }
+            }, () => { });
+        };
+        this.download = () => {
+            electron__WEBPACK_IMPORTED_MODULE_1__.ipcRenderer.invoke("update", "start", this.target()).then((result) => {
+                if (result && result[1] && result[1].phase) {
+                    this.setState(result[1]);
+                }
+            }, () => { });
+        };
+        this.cancel = () => {
+            electron__WEBPACK_IMPORTED_MODULE_1__.ipcRenderer.invoke("update", "cancel").then(() => { }, () => { });
+        };
+        this.install = () => {
+            electron__WEBPACK_IMPORTED_MODULE_1__.ipcRenderer.invoke("update", "install", this.target()).then((result) => {
+                if (result && result[1] && result[1].phase) {
+                    this.setState(result[1]);
+                }
+            }, () => { });
+        };
+        this.manual = () => {
+            electron__WEBPACK_IMPORTED_MODULE_1__.ipcRenderer.send("control", "download-update");
+        };
+        this.state = {
+            phase: "idle",
+            tag: this.props.update.latest.label,
+            percent: 0,
+            received: 0,
+            total: 0,
+            message: "",
+        };
+    }
+    componentDidMount() {
+        electron__WEBPACK_IMPORTED_MODULE_1__.ipcRenderer.on("event.update-state", this.onState);
+        this.refresh();
+    }
+    componentWillUnmount() {
+        electron__WEBPACK_IMPORTED_MODULE_1__.ipcRenderer.removeListener("event.update-state", this.onState);
+    }
+    target() {
+        return {
+            tag: this.props.update.latest.label,
+            asset: this.props.update.asset,
+        };
+    }
+    renderManual() {
+        return react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", { className: "bp5-button bp5-minimal", type: "button", style: css.buttonSecond, onClick: this.manual }, "Elle \u0130ndir");
+    }
+    renderBody() {
+        let update = this.props.update;
+        let state = this.state;
+        if (!update.installable) {
+            return react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null,
+                react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", { style: css.message }, "Bu s\u00FCr\u00FCm otomatik kurulam\u0131yor, dosyay\u0131 elle indirin."),
+                this.renderManual(),
+                react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", { className: "bp5-button bp5-minimal", type: "button", style: css.buttonSecond, onClick: this.props.onDismiss }, "Daha Sonra"));
+        }
+        if (state.phase === "downloading") {
+            return react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null,
+                react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", { style: css.message },
+                    "\u0130ndiriliyor\u2026 %",
+                    state.percent),
+                react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", { style: css.bar },
+                    react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", { style: {
+                            ...css.barFill,
+                            width: state.percent + "%",
+                        } })),
+                react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", { style: css.size },
+                    formatSize(state.received),
+                    " / ",
+                    formatSize(state.total)),
+                react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", { className: "bp5-button bp5-minimal", type: "button", style: css.button, onClick: this.cancel }, "\u0130ptal"));
+        }
+        if (state.phase === "verifying") {
+            return react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null,
+                react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", { style: css.message }, "\u0130ndirilen dosya do\u011Frulan\u0131yor\u2026"));
+        }
+        if (state.phase === "downloaded") {
+            let size = state.total ? formatSize(state.total) : "";
+            return react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null,
+                react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", { style: css.message },
+                    "\u0130ndirildi ve do\u011Fruland\u0131",
+                    size ? " (" + size + ")" : "",
+                    "."),
+                react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", { className: "bp5-button bp5-intent-primary bp5-icon-cloud-upload", type: "button", style: css.button, onClick: this.install }, "Kur"),
+                react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", { className: "bp5-button bp5-minimal", type: "button", style: css.buttonSecond, onClick: this.props.onDismiss }, "Daha Sonra"));
+        }
+        if (state.phase === "installing") {
+            return react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null,
+                react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", { style: css.message }, state.message || "Kuruluyor…"),
+                react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", { style: css.size }, "Uygulama kapan\u0131p yeniden a\u00E7\u0131lacak."));
+        }
+        if (state.phase === "error") {
+            return react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null,
+                react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", { style: css.message }, state.message || "Güncelleme tamamlanamadı."),
+                react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", { className: "bp5-button bp5-intent-primary bp5-icon-refresh", type: "button", style: css.button, onClick: this.download }, "Tekrar Dene"),
+                this.renderManual());
+        }
+        return react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null,
+            react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", { className: "bp5-button bp5-intent-primary bp5-icon-download", type: "button", style: css.button, onClick: this.download }, "\u0130ndir"),
+            react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", { className: "bp5-button bp5-minimal", type: "button", style: css.buttonSecond, onClick: this.props.onDismiss }, "Daha Sonra"));
+    }
+    render() {
+        let update = this.props.update;
+        return react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null,
+            react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", { style: css.title },
+                react__WEBPACK_IMPORTED_MODULE_0__.createElement("b", null,
+                    "Yeni s\u00FCr\u00FCm: ",
+                    update.latest.label)),
+            react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", { style: css.meta },
+                "Kullan\u0131lan s\u00FCr\u00FCm: ",
+                update.current.label),
+            this.renderBody());
     }
 }
 
@@ -13126,6 +13309,47 @@ function compareBaseVersion(left, right) {
     }
     return 0;
 }
+function parseDigest(digest) {
+    let match = String(digest || "").trim().match(/^sha256:([a-f0-9]{64})$/i);
+    return match ? match[1].toLowerCase() : "";
+}
+function installableAsset(name) {
+    if (process.platform === "darwin") {
+        return /macos/i.test(name) && /\.zip$/i.test(name);
+    }
+    if (process.platform === "win32") {
+        return /setup\.exe$/i.test(name);
+    }
+    return false;
+}
+function selectAsset(assets) {
+    if (!Array.isArray(assets)) {
+        return null;
+    }
+    for (let item of assets) {
+        if (!item) {
+            continue;
+        }
+        let name = String(item.name || "");
+        let url = String(item.browser_download_url || "");
+        if (!name || !url || !installableAsset(name)) {
+            continue;
+        }
+        return {
+            name: name,
+            url: url,
+            size: Number(item.size) || 0,
+            sha256: parseDigest(item.digest),
+        };
+    }
+    return null;
+}
+function autoInstallSupported() {
+    if (process.platform === "win32") {
+        return true;
+    }
+    return process.platform === "darwin" && process.arch === "arm64";
+}
 function getCurrentVersion() {
     return parseVersion("v1.4.4823.50-auto-auth.1") || parseVersion("1.4.4823.50");
 }
@@ -13158,9 +13382,12 @@ function check() {
             (baseDiff === 0 && latest.revision <= current.revision)) {
             return null;
         }
+        let asset = selectAsset(data.assets);
         return {
             current: current,
             latest: latest,
+            asset: asset,
+            installable: !!asset && autoInstallSupported(),
         };
     }, () => {
         return null;

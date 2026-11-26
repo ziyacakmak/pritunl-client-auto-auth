@@ -16,6 +16,7 @@ import About from './About';
 import * as Blueprint from "@blueprintjs/core";
 import * as Alert from "../Alert";
 import * as UpdateUtils from "../utils/UpdateUtils";
+import UpdateNotice from "./UpdateNotice";
 
 const updateCheckInterval = 6 * 60 * 60 * 1000
 
@@ -278,29 +279,11 @@ export default class Main extends React.Component<{}, State> {
 
 	showUpdate = (update: UpdateUtils.Update): void => {
 		let updateKey = ""
-		let updateElm: JSX.Element = <div>
-			<div><b>Yeni bir sürüm mevcut: {update.latest.label}</b></div>
-			<div>Kullanılan sürüm: {update.current.label}</div>
-			<button
-				className="bp5-button bp5-intent-primary bp5-icon-download"
-				type="button"
-				style={css.updateButton}
-				onClick={(): void => {
-					Alert.dismiss(updateKey)
-					Electron.ipcRenderer.send("control", "download-update")
-				}}
-			>Güncellemeyi İndir</button>
-			<button
-				className="bp5-button bp5-minimal"
-				type="button"
-				style={css.updateDismissButton}
-				onClick={(): void => {
-					Alert.dismiss(updateKey)
-				}}
-			>Daha Sonra</button>
-		</div>
 
-		updateKey = Alert.info(updateElm, 0)
+		updateKey = Alert.info(
+			<UpdateNotice update={update} onDismiss={(): void => {
+				Alert.dismiss(updateKey)
+			}} />, 0)
 	}
 
 	render(): JSX.Element {

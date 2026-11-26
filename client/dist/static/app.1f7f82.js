@@ -65475,6 +65475,47 @@ function compareBaseVersion(left, right) {
     }
     return 0;
 }
+function parseDigest(digest) {
+    let match = String(digest || "").trim().match(/^sha256:([a-f0-9]{64})$/i);
+    return match ? match[1].toLowerCase() : "";
+}
+function installableAsset(name) {
+    if (process.platform === "darwin") {
+        return /macos/i.test(name) && /\.zip$/i.test(name);
+    }
+    if (process.platform === "win32") {
+        return /setup\.exe$/i.test(name);
+    }
+    return false;
+}
+function selectAsset(assets) {
+    if (!Array.isArray(assets)) {
+        return null;
+    }
+    for (let item of assets) {
+        if (!item) {
+            continue;
+        }
+        let name = String(item.name || "");
+        let url = String(item.browser_download_url || "");
+        if (!name || !url || !installableAsset(name)) {
+            continue;
+        }
+        return {
+            name: name,
+            url: url,
+            size: Number(item.size) || 0,
+            sha256: parseDigest(item.digest),
+        };
+    }
+    return null;
+}
+function autoInstallSupported() {
+    if (process.platform === "win32") {
+        return true;
+    }
+    return process.platform === "darwin" && process.arch === "arm64";
+}
 function getCurrentVersion() {
     return parseVersion("v1.4.4823.50-auto-auth.1") || parseVersion("1.4.4823.50");
 }
@@ -65507,16 +65548,197 @@ function check() {
             (baseDiff === 0 && latest.revision <= current.revision)) {
             return null;
         }
+        let asset = selectAsset(data.assets);
         return {
             current: current,
             latest: latest,
+            asset: asset,
+            installable: !!asset && autoInstallSupported(),
         };
     }, () => {
         return null;
     });
 }
 
+;// ./app/components/UpdateNotice.js
+
+
+const UpdateNotice_css = {
+    title: {
+        marginBottom: "2px",
+    },
+    meta: {
+        opacity: 0.8,
+        marginBottom: "4px",
+    },
+    bar: {
+        height: "6px",
+        borderRadius: "3px",
+        overflow: "hidden",
+        margin: "7px 0 3px 0",
+        backgroundColor: "rgba(255, 255, 255, 0.2)",
+    },
+    barFill: {
+        height: "100%",
+        backgroundColor: "#2d72d2",
+        transition: "width 200ms linear",
+    },
+    size: {
+        fontSize: "12px",
+        opacity: 0.8,
+    },
+    message: {
+        marginTop: "4px",
+    },
+    button: {
+        marginTop: "7px",
+    },
+    buttonSecond: {
+        marginTop: "7px",
+        marginLeft: "5px",
+    },
+};
+function formatSize(bytes) {
+    if (!bytes) {
+        return "0 MB";
+    }
+    let mb = bytes / (1024 * 1024);
+    if (mb >= 1) {
+        return Math.round(mb) + " MB";
+    }
+    return Math.round(bytes / 1024) + " KB";
+}
+class UpdateNotice extends react.Component {
+    constructor(props, context) {
+        super(props, context);
+        this.onState = (evt, state) => {
+            if (!state || !state.phase) {
+                return;
+            }
+            this.setState(state);
+        };
+        this.refresh = () => {
+            external_electron_namespaceObject.ipcRenderer.invoke("update", "status", this.target()).then((result) => {
+                if (result && result[1] && result[1].phase) {
+                    this.setState(result[1]);
+                }
+            }, () => { });
+        };
+        this.download = () => {
+            external_electron_namespaceObject.ipcRenderer.invoke("update", "start", this.target()).then((result) => {
+                if (result && result[1] && result[1].phase) {
+                    this.setState(result[1]);
+                }
+            }, () => { });
+        };
+        this.cancel = () => {
+            external_electron_namespaceObject.ipcRenderer.invoke("update", "cancel").then(() => { }, () => { });
+        };
+        this.install = () => {
+            external_electron_namespaceObject.ipcRenderer.invoke("update", "install", this.target()).then((result) => {
+                if (result && result[1] && result[1].phase) {
+                    this.setState(result[1]);
+                }
+            }, () => { });
+        };
+        this.manual = () => {
+            external_electron_namespaceObject.ipcRenderer.send("control", "download-update");
+        };
+        this.state = {
+            phase: "idle",
+            tag: this.props.update.latest.label,
+            percent: 0,
+            received: 0,
+            total: 0,
+            message: "",
+        };
+    }
+    componentDidMount() {
+        external_electron_namespaceObject.ipcRenderer.on("event.update-state", this.onState);
+        this.refresh();
+    }
+    componentWillUnmount() {
+        external_electron_namespaceObject.ipcRenderer.removeListener("event.update-state", this.onState);
+    }
+    target() {
+        return {
+            tag: this.props.update.latest.label,
+            asset: this.props.update.asset,
+        };
+    }
+    renderManual() {
+        return react.createElement("button", { className: "bp5-button bp5-minimal", type: "button", style: UpdateNotice_css.buttonSecond, onClick: this.manual }, "Elle \u0130ndir");
+    }
+    renderBody() {
+        let update = this.props.update;
+        let state = this.state;
+        if (!update.installable) {
+            return react.createElement("div", null,
+                react.createElement("div", { style: UpdateNotice_css.message }, "Bu s\u00FCr\u00FCm otomatik kurulam\u0131yor, dosyay\u0131 elle indirin."),
+                this.renderManual(),
+                react.createElement("button", { className: "bp5-button bp5-minimal", type: "button", style: UpdateNotice_css.buttonSecond, onClick: this.props.onDismiss }, "Daha Sonra"));
+        }
+        if (state.phase === "downloading") {
+            return react.createElement("div", null,
+                react.createElement("div", { style: UpdateNotice_css.message },
+                    "\u0130ndiriliyor\u2026 %",
+                    state.percent),
+                react.createElement("div", { style: UpdateNotice_css.bar },
+                    react.createElement("div", { style: {
+                            ...UpdateNotice_css.barFill,
+                            width: state.percent + "%",
+                        } })),
+                react.createElement("div", { style: UpdateNotice_css.size },
+                    formatSize(state.received),
+                    " / ",
+                    formatSize(state.total)),
+                react.createElement("button", { className: "bp5-button bp5-minimal", type: "button", style: UpdateNotice_css.button, onClick: this.cancel }, "\u0130ptal"));
+        }
+        if (state.phase === "verifying") {
+            return react.createElement("div", null,
+                react.createElement("div", { style: UpdateNotice_css.message }, "\u0130ndirilen dosya do\u011Frulan\u0131yor\u2026"));
+        }
+        if (state.phase === "downloaded") {
+            let size = state.total ? formatSize(state.total) : "";
+            return react.createElement("div", null,
+                react.createElement("div", { style: UpdateNotice_css.message },
+                    "\u0130ndirildi ve do\u011Fruland\u0131",
+                    size ? " (" + size + ")" : "",
+                    "."),
+                react.createElement("button", { className: "bp5-button bp5-intent-primary bp5-icon-cloud-upload", type: "button", style: UpdateNotice_css.button, onClick: this.install }, "Kur"),
+                react.createElement("button", { className: "bp5-button bp5-minimal", type: "button", style: UpdateNotice_css.buttonSecond, onClick: this.props.onDismiss }, "Daha Sonra"));
+        }
+        if (state.phase === "installing") {
+            return react.createElement("div", null,
+                react.createElement("div", { style: UpdateNotice_css.message }, state.message || "Kuruluyor…"),
+                react.createElement("div", { style: UpdateNotice_css.size }, "Uygulama kapan\u0131p yeniden a\u00E7\u0131lacak."));
+        }
+        if (state.phase === "error") {
+            return react.createElement("div", null,
+                react.createElement("div", { style: UpdateNotice_css.message }, state.message || "Güncelleme tamamlanamadı."),
+                react.createElement("button", { className: "bp5-button bp5-intent-primary bp5-icon-refresh", type: "button", style: UpdateNotice_css.button, onClick: this.download }, "Tekrar Dene"),
+                this.renderManual());
+        }
+        return react.createElement("div", null,
+            react.createElement("button", { className: "bp5-button bp5-intent-primary bp5-icon-download", type: "button", style: UpdateNotice_css.button, onClick: this.download }, "\u0130ndir"),
+            react.createElement("button", { className: "bp5-button bp5-minimal", type: "button", style: UpdateNotice_css.buttonSecond, onClick: this.props.onDismiss }, "Daha Sonra"));
+    }
+    render() {
+        let update = this.props.update;
+        return react.createElement("div", null,
+            react.createElement("div", { style: UpdateNotice_css.title },
+                react.createElement("b", null,
+                    "Yeni s\u00FCr\u00FCm: ",
+                    update.latest.label)),
+            react.createElement("div", { style: UpdateNotice_css.meta },
+                "Kullan\u0131lan s\u00FCr\u00FCm: ",
+                update.current.label),
+            this.renderBody());
+    }
+}
+
 ;// ./app/components/Main.js
+
 
 
 
@@ -65742,22 +65964,9 @@ class Main extends react.Component {
         };
         this.showUpdate = (update) => {
             let updateKey = "";
-            let updateElm = react.createElement("div", null,
-                react.createElement("div", null,
-                    react.createElement("b", null,
-                        "Yeni bir s\u00FCr\u00FCm mevcut: ",
-                        update.latest.label)),
-                react.createElement("div", null,
-                    "Kullan\u0131lan s\u00FCr\u00FCm: ",
-                    update.current.label),
-                react.createElement("button", { className: "bp5-button bp5-intent-primary bp5-icon-download", type: "button", style: Main_css.updateButton, onClick: () => {
-                        dismiss(updateKey);
-                        external_electron_namespaceObject.ipcRenderer.send("control", "download-update");
-                    } }, "G\u00FCncellemeyi \u0130ndir"),
-                react.createElement("button", { className: "bp5-button bp5-minimal", type: "button", style: Main_css.updateDismissButton, onClick: () => {
-                        dismiss(updateKey);
-                    } }, "Daha Sonra"));
-            updateKey = info(updateElm, 0);
+            updateKey = info(react.createElement(UpdateNotice, { update: update, onDismiss: () => {
+                    dismiss(updateKey);
+                } }), 0);
         };
         this.state = {
             path: "/",

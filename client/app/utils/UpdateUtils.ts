@@ -7,9 +7,18 @@ export interface Version {
 	revision: number
 }
 
+export interface Asset {
+	name: string
+	url: string
+	size: number
+	sha256: string
+}
+
 export interface Update {
 	current: Version
 	latest: Version
+	asset: Asset | null
+	installable: boolean
 }
 
 function parseVersion(label: string): Version | null {
@@ -47,6 +56,59 @@ function compareBaseVersion(left: string, right: string): number {
 	}
 
 	return 0
+}
+
+function parseDigest(digest: any): string {
+	let match = String(digest || "").trim().match(/^sha256:([a-f0-9]{64})$/i)
+	return match ? match[1].toLowerCase() : ""
+}
+
+function installableAsset(name: string): boolean {
+	if (process.platform === "darwin") {
+		return /macos/i.test(name) && /\.zip$/i.test(name)
+	}
+
+	if (process.platform === "win32") {
+		return /setup\.exe$/i.test(name)
+	}
+
+	return false
+}
+
+function selectAsset(assets: any): Asset | null {
+	if (!Array.isArray(assets)) {
+		return null
+	}
+
+	for (let item of assets) {
+		if (!item) {
+			continue
+		}
+
+		let name = String(item.name || "")
+		let url = String(item.browser_download_url || "")
+
+		if (!name || !url || !installableAsset(name)) {
+			continue
+		}
+
+		return {
+			name: name,
+			url: url,
+			size: Number(item.size) || 0,
+			sha256: parseDigest(item.digest),
+		}
+	}
+
+	return null
+}
+
+function autoInstallSupported(): boolean {
+	if (process.platform === "win32") {
+		return true
+	}
+
+	return process.platform === "darwin" && process.arch === "arm64"
 }
 
 export function getCurrentVersion(): Version | null {
@@ -88,9 +150,13 @@ export function check(): Promise<Update | null> {
 				return null
 			}
 
+			let asset = selectAsset(data.assets)
+
 			return {
 				current: current,
 				latest: latest,
+				asset: asset,
+				installable: !!asset && autoInstallSupported(),
 			}
 		}, (): null => {
 			return null

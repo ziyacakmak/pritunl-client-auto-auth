@@ -7853,7 +7853,629 @@ async function handleSync(id, bodyStr) {
     await prfl.sync(bodyStr);
 }
 
+;// ./main/Updater.js
+
+
+
+
+
+
+
+
+
+const allowedHosts = [
+    "github.com",
+    "objects.githubusercontent.com",
+    "api.github.com",
+    "codeload.github.com",
+];
+let state = emptyState();
+let request = null;
+let running = false;
+let aborted = false;
+function emptyState() {
+    return {
+        phase: "idle",
+        tag: "",
+        percent: 0,
+        received: 0,
+        total: 0,
+        message: "",
+    };
+}
+function getState() {
+    return state;
+}
+function emit() {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send("event.update-state", state);
+    }
+}
+function setState(next) {
+    state = Object.assign({}, state, next);
+    emit();
+}
+function Updater_fail(message, err) {
+    if (err) {
+        error(new ProcessError(err, message));
+    }
+    setState({
+        phase: "error",
+        percent: 0,
+        message: message,
+    });
+    return [message, state];
+}
+function validUrl(url) {
+    try {
+        let parsed = new URL(url);
+        return parsed.protocol === "https:" &&
+            allowedHosts.indexOf(parsed.hostname) !== -1;
+    }
+    catch (err) {
+        return false;
+    }
+}
+function sanitize(name) {
+    return String(name || "").replace(/[^A-Za-z0-9._-]/g, "_");
+}
+function targetDir(target) {
+    return external_path_default().join(external_electron_default().app.getPath("temp"), "pritunl-update", sanitize(target && target.tag));
+}
+function targetFile(target) {
+    return external_path_default().join(targetDir(target), sanitize(target.asset && target.asset.name));
+}
+function pendingFile(target) {
+    return external_path_default().join(targetDir(target), "pending.json");
+}
+function resultFile(target) {
+    return external_path_default().join(targetDir(target), "rc.txt");
+}
+function removeFile(pth) {
+    try {
+        external_fs_default().unlinkSync(pth);
+    }
+    catch (err) { }
+}
+function removeDir(pth) {
+    try {
+        external_fs_default().rmSync(pth, { recursive: true, force: true });
+    }
+    catch (err) { }
+}
+function isWritable(pth) {
+    try {
+        external_fs_default().accessSync(pth, (external_fs_default()).constants.W_OK);
+        return true;
+    }
+    catch (err) {
+        return false;
+    }
+}
+function readPending(target) {
+    try {
+        let data = JSON.parse(external_fs_default().readFileSync(pendingFile(target), "utf8"));
+        if (!data || !data.tag || !data.sha256) {
+            return null;
+        }
+        return data;
+    }
+    catch (err) {
+        return null;
+    }
+}
+function writePending(target, pending) {
+    try {
+        external_fs_default().writeFileSync(pendingFile(target), JSON.stringify(pending));
+    }
+    catch (err) {
+        error(new WriteError(err, "Güncelleme: Bekleyen güncelleme yazılamadı", { path: pendingFile(target) }));
+    }
+}
+function clearPending(target) {
+    removeFile(pendingFile(target));
+}
+function execFile(file, args) {
+    return new Promise((resolve) => {
+        external_child_process_default().execFile(file, args, { timeout: 180000 }, (err, stdout, stderr) => {
+            resolve({
+                ok: !err,
+                stdout: String(stdout || ""),
+                stderr: String(stderr || ""),
+            });
+        });
+    });
+}
+function fetchToFile(url, filePath, onProgress) {
+    return new Promise((resolve, reject) => {
+        let settled = false;
+        let fail = (err) => {
+            if (settled) {
+                return;
+            }
+            settled = true;
+            request = null;
+            reject(err);
+        };
+        let req = external_electron_default().net.request(url);
+        request = req;
+        req.on("error", (err) => {
+            fail(err);
+        });
+        req.on("abort", () => {
+            fail(new Error("aborted"));
+        });
+        req.on("response", (resp) => {
+            if (resp.statusCode !== 200) {
+                resp.on("data", () => { });
+                fail(new Error("HTTP " + resp.statusCode));
+                return;
+            }
+            let total = parseInt(String(resp.headers["content-length"] || "0"), 10) || 0;
+            let hash = external_crypto_default().createHash("sha256");
+            let file = external_fs_default().createWriteStream(filePath);
+            let received = 0;
+            let failed = false;
+            file.on("error", (err) => {
+                failed = true;
+                fail(err);
+            });
+            resp.on("data", (chunk) => {
+                if (failed) {
+                    return;
+                }
+                received += chunk.length;
+                hash.update(chunk);
+                if (!file.write(chunk)) {
+                    let stream = resp;
+                    stream.pause();
+                    file.once("drain", () => {
+                        stream.resume();
+                    });
+                }
+                onProgress(received, total);
+            });
+            resp.on("error", (err) => {
+                failed = true;
+                fail(err);
+            });
+            resp.on("end", () => {
+                if (failed) {
+                    return;
+                }
+                file.end(() => {
+                    if (settled) {
+                        return;
+                    }
+                    settled = true;
+                    request = null;
+                    resolve({
+                        size: received,
+                        sha256: hash.digest("hex"),
+                    });
+                });
+            });
+        });
+        req.end();
+    });
+}
+function fetchText(url) {
+    return new Promise((resolve, reject) => {
+        let req = external_electron_default().net.request(url);
+        req.on("error", (err) => {
+            reject(err);
+        });
+        req.on("response", (resp) => {
+            let data = "";
+            if (resp.statusCode !== 200) {
+                resp.on("data", () => { });
+                reject(new Error("HTTP " + resp.statusCode));
+                return;
+            }
+            resp.on("data", (chunk) => {
+                data += chunk.toString("utf8");
+            });
+            resp.on("end", () => {
+                resolve(data);
+            });
+        });
+        req.end();
+    });
+}
+async function expectedSha(target) {
+    if (target.asset.sha256) {
+        return target.asset.sha256;
+    }
+    let idx = target.asset.url.lastIndexOf("/");
+    if (idx < 0) {
+        return "";
+    }
+    let sums = await fetchText(target.asset.url.slice(0, idx + 1) + "SHA256SUMS.txt");
+    for (let line of sums.split("\n")) {
+        let parts = line.trim().split(/\s+/);
+        if (parts.length >= 2 &&
+            parts[1].replace(/^\*/, "") === target.asset.name) {
+            return parts[0].toLowerCase();
+        }
+    }
+    return "";
+}
+function pollResult(pth, timeout) {
+    let started = Date.now();
+    return new Promise((resolve) => {
+        let timer = setInterval(() => {
+            let value = null;
+            try {
+                let text = external_fs_default().readFileSync(pth, "utf8").trim();
+                if (text) {
+                    let parsed = parseInt(text, 10);
+                    if (!isNaN(parsed)) {
+                        value = parsed;
+                    }
+                }
+            }
+            catch (err) { }
+            if (value !== null) {
+                clearInterval(timer);
+                resolve(value);
+                return;
+            }
+            if (Date.now() - started > timeout) {
+                clearInterval(timer);
+                resolve(-1);
+            }
+        }, 500);
+    });
+}
+function Updater_status(target) {
+    if (running) {
+        return [null, state];
+    }
+    if (!target || !target.tag || !target.asset) {
+        state = emptyState();
+        return [null, state];
+    }
+    let pending = readPending(target);
+    if (pending && pending.tag === target.tag &&
+        (!target.asset.sha256 ||
+            pending.sha256 === target.asset.sha256) &&
+        external_fs_default().existsSync(targetFile(target))) {
+        state = {
+            phase: "downloaded",
+            tag: target.tag,
+            percent: 100,
+            received: pending.size,
+            total: pending.size,
+            message: "",
+        };
+        return [null, state];
+    }
+    state = Object.assign(emptyState(), { tag: target.tag });
+    return [null, state];
+}
+function cancel() {
+    aborted = true;
+    if (request) {
+        try {
+            request.abort();
+        }
+        catch (err) { }
+    }
+}
+async function start(target) {
+    if (running) {
+        return ["Güncelleme: Zaten bir indirme sürüyor", state];
+    }
+    if (!target || !target.tag || !target.asset) {
+        return Updater_fail("Güncelleme: Güncelleme bilgisi eksik");
+    }
+    if (!validUrl(target.asset.url)) {
+        return Updater_fail("Güncelleme: İndirme adresi geçersiz");
+    }
+    running = true;
+    aborted = false;
+    let file = targetFile(target);
+    let part = file + ".part";
+    try {
+        external_fs_default().mkdirSync(targetDir(target), { recursive: true });
+        removeFile(part);
+        removeFile(resultFile(target));
+        clearPending(target);
+        setState({
+            phase: "downloading",
+            tag: target.tag,
+            percent: 0,
+            received: 0,
+            total: target.asset.size || 0,
+            message: "",
+        });
+        let downloaded = null;
+        let lastErr = null;
+        for (let attempt = 0; attempt < 2; attempt++) {
+            try {
+                downloaded = await fetchToFile(target.asset.url, part, (received, total) => {
+                    setState({
+                        received: received,
+                        total: total || target.asset.size || 0,
+                        percent: total ? Math.min(99, Math.round(received / total * 100)) : 0,
+                    });
+                });
+                lastErr = null;
+                break;
+            }
+            catch (err) {
+                lastErr = err;
+                removeFile(part);
+                if (aborted) {
+                    break;
+                }
+            }
+        }
+        if (aborted) {
+            setState({
+                phase: "idle",
+                percent: 0,
+                received: 0,
+                message: "",
+            });
+            return [null, state];
+        }
+        if (!downloaded) {
+            return Updater_fail("Güncelleme: İndirme tamamlanamadı", lastErr || undefined);
+        }
+        setState({
+            phase: "verifying",
+            percent: 100,
+            message: "İndirilen dosya doğrulanıyor",
+        });
+        let sha = "";
+        try {
+            sha = await expectedSha(target);
+        }
+        catch (err) {
+            sha = "";
+        }
+        if (!sha) {
+            removeFile(part);
+            return Updater_fail("Güncelleme: Beklenen özet değeri bulunamadı");
+        }
+        if (sha !== downloaded.sha256) {
+            removeFile(part);
+            return Updater_fail("Güncelleme: İndirilen dosya doğrulanamadı " +
+                "(özet uyuşmuyor)");
+        }
+        external_fs_default().renameSync(part, file);
+        writePending(target, {
+            tag: target.tag,
+            file: external_path_default().basename(file),
+            size: downloaded.size,
+            sha256: sha,
+        });
+        setState({
+            phase: "downloaded",
+            percent: 100,
+            received: downloaded.size,
+            total: downloaded.size,
+            message: "",
+        });
+        return [null, state];
+    }
+    finally {
+        running = false;
+    }
+}
+function darwinBundle() {
+    let appPath = external_electron_default().app.getAppPath();
+    if (!appPath) {
+        return "";
+    }
+    let bundle = external_path_default().resolve(appPath, "..", "..", "..");
+    if (!bundle.endsWith(".app")) {
+        return "";
+    }
+    return bundle;
+}
+async function installDarwin(target, file) {
+    if ((external_process_default()).arch !== "arm64") {
+        return Updater_fail("Güncelleme: Otomatik kurulum yalnızca Apple Silicon " +
+            "için destekleniyor");
+    }
+    let bundle = darwinBundle();
+    if (!bundle) {
+        return Updater_fail("Güncelleme: Uygulama klasörü bulunamadı");
+    }
+    let dir = targetDir(target);
+    let extract = external_path_default().join(dir, "app");
+    let source = external_path_default().join(extract, "Pritunl.app");
+    setState({
+        phase: "installing",
+        percent: 100,
+        message: "Güncelleme hazırlanıyor",
+    });
+    removeDir(extract);
+    let unzip = await execFile("ditto", ["-x", "-k", file, extract]);
+    if (!unzip.ok) {
+        return Updater_fail("Güncelleme: Arşiv açılamadı");
+    }
+    if (!external_fs_default().existsSync(source)) {
+        return Updater_fail("Güncelleme: Arşivde Pritunl.app bulunamadı");
+    }
+    let plist = external_path_default().join(source, "Contents", "Info.plist");
+    let identifier = await execFile("/usr/bin/defaults", ["read", plist, "CFBundleIdentifier"]);
+    if (!identifier.ok ||
+        identifier.stdout.trim() !== "com.electron.pritunl") {
+        return Updater_fail("Güncelleme: Arşivdeki uygulama Pritunl değil");
+    }
+    let verify = await execFile("codesign", ["--verify", "--deep", "--strict", source]);
+    if (!verify.ok) {
+        return Updater_fail("Güncelleme: İndirilen uygulama imza doğrulamasından " +
+            "geçemedi");
+    }
+    let scriptPath = external_path_default().join(dir, "install.sh");
+    external_fs_default().writeFileSync(scriptPath, darwinScript(bundle, source), "utf8");
+    external_fs_default().chmodSync(scriptPath, 0o755);
+    let elevated = !isWritable(external_path_default().dirname(bundle));
+    if (elevated) {
+        setState({
+            phase: "installing",
+            message: "Kuruluyor, yönetici parolası istenecek",
+        });
+        let apple = "do shell script \"/bin/sh '" + scriptPath +
+            "'\" with administrator privileges";
+        let result = await execFile("osascript", ["-e", apple]);
+        if (!result.ok) {
+            let output = result.stdout + result.stderr;
+            if (output.indexOf("-128") !== -1 ||
+                /cancel(ed|led)/i.test(output)) {
+                return Updater_fail("Güncelleme: Yönetici izni verilmedi");
+            }
+            return Updater_fail("Güncelleme: Kurulum tamamlanamadı");
+        }
+        clearPending(target);
+        setState({
+            phase: "installing",
+            message: "Kuruldu, uygulama yeniden açılıyor",
+        });
+        return [null, state];
+    }
+    setState({
+        phase: "installing",
+        message: "Kuruluyor",
+    });
+    external_child_process_default().spawn("/bin/sh", [scriptPath], {
+        detached: true,
+        stdio: "ignore",
+    }).unref();
+    clearPending(target);
+    setState({
+        phase: "installing",
+        message: "Kuruldu, uygulama yeniden açılıyor",
+    });
+    return [null, state];
+}
+function darwinScript(bundle, source) {
+    return [
+        "#!/bin/sh",
+        "BUNDLE='" + bundle + "'",
+        "SRC='" + source + "'",
+        "BAK=\"$BUNDLE.bak\"",
+        "",
+        "pkill -f \"$BUNDLE/Contents/MacOS/\" >/dev/null 2>&1",
+        "i=0",
+        "while [ $i -lt 40 ]; do",
+        "\tif ! pgrep -f \"$BUNDLE/Contents/MacOS/\" >/dev/null 2>&1; then",
+        "\t\tbreak",
+        "\tfi",
+        "\tsleep 0.25",
+        "\ti=$((i+1))",
+        "done",
+        "",
+        "rm -rf \"$BAK\"",
+        "if [ -e \"$BUNDLE\" ]; then",
+        "\tmv \"$BUNDLE\" \"$BAK\" || exit 3",
+        "fi",
+        "",
+        "if ! ditto \"$SRC\" \"$BUNDLE\"; then",
+        "\trm -rf \"$BUNDLE\"",
+        "\tif [ -e \"$BAK\" ]; then mv \"$BAK\" \"$BUNDLE\"; fi",
+        "\texit 4",
+        "fi",
+        "",
+        "xattr -dr com.apple.quarantine \"$BUNDLE\" >/dev/null 2>&1",
+        "",
+        "if ! codesign --verify --deep --strict \"$BUNDLE\" >/dev/null 2>&1; then",
+        "\trm -rf \"$BUNDLE\"",
+        "\tif [ -e \"$BAK\" ]; then mv \"$BAK\" \"$BUNDLE\"; fi",
+        "\texit 5",
+        "fi",
+        "",
+        "rm -rf \"$BAK\"",
+        "open -a \"$BUNDLE\" >/dev/null 2>&1",
+        "exit 0",
+        "",
+    ].join("\n");
+}
+async function installWindows(target, file) {
+    let dir = targetDir(target);
+    let rcPath = resultFile(target);
+    let cmdPath = external_path_default().join(dir, "update.cmd");
+    let appExe = external_electron_default().app.getPath("exe");
+    removeFile(rcPath);
+    let script = "try { " +
+        "Unblock-File -LiteralPath '" + file + "'; " +
+        "$p = Start-Process -FilePath '" + file + "' " +
+        "-ArgumentList '/SILENT','/NORESTART','/CLOSEAPPLICATIONS' " +
+        "-Verb RunAs -Wait -PassThru -ErrorAction Stop; " +
+        "exit $p.ExitCode } catch { exit 1223 }";
+    let batch = [
+        "@echo off",
+        "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"" +
+            script + "\"",
+        "set RC=%ERRORLEVEL%",
+        "> \"" + rcPath + "\" echo %RC%",
+        "if not \"%RC%\"==\"0\" exit /b %RC%",
+        "start \"\" \"" + appExe + "\"",
+        "exit /b 0",
+        "",
+    ].join("\r\n");
+    external_fs_default().writeFileSync(cmdPath, batch, "utf8");
+    setState({
+        phase: "installing",
+        percent: 100,
+        message: "Kuruluyor, yönetici izni (UAC) istenecek",
+    });
+    external_child_process_default().spawn("cmd.exe", ["/c", cmdPath], {
+        detached: true,
+        stdio: "ignore",
+        windowsHide: true,
+    }).unref();
+    let code = await pollResult(rcPath, 120000);
+    if (code === 1223) {
+        return Updater_fail("Güncelleme: Yönetici izni verilmedi");
+    }
+    if (code === -1) {
+        clearPending(target);
+        return [null, state];
+    }
+    if (code !== 0) {
+        return Updater_fail("Güncelleme: Kurulum tamamlanamadı (kod " + code + ")");
+    }
+    clearPending(target);
+    setState({
+        phase: "installing",
+        message: "Kuruldu, uygulama yeniden açılıyor",
+    });
+    return [null, state];
+}
+async function install(target) {
+    if (running) {
+        return ["Güncelleme: Zaten bir işlem sürüyor", state];
+    }
+    if (!target || !target.tag || !target.asset) {
+        return Updater_fail("Güncelleme: Güncelleme bilgisi eksik");
+    }
+    let file = targetFile(target);
+    if (!external_fs_default().existsSync(file)) {
+        return Updater_fail("Güncelleme: İndirilen dosya bulunamadı");
+    }
+    running = true;
+    try {
+        if ((external_process_default()).platform === "darwin") {
+            return await installDarwin(target, file);
+        }
+        if ((external_process_default()).platform === "win32") {
+            return await installWindows(target, file);
+        }
+        return Updater_fail("Güncelleme: Bu platformda otomatik kurulum " +
+            "desteklenmiyor");
+    }
+    finally {
+        running = false;
+    }
+}
+
 ;// ./main/Main.js
+
 
 
 
@@ -7941,6 +8563,30 @@ external_electron_default().ipcMain.handle("processing", (evt, msg, data) => {
     }
     let err = new Errors_ParseError(null, "Ana: Bilinmeyen işleyici türü");
     return [err, null];
+});
+external_electron_default().ipcMain.handle("update", (evt, msg, target) => {
+    if (msg === "status") {
+        return Updater_status(target);
+    }
+    else if (msg === "start") {
+        if (!target) {
+            return ["Güncelleme: Güncelleme bilgisi eksik",
+                getState()];
+        }
+        return start(target);
+    }
+    else if (msg === "cancel") {
+        cancel();
+        return [null, getState()];
+    }
+    else if (msg === "install") {
+        if (!target) {
+            return ["Güncelleme: Güncelleme bilgisi eksik",
+                getState()];
+        }
+        return install(target);
+    }
+    return ["Ana: Bilinmeyen güncelleme komutu", getState()];
 });
 external_electron_default().ipcMain.on("control", (evt, msg, data) => {
     if (msg === "service-auth-error") {

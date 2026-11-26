@@ -11,6 +11,7 @@ import * as Errors from "../app/Errors";
 import * as Tpm from "./Tpm"
 import * as Daemon from "./Daemon"
 import * as ProfileSync from "./ProfileSync"
+import * as Updater from "./Updater"
 
 let tray: electron.Tray
 let awaken: boolean
@@ -96,6 +97,34 @@ electron.ipcMain.handle(
 		}
 		let err = new Errors.ParseError(null, "Ana: Bilinmeyen işleyici türü");
 		return [err, null]
+	},
+)
+
+electron.ipcMain.handle(
+	"update",
+	(evt: electron.IpcMainEvent, msg: string,
+			target: Updater.Target | null) => {
+
+		if (msg === "status") {
+			return Updater.status(target)
+		} else if (msg === "start") {
+			if (!target) {
+				return ["Güncelleme: Güncelleme bilgisi eksik",
+					Updater.getState()]
+			}
+			return Updater.start(target)
+		} else if (msg === "cancel") {
+			Updater.cancel()
+			return [null, Updater.getState()]
+		} else if (msg === "install") {
+			if (!target) {
+				return ["Güncelleme: Güncelleme bilgisi eksik",
+					Updater.getState()]
+			}
+			return Updater.install(target)
+		}
+
+		return ["Ana: Bilinmeyen güncelleme komutu", Updater.getState()]
 	},
 )
 
