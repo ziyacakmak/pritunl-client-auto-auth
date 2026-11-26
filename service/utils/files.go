@@ -4,7 +4,10 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
+	"runtime"
 	"sync"
+	"time"
 
 	"github.com/dropbox/godropbox/errors"
 	"github.com/pritunl/pritunl-client/service/errortypes"
@@ -229,6 +232,98 @@ func CreateWriteLock(path string, data string, perm os.FileMode) (err error) {
 		}
 		return
 	}
+
+	return
+}
+
+func renameRetry(src, dst string) (err error) {
+	for i := 0; ; i++ {
+		err = os.Rename(src, dst)
+		if err == nil || runtime.GOOS != "windows" || i >= 20 {
+			return
+		}
+
+		time.Sleep(time.Duration(i+1) * 5 * time.Millisecond)
+	}
+}
+
+func syncDir(pth string) {
+	if runtime.GOOS == "windows" {
+		return
+	}
+
+	dir, err := os.Open(pth)
+	if err != nil {
+		return
+	}
+	defer dir.Close()
+
+	_ = dir.Sync()
+}
+
+func CreateWriteAtomic(path string, data string, perm os.FileMode) (err error) {
+	dirPath := filepath.Dir(path)
+
+	file, err := os.CreateTemp(dirPath, filepath.Base(path)+".*.tmp")
+	if err != nil {
+		err = &errortypes.WriteError{
+			errors.Wrapf(err, "utils: Failed to create temp file for '%s'",
+				path),
+		}
+		return
+	}
+	tmpPath := file.Name()
+
+	err = file.Chmod(perm)
+	if err != nil {
+		file.Close()
+		os.Remove(tmpPath)
+		err = &errortypes.WriteError{
+			errors.Wrapf(err, "utils: Failed to chmod file '%s'", tmpPath),
+		}
+		return
+	}
+
+	_, err = file.WriteString(data)
+	if err != nil {
+		file.Close()
+		os.Remove(tmpPath)
+		err = &errortypes.WriteError{
+			errors.Wrapf(err, "utils: Failed to write to file '%s'", tmpPath),
+		}
+		return
+	}
+
+	err = file.Sync()
+	if err != nil {
+		file.Close()
+		os.Remove(tmpPath)
+		err = &errortypes.WriteError{
+			errors.Wrapf(err, "utils: Failed to sync file '%s'", tmpPath),
+		}
+		return
+	}
+
+	err = file.Close()
+	if err != nil {
+		os.Remove(tmpPath)
+		err = &errortypes.WriteError{
+			errors.Wrapf(err, "utils: Failed to close file '%s'", tmpPath),
+		}
+		return
+	}
+
+	err = renameRetry(tmpPath, path)
+	if err != nil {
+		os.Remove(tmpPath)
+		err = &errortypes.WriteError{
+			errors.Wrapf(err, "utils: Failed to rename file '%s' to '%s'",
+				tmpPath, path),
+		}
+		return
+	}
+
+	syncDir(dirPath)
 
 	return
 }

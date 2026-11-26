@@ -4414,6 +4414,10 @@ function loadProfiles() {
                 }
                 let prfls = [];
                 for (let filename of filenames) {
+                    if (filename.endsWith('.tmp')) {
+                        _utils_MiscUtils__WEBPACK_IMPORTED_MODULE_10__.fileDeleteStale(path__WEBPACK_IMPORTED_MODULE_13___default().join(profilesPath, filename), 10 * 60 * 1000);
+                        continue;
+                    }
                     if (!filename.endsWith('.conf')) {
                         continue;
                     }
@@ -10542,9 +10546,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var util__WEBPACK_IMPORTED_MODULE_11___default = /*#__PURE__*/__webpack_require__.n(util__WEBPACK_IMPORTED_MODULE_11__);
 /* harmony import */ var crypto__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! crypto */ "crypto");
 /* harmony import */ var crypto__WEBPACK_IMPORTED_MODULE_12___default = /*#__PURE__*/__webpack_require__.n(crypto__WEBPACK_IMPORTED_MODULE_12__);
-/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! fs */ "fs");
-/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_13___default = /*#__PURE__*/__webpack_require__.n(fs__WEBPACK_IMPORTED_MODULE_13__);
-
 
 
 
@@ -10980,13 +10981,11 @@ function New(self) {
         }
         return new Promise((resolve) => {
             let profilePath = this.confPath();
-            fs__WEBPACK_IMPORTED_MODULE_13___default().writeFile(profilePath, this.exportConf(), (err) => {
-                if (err) {
-                    err = new _Errors__WEBPACK_IMPORTED_MODULE_7__.ReadError(err, "Profiller: Profil yazma hatası", { profile_path: profilePath });
-                    _Logger__WEBPACK_IMPORTED_MODULE_8__.errorAlert(err, 10);
-                    resolve();
-                    return;
-                }
+            _utils_MiscUtils__WEBPACK_IMPORTED_MODULE_2__.fileWriteAtomic(profilePath, this.exportConf()).then(() => {
+                resolve();
+            }, (err) => {
+                err = new _Errors__WEBPACK_IMPORTED_MODULE_7__.ReadError(err, "Profiller: Profil yazma hatası", { profile_path: profilePath });
+                _Logger__WEBPACK_IMPORTED_MODULE_8__.errorAlert(err, 10);
                 resolve();
             });
         });
@@ -11042,26 +11041,22 @@ function New(self) {
             let profilePath = this.dataPath();
             if (!_Config__WEBPACK_IMPORTED_MODULE_9__["default"].safe_storage) {
                 this.extractKey(data).then((newData) => {
-                    fs__WEBPACK_IMPORTED_MODULE_13___default().writeFile(profilePath, newData, (err) => {
-                        if (err) {
-                            err = new _Errors__WEBPACK_IMPORTED_MODULE_7__.WriteError(err, "Profiller: Profil yazma hatası", { profile_path: profilePath });
-                            _Logger__WEBPACK_IMPORTED_MODULE_8__.errorAlert(err, 10);
-                            resolve();
-                            return;
-                        }
+                    _utils_MiscUtils__WEBPACK_IMPORTED_MODULE_2__.fileWriteAtomic(profilePath, newData).then(() => {
+                        resolve();
+                    }, (err) => {
+                        err = new _Errors__WEBPACK_IMPORTED_MODULE_7__.WriteError(err, "Profiller: Profil yazma hatası", { profile_path: profilePath });
+                        _Logger__WEBPACK_IMPORTED_MODULE_8__.errorAlert(err, 10);
                         resolve();
                     });
                 });
             }
             else {
                 this.encryptKey(data).then((newData) => {
-                    fs__WEBPACK_IMPORTED_MODULE_13___default().writeFile(profilePath, newData, (err) => {
-                        if (err) {
-                            err = new _Errors__WEBPACK_IMPORTED_MODULE_7__.WriteError(err, "Profiller: Profil yazma hatası", { profile_path: profilePath });
-                            _Logger__WEBPACK_IMPORTED_MODULE_8__.errorAlert(err, 10);
-                            resolve();
-                            return;
-                        }
+                    _utils_MiscUtils__WEBPACK_IMPORTED_MODULE_2__.fileWriteAtomic(profilePath, newData).then(() => {
+                        resolve();
+                    }, (err) => {
+                        err = new _Errors__WEBPACK_IMPORTED_MODULE_7__.WriteError(err, "Profiller: Profil yazma hatası", { profile_path: profilePath });
+                        _Logger__WEBPACK_IMPORTED_MODULE_8__.errorAlert(err, 10);
                         resolve();
                     });
                 });
@@ -12223,12 +12218,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   expandPath: () => (/* binding */ expandPath),
 /* harmony export */   fileChmod: () => (/* binding */ fileChmod),
 /* harmony export */   fileDelete: () => (/* binding */ fileDelete),
+/* harmony export */   fileDeleteStale: () => (/* binding */ fileDeleteStale),
 /* harmony export */   fileExists: () => (/* binding */ fileExists),
 /* harmony export */   fileRead: () => (/* binding */ fileRead),
 /* harmony export */   fileReaddir: () => (/* binding */ fileReaddir),
 /* harmony export */   fileSize: () => (/* binding */ fileSize),
 /* harmony export */   fileStat: () => (/* binding */ fileStat),
 /* harmony export */   fileWrite: () => (/* binding */ fileWrite),
+/* harmony export */   fileWriteAtomic: () => (/* binding */ fileWriteAtomic),
 /* harmony export */   formatAmount: () => (/* binding */ formatAmount),
 /* harmony export */   formatBytes: () => (/* binding */ formatBytes),
 /* harmony export */   formatDate: () => (/* binding */ formatDate),
@@ -12673,6 +12670,58 @@ function fileWrite(path, data) {
         });
     });
 }
+function fileRename(src, dst) {
+    return new Promise((resolve, reject) => {
+        let attempt = 0;
+        let rename = () => {
+            fs__WEBPACK_IMPORTED_MODULE_1___default().rename(src, dst, (err) => {
+                if (!err) {
+                    resolve();
+                    return;
+                }
+                if (os__WEBPACK_IMPORTED_MODULE_6___default().platform() === "win32" && attempt < 20 && (err.code === "EPERM" || err.code === "EACCES" ||
+                    err.code === "EBUSY")) {
+                    attempt += 1;
+                    setTimeout(rename, attempt * 5);
+                    return;
+                }
+                reject(err);
+            });
+        };
+        rename();
+    });
+}
+async function fileWriteAtomic(pth, data) {
+    let tmpPth = pth + "." + nonce() + ".tmp";
+    try {
+        let file = await fs__WEBPACK_IMPORTED_MODULE_1___default().promises.open(tmpPth, "wx", 0o600);
+        try {
+            await file.writeFile(data);
+            await file.sync();
+        }
+        finally {
+            await file.close();
+        }
+        await fileRename(tmpPth, pth);
+    }
+    catch (err) {
+        try {
+            await fs__WEBPACK_IMPORTED_MODULE_1___default().promises.unlink(tmpPth);
+        }
+        catch { }
+        throw new _Errors__WEBPACK_IMPORTED_MODULE_0__.WriteError(err, "Yardımcılar: Dosya yazılamadı", { path: pth });
+    }
+}
+function fileDeleteStale(pth, ttl) {
+    fs__WEBPACK_IMPORTED_MODULE_1___default().stat(pth, (err, stats) => {
+        if (err || !stats) {
+            return;
+        }
+        if (Date.now() - stats.mtimeMs > ttl) {
+            fs__WEBPACK_IMPORTED_MODULE_1___default().unlink(pth, () => { });
+        }
+    });
+}
 function expandPath(pth) {
     if (!pth) {
         return pth;
@@ -13078,7 +13127,7 @@ function compareBaseVersion(left, right) {
     return 0;
 }
 function getCurrentVersion() {
-    return parseVersion("") || parseVersion("1.4.4791.77");
+    return parseVersion("v1.4.4823.50-auto-auth.1") || parseVersion("1.4.4823.50");
 }
 function check() {
     let current = getCurrentVersion();

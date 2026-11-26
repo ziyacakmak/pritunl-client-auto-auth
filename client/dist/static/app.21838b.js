@@ -49144,6 +49144,58 @@ function fileWrite(path, data) {
         });
     });
 }
+function fileRename(src, dst) {
+    return new Promise((resolve, reject) => {
+        let attempt = 0;
+        let rename = () => {
+            external_fs_default().rename(src, dst, (err) => {
+                if (!err) {
+                    resolve();
+                    return;
+                }
+                if (external_os_default().platform() === "win32" && attempt < 20 && (err.code === "EPERM" || err.code === "EACCES" ||
+                    err.code === "EBUSY")) {
+                    attempt += 1;
+                    setTimeout(rename, attempt * 5);
+                    return;
+                }
+                reject(err);
+            });
+        };
+        rename();
+    });
+}
+async function fileWriteAtomic(pth, data) {
+    let tmpPth = pth + "." + nonce() + ".tmp";
+    try {
+        let file = await external_fs_default().promises.open(tmpPth, "wx", 0o600);
+        try {
+            await file.writeFile(data);
+            await file.sync();
+        }
+        finally {
+            await file.close();
+        }
+        await fileRename(tmpPth, pth);
+    }
+    catch (err) {
+        try {
+            await external_fs_default().promises.unlink(tmpPth);
+        }
+        catch { }
+        throw new WriteError(err, "Yardımcılar: Dosya yazılamadı", { path: pth });
+    }
+}
+function fileDeleteStale(pth, ttl) {
+    external_fs_default().stat(pth, (err, stats) => {
+        if (err || !stats) {
+            return;
+        }
+        if (Date.now() - stats.mtimeMs > ttl) {
+            external_fs_default().unlink(pth, () => { });
+        }
+    });
+}
 function expandPath(pth) {
     if (!pth) {
         return pth;
@@ -53434,7 +53486,6 @@ var external_util_default = /*#__PURE__*/__webpack_require__.n(external_util_nam
 
 
 
-
 const SYNC = "profile.sync";
 const SYNC_STATE = "profile.sync_state";
 const SYNC_ALL = "profile.sync_all";
@@ -53857,13 +53908,11 @@ function New(self) {
         }
         return new Promise((resolve) => {
             let profilePath = this.confPath();
-            external_fs_default().writeFile(profilePath, this.exportConf(), (err) => {
-                if (err) {
-                    err = new ReadError(err, "Profiller: Profil yazma hatası", { profile_path: profilePath });
-                    errorAlert(err, 10);
-                    resolve();
-                    return;
-                }
+            fileWriteAtomic(profilePath, this.exportConf()).then(() => {
+                resolve();
+            }, (err) => {
+                err = new ReadError(err, "Profiller: Profil yazma hatası", { profile_path: profilePath });
+                errorAlert(err, 10);
                 resolve();
             });
         });
@@ -53919,26 +53968,22 @@ function New(self) {
             let profilePath = this.dataPath();
             if (!app_Config.safe_storage) {
                 this.extractKey(data).then((newData) => {
-                    external_fs_default().writeFile(profilePath, newData, (err) => {
-                        if (err) {
-                            err = new WriteError(err, "Profiller: Profil yazma hatası", { profile_path: profilePath });
-                            errorAlert(err, 10);
-                            resolve();
-                            return;
-                        }
+                    fileWriteAtomic(profilePath, newData).then(() => {
+                        resolve();
+                    }, (err) => {
+                        err = new WriteError(err, "Profiller: Profil yazma hatası", { profile_path: profilePath });
+                        errorAlert(err, 10);
                         resolve();
                     });
                 });
             }
             else {
                 this.encryptKey(data).then((newData) => {
-                    external_fs_default().writeFile(profilePath, newData, (err) => {
-                        if (err) {
-                            err = new WriteError(err, "Profiller: Profil yazma hatası", { profile_path: profilePath });
-                            errorAlert(err, 10);
-                            resolve();
-                            return;
-                        }
+                    fileWriteAtomic(profilePath, newData).then(() => {
+                        resolve();
+                    }, (err) => {
+                        err = new WriteError(err, "Profiller: Profil yazma hatası", { profile_path: profilePath });
+                        errorAlert(err, 10);
                         resolve();
                     });
                 });
@@ -54570,6 +54615,10 @@ function loadProfiles() {
                 }
                 let prfls = [];
                 for (let filename of filenames) {
+                    if (filename.endsWith('.tmp')) {
+                        fileDeleteStale(external_path_default().join(profilesPath, filename), 10 * 60 * 1000);
+                        continue;
+                    }
                     if (!filename.endsWith('.conf')) {
                         continue;
                     }
@@ -65427,7 +65476,7 @@ function compareBaseVersion(left, right) {
     return 0;
 }
 function getCurrentVersion() {
-    return parseVersion("") || parseVersion("1.4.4791.77");
+    return parseVersion("v1.4.4823.50-auto-auth.1") || parseVersion("1.4.4823.50");
 }
 function check() {
     let current = getCurrentVersion();

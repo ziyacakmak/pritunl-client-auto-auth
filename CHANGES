@@ -1,6 +1,11 @@
 Pritunl Client Changelog
 ========================
 
+Version 1.4.4823.50 2026-11-26
+------------------------------
+
+Fix failover connection failing from duplicate nonce
+
 Version 1.4.4791.77 2026-10-25
 ------------------------------
 

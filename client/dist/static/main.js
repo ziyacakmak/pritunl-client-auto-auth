@@ -6368,6 +6368,58 @@ function MiscUtils_fileWrite(path, data) {
         });
     });
 }
+function fileRename(src, dst) {
+    return new Promise((resolve, reject) => {
+        let attempt = 0;
+        let rename = () => {
+            MiscUtils_fs.rename(src, dst, (err) => {
+                if (!err) {
+                    resolve();
+                    return;
+                }
+                if (MiscUtils_os.platform() === "win32" && attempt < 20 && (err.code === "EPERM" || err.code === "EACCES" ||
+                    err.code === "EBUSY")) {
+                    attempt += 1;
+                    setTimeout(rename, attempt * 5);
+                    return;
+                }
+                reject(err);
+            });
+        };
+        rename();
+    });
+}
+async function fileWriteAtomic(pth, data) {
+    let tmpPth = pth + "." + nonce() + ".tmp";
+    try {
+        let file = await MiscUtils_fs.promises.open(tmpPth, "wx", 0o600);
+        try {
+            await file.writeFile(data);
+            await file.sync();
+        }
+        finally {
+            await file.close();
+        }
+        await fileRename(tmpPth, pth);
+    }
+    catch (err) {
+        try {
+            await MiscUtils_fs.promises.unlink(tmpPth);
+        }
+        catch { }
+        throw new MiscUtils_Errors.WriteError(err, "Yardımcılar: Dosya yazılamadı", { path: pth });
+    }
+}
+function fileDeleteStale(pth, ttl) {
+    MiscUtils_fs.stat(pth, (err, stats) => {
+        if (err || !stats) {
+            return;
+        }
+        if (Date.now() - stats.mtimeMs > ttl) {
+            MiscUtils_fs.unlink(pth, () => { });
+        }
+    });
+}
 function expandPath(pth) {
     if (!pth) {
         return pth;
