@@ -54,6 +54,13 @@ jobs:
             build-local/Pritunl-darwin-arm64/Pritunl.app \
             "$RUNNER_TEMP/Pritunl-AutoAuth-macOS-arm64.zip"
 
+      - name: Verify embedded release tag
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          sh tools/verify_release_tag.sh \
+            "client/build-local/Pritunl-darwin-arm64/Pritunl.app/Contents/Resources/app.asar"
+
       - uses: actions/upload-artifact@v4
         with:
           name: macos
@@ -110,6 +117,24 @@ jobs:
         env:
           RELEASE_TAG: ${{ github.ref_name }}
         run: ./tools/build_win_auto_auth.ps1
+
+      - name: Verify embedded release tag
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          count=0
+          for asar in build/win/*/resources/app.asar; do
+            if [ ! -f "$asar" ]; then
+              continue
+            fi
+            sh tools/verify_release_tag.sh "$asar"
+            count=$((count + 1))
+          done
+          if [ "$count" -lt 2 ]; then
+            echo "expected two Windows app.asar files, found $count" >&2
+            exit 1
+          fi
 
       - uses: actions/upload-artifact@v4
         with:
