@@ -87,7 +87,7 @@ page:
 | Platform | Artifact |
 | --- | --- |
 | macOS (Apple Silicon) | `Pritunl-AutoAuth-macOS-arm64.zip` |
-| Windows (x64 / arm64) | `Pritunl-AutoAuth-1.4.4791.77-setup.exe` |
+| Windows (x64 / arm64) | `Pritunl-AutoAuth-1.4.4823.50-setup.exe` |
 
 The macOS app is ad-hoc signed and not notarized. The Windows installer is not
 code-signed. Expect Gatekeeper or SmartScreen warnings; verify the SHA-256
@@ -95,8 +95,8 @@ checksum attached to the release before running anything.
 
 The client checks this repository's latest GitHub release every six hours. The
 release tag is embedded at build time and compared by upstream version and
-`auto-auth.N` revision, so `v1.4.4791.77-auto-auth.3` is offered as an update to
-`v1.4.4791.77-auto-auth.2`. Official Pritunl update notices are ignored; the
+`auto-auth.N` revision, so `v1.4.4823.50-auto-auth.1` is offered as an update to
+`v1.4.4791.77-auto-auth.4`. Official Pritunl update notices are ignored; the
 download button opens the fork's releases page.
 
 Upstream releases are checked daily by the
@@ -112,7 +112,7 @@ a newer Pritunl Client is available it opens an issue labeled
 - For the optional macOS daemon update: administrator rights.
 - For the Windows installer: administrator rights.
 
-The fork is based on Pritunl Client **1.4.4791.77** and was tested against the
+The fork is based on Pritunl Client **1.4.4823.50** and was tested against the
 matching `com.pritunl.service` daemon on macOS. The client can also run against
 an older daemon, but matching versions are recommended.
 
@@ -147,10 +147,11 @@ client/build-local/Pritunl-darwin-arm64/Pritunl.app
 
 By default the reference app is looked up in this order:
 
-1. `~/Pritunl-1.4.4791.77.app`
-2. `~/Pritunl-1.4.4777.90.app`
-3. `~/Pritunl-1.4.4752.50.app`
-4. `/Applications/Pritunl.app`
+1. `~/Pritunl-1.4.4823.50.app`
+2. `~/Pritunl-1.4.4791.77.app`
+3. `~/Pritunl-1.4.4777.90.app`
+4. `~/Pritunl-1.4.4752.50.app`
+5. `/Applications/Pritunl.app`
 
 Override it explicitly if needed:
 
@@ -174,7 +175,7 @@ The script builds the Go service and CLI for x64 and arm64, packages the
 Electron client for both architectures, and produces:
 
 ```text
-build\Pritunl-AutoAuth-1.4.4791.77-setup.exe
+build\Pritunl-AutoAuth-1.4.4823.50-setup.exe
 ```
 
 The installer is unsigned. It installs to `Program Files (x86)\Pritunl`,
@@ -227,7 +228,7 @@ existing Pritunl installation in `Program Files (x86)\Pritunl` and registers the
 service. The app can be started from the Start menu or desktop shortcut.
 
 To build and install from source instead, run the PowerShell build above and
-then execute `build\Pritunl-AutoAuth-1.4.4791.77-setup.exe`.
+then execute `build\Pritunl-AutoAuth-1.4.4823.50-setup.exe`.
 
 ## Configure
 

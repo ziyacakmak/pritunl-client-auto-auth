@@ -532,7 +532,7 @@ export async function fileWriteAtomic(pth: string,
 			await fs.promises.unlink(tmpPth)
 		} catch {}
 
-		throw new Errors.WriteError(err, "Utils: Failed to write file",
+		throw new Errors.WriteError(err, "Yardımcılar: Dosya yazılamadı",
 			{path: pth})
 	}
 }
